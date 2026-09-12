@@ -3,7 +3,7 @@ package backbone
 import (
 	"context"
 	"encoding/json"
-	"vagues/backbone/process"
+	"vague/backbone/process"
 )
 
 // Input sends keys in Vim notation.

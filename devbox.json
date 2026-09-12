@@ -7,7 +7,7 @@
   "shell": {
     "init_hook": [
       "alias dev='devbox'",
-      "export PS1='📦 vagues > '"
+      "export PS1='📦 vague > '"
     ],
     "scripts": {
       "echo": [

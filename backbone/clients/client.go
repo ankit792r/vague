@@ -8,7 +8,7 @@ import (
 	"io"
 	"net"
 	"sync"
-	"vagues/backbone/process"
+	"vague/backbone/process"
 )
 
 var ErrClosed = errors.New("connection closed")

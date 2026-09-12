@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"vagues/backbone/command"
+	"vague/backbone/command"
 )
 
 func main() {

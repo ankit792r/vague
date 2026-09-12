@@ -2,7 +2,7 @@ package session
 
 import (
 	"log/slog"
-	"vagues/backbone/process"
+	"vague/backbone/process"
 )
 
 // send queues a message, reporting whether the session can still keep up.

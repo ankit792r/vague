@@ -1,8 +1,8 @@
 package command
 
 import (
-	client "vagues/backbone/clients"
-	"vagues/backbone/process"
+	client "vague/backbone/clients"
+	"vague/backbone/process"
 
 	"github.com/spf13/cobra"
 )

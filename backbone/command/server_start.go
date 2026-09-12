@@ -3,8 +3,8 @@ package command
 import (
 	"fmt"
 	"os"
-	"vagues/backbone/process"
-	server "vagues/backbone/servers"
+	"vague/backbone/process"
+	server "vague/backbone/servers"
 
 	"github.com/spf13/cobra"
 )

@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net"
 	"sync"
-	"vagues/backbone/process"
+	"vague/backbone/process"
 )
 
 type Session struct {

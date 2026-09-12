@@ -8,8 +8,8 @@ import (
 	"net"
 	"sync"
 	"time"
-	"vagues/backbone/process"
-	"vagues/backbone/session"
+	"vague/backbone/process"
+	"vague/backbone/session"
 )
 
 type Server struct {

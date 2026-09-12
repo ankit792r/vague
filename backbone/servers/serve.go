@@ -9,8 +9,8 @@ import (
 	"log/slog"
 	"net"
 	"time"
-	"vagues/backbone/process"
-	"vagues/backbone/session"
+	"vague/backbone/process"
+	"vague/backbone/session"
 )
 
 func (s *Server) serveSession(ctx context.Context, sess *session.Session) {

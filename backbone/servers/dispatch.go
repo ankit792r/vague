@@ -4,8 +4,8 @@ package backbone
 import (
 	"context"
 	"fmt"
-	"vagues/backbone/process"
-	"vagues/backbone/session"
+	"vague/backbone/process"
+	"vague/backbone/session"
 )
 
 func (s *Server) dispatch(ctx context.Context, sess *session.Session, msg process.Message) {
