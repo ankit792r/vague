@@ -13,6 +13,14 @@ import (
 
 var ErrClosed = errors.New("connection closed")
 
+// notificationQueue is how many unread server notifications are held before
+// the oldest are dropped.
+//
+// A caller that is not draining notifications is by definition not drawing
+// anything, so stale redraws are worthless to it and blocking the read loop
+// on its behalf would stall its replies too.
+const notificationQueue = 64
+
 type Client struct {
 	conn   net.Conn
 	reader *bufio.Reader
@@ -21,7 +29,8 @@ type Client struct {
 	writeMu sync.Mutex
 	nextId  uint64
 
-	pending map[uint64]chan process.Message
+	notifications chan Notification
+	pending       map[uint64]chan process.Message
 
 	err error
 
@@ -36,16 +45,23 @@ func ClientConnect() (*Client, error) {
 	}
 
 	client := &Client{
-		conn:    conn,
-		reader:  bufio.NewReader(conn),
-		nextId:  1,
-		pending: make(map[uint64]chan process.Message),
-		done:    make(chan struct{}),
+		conn:          conn,
+		reader:        bufio.NewReader(conn),
+		nextId:        1,
+		pending:       make(map[uint64]chan process.Message),
+		notifications: make(chan Notification, notificationQueue),
+		done:          make(chan struct{}),
 	}
 
 	// Here start the reading loop
 	go client.readLoop()
 	return client, nil
+}
+
+// Notifications yields server-initiated messages, chiefly redraws. It is
+// closed when the connection ends.
+func (c *Client) Notifications() <-chan Notification {
+	return c.notifications
 }
 
 func (c *Client) Close() error {

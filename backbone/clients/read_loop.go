@@ -13,6 +13,8 @@ type Notification struct {
 }
 
 func (c *Client) readLoop() {
+	defer close(c.notifications)
+
 	for {
 		payload, err := process.ReadFrame(c.reader)
 		if err != nil {
@@ -62,5 +64,19 @@ func (c *Client) deliver(msg process.Message) {
 
 // queue offers a notification, discarding the oldest if nobody is reading.
 func (c *Client) queue(note Notification) {
-	// TODO: Handle this
+	select {
+	case c.notifications <- note:
+		return
+	default:
+	}
+
+	select {
+	case <-c.notifications:
+	default:
+	}
+
+	select {
+	case c.notifications <- note:
+	default:
+	}
 }
