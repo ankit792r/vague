@@ -44,6 +44,7 @@ func ClientConnect() (*Client, error) {
 	}
 
 	// Here start the reading loop
+	go client.readLoop()
 	return client, nil
 }
 
