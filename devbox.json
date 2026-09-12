@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.18.0/.schema/devbox.schema.json",
+  "packages": [
+    "go@latest",
+    "cobra-cli@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "alias dev='devbox'",
+      "export PS1='📦 vagues > '"
+    ],
+    "scripts": {
+      "echo": [
+        "echo hello"
+      ]
+    }
+  }
+}
