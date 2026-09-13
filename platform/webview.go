@@ -1,7 +1,6 @@
 package platform
 
 import (
-	"context"
 	"embed"
 	"fmt"
 	"io/fs"
@@ -15,18 +14,13 @@ import (
 	_ "github.com/abemedia/go-webview/embedded"
 )
 
-//go:embed frontend/dist/*
-var frontend embed.FS
-
-func BootUI(ctx context.Context) error {
+// Create new web view frame
+func (f *Frame) BuildWebView() error {
 	w := webview.New(true)
 	defer w.Destroy()
 
-	bindings := NewBindings(ctx)
-	defer bindings.Close()
-
-	if err := w.Bind("callNative", bindings.CallNative); err != nil {
-		return fmt.Errorf("bind callNative: %w", err)
+	if err := w.Bind("ipcBinding", f.IpcBinding); err != nil {
+		return fmt.Errorf("Binding Ipc Failed: %w", err)
 	}
 
 	w.SetTitle("Vague")
@@ -37,8 +31,11 @@ func BootUI(ctx context.Context) error {
 	return nil
 }
 
-func loadUI() (string, error) {
-	dist, err := fs.Sub(frontend, "frontend/dist")
+//go:embed frontend/dist/*
+var uiDist embed.FS
+
+func loadStaticUI() (string, error) {
+	dist, err := fs.Sub(uiDist, "frontend/dist")
 	if err != nil {
 		return "", err
 	}
