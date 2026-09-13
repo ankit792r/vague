@@ -18,7 +18,7 @@ var rootCmd = &cobra.Command{
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Run the server and client")
-		return platform.BootUI(cmd.Context())
+		return platform.NewFrame(cmd.Context())
 	},
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
