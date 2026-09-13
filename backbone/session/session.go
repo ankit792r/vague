@@ -17,6 +17,7 @@ type Session struct {
 
 	done     chan struct{}
 	doneOnce sync.Once
+	frameId  uint64
 }
 
 func NewSession(id uint64, conn net.Conn) *Session {
@@ -35,7 +36,6 @@ func (s *Session) Close() {
 		close(s.done)
 	})
 }
-
 
 // writeLoop drains the outbound queue until the session closes. Frames are
 // written by one goroutine only, so they cannot interleave.
