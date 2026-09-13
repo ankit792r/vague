@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"fmt"
+	"vague/platform"
 
 	"github.com/spf13/cobra"
 )
@@ -17,14 +18,14 @@ var rootCmd = &cobra.Command{
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Run the server and client")
-		return nil
+		return platform.BootUI()
 	},
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
 		// DisableNoDescFlag: true,
 		// DisableDescriptions: true,
 		// HiddenDefaultCmd: true,
-	} ,
+	},
 }
 
 func Execute(ctx context.Context) error {

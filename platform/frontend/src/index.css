@@ -1,0 +1,56 @@
+/* index.css */
+
+@import url("https://cdn.jsdelivr.net/npm/@fontsource/iosevka@5.1.0/index.css");
+
+:root {
+  --font-ui: "Iosevka", monospace;
+  --font-text: "Iosevka", monospace;
+
+  --bg: #141415;
+  --fg: #cdcdcd;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+}
+
+body {
+  font-size: 20px;
+  font-weight: normal;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: transparent;
+  border: 0;
+}
+
+::selection {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+a {
+  color: var(--accent);
+}
