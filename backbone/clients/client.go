@@ -119,7 +119,7 @@ func (c *Client) call(ctx context.Context, method string, params any, result any
 			return nil
 		}
 
-		return res.DecodeResult(res)
+		return res.DecodeResult(result)
 
 	case <-ctx.Done():
 		c.forget(msg.ID)
