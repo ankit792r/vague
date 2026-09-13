@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"context"
 	"embed"
 	"fmt"
 	"io/fs"
@@ -17,16 +18,19 @@ import (
 //go:embed frontend/dist/*
 var frontend embed.FS
 
-func BootUI() error {
-	// _, err := loadUI()
-	// if err != nil {
-	// 	return err
-	// }
-
+func BootUI(ctx context.Context) error {
 	w := webview.New(true)
+	defer w.Destroy()
+
+	bindings := NewBindings(ctx)
+	defer bindings.Close()
+
+	if err := w.Bind("callNative", bindings.CallNative); err != nil {
+		return fmt.Errorf("bind callNative: %w", err)
+	}
+
 	w.SetTitle("Vague")
 	w.SetSize(1200, 800, webview.HintNone)
-	// w.Navigate("http://" + addr)
 	w.Navigate("http://localhost:5173")
 	w.Run()
 
