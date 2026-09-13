@@ -1,24 +1,28 @@
 import { useEffect } from "preact/hooks"
-import { callNative, encodeKey, nextCallId } from "./native.ts"
+import { Fragment } from "preact/jsx-runtime"
+import { callIpc, nextCallId } from "./utils/ipc"
 
 export function App() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      const keys = encodeKey(e)
-      console.log("keys", keys)
-      if (!keys) {
-        return
-      }
-
       e.preventDefault()
-      void callNative(nextCallId(), "input", { keys }).catch((err: unknown) => {
-        console.error("callNative failed", err)
-      })
+      void callIpc(nextCallId(), "input", { e })
+        .then((reply) => {
+          console.log(reply)
+        })
+        .catch((err: unknown) => {
+          console.error("callIpc failed", err)
+        })
     }
 
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [])
 
-  return <div>Hello Vague</div>
+  return (
+    <Fragment>
+      <h1>Hii there</h1>
+      <p>this is an example buffer</p>
+    </Fragment>
+  )
 }

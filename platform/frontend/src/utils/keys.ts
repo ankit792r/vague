@@ -1,39 +1,3 @@
-export type NativeReply = {
-  id: number
-  result?: unknown
-  error?: string
-}
-
-type CallNativeFn = (
-  id: number,
-  method: string,
-  params: unknown,
-) => Promise<NativeReply>
-
-declare global {
-  interface Window {
-    callNative?: CallNativeFn
-  }
-}
-
-let nextId = 1
-
-export function nextCallId(): number {
-  return nextId++
-}
-
-export function callNative(
-  id: number,
-  method: string,
-  params: unknown = null,
-): Promise<NativeReply> {
-  const native = window.callNative
-  if (typeof native !== "function") {
-    return Promise.reject(new Error("native bridge is not available"))
-  }
-  return native(id, method, params)
-}
-
 export function encodeKey(e: KeyboardEvent): string {
   if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") {
     return ""
