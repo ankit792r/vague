@@ -1,12 +1,13 @@
 import { useEffect } from "preact/hooks"
 import { Fragment } from "preact/jsx-runtime"
-import { callIpc, nextCallId } from "./utils/ipc"
+import { hostRequest } from "./host/client"
+import { encodeKey } from "./utils/keys"
 
 export function App() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       e.preventDefault()
-      void callIpc(nextCallId(), "input", { e })
+      void hostRequest("input", { keys: encodeKey(e) })
         .then((reply) => {
           console.log(reply)
         })
