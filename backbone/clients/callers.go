@@ -28,3 +28,17 @@ func (c *Client) Raw(ctx context.Context, params process.ExecuteParams) (json.Ra
 
 	return result, nil
 }
+
+func (c *Client) FrameAttach(ctx context.Context, params process.AttachParams) (*process.AttachResult, error) {
+	var result process.AttachResult
+
+	if err := c.call(ctx, process.MethodFrameAttach, params, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (c *Client) FrameDetach(ctx context.Context) error {
+	return c.call(ctx, process.MethodFrameAttach, nil, nil)
+}
