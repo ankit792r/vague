@@ -2,6 +2,7 @@ package platform
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"net"
@@ -25,8 +26,36 @@ func (f *Frame) BuildWebView() error {
 		w.Destroy()
 	}()
 
-	if err := w.Bind("ipcBinding", f.IpcBinding); err != nil {
-		return fmt.Errorf("Binding Ipc Failed: %w", err)
+	w.Init(`
+	window.hostEvent = (() => {
+		const listeners = new Set();
+		return {
+			subscribe(fn) {
+				listeners.add(fn);
+				return () => listeners.delete(fn);
+			},
+			_emit(event, payload) {
+				const msg = { event, payload };
+				listeners.forEach(fn => fn(msg));
+			}
+		};
+	})();
+	`)
+
+	go func() {
+		for note := range f.client.Notifications() {
+			var payload any
+			_ = json.Unmarshal(note.Params, &payload)
+			emitHostEvent(w, note.Method, payload) // "redraw", "quit", etc.
+		}
+	}()
+
+	// if err := w.Bind("ipcBinding", f.IpcBinding); err != nil {
+	// 	return fmt.Errorf("Binding Ipc Failed: %w", err)
+	// }
+
+	if err := w.Bind("hostRequest", f.HostRequest); err != nil {
+		return fmt.Errorf("Host Request Binding Failed: %w", err)
 	}
 
 	res, err := f.client.FrameAttach(f.ctx, process.AttachParams{})
@@ -34,7 +63,9 @@ func (f *Frame) BuildWebView() error {
 		return err
 	}
 
-	fmt.Printf("Got res: %s\n", res)
+	fmt.Println("Got response ------------------ ", res)
+
+	emitHostEvent(w, "attached", res)
 
 	w.SetTitle("Vague")
 	w.SetSize(1200, 800, webview.HintNone)
@@ -105,4 +136,17 @@ func loadStaticUI() (string, error) {
 	}()
 
 	return addr, nil
+}
+
+func emitHostEvent(w webview.WebView, event string, payload any) {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return
+	}
+	js := fmt.Sprintf(
+		`window.hostEvent && window.hostEvent._emit(%q, %s)`,
+		event,
+		string(data),
+	)
+	w.Dispatch(func() { w.Eval(js) })
 }
