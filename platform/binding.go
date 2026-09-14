@@ -12,7 +12,7 @@ type HostReply struct {
 	Error  string          `json:"error,omitempty"`
 }
 
-func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) (HostReply, error) {
+func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) HostReply {
 	reply := HostReply{ID: id}
 
 	switch method {
@@ -20,40 +20,40 @@ func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) (H
 		var p process.InputParams
 		if err := json.Unmarshal(params, &p); err != nil {
 			reply.Error = err.Error()
-			return reply, nil
+			return reply
 		}
 		if err := f.client.Input(p.Keys); err != nil {
 			reply.Error = err.Error()
 		}
-		return reply, nil
+		return reply
 
 	case process.MethodExecute:
 		var p process.ExecuteParams
 		if err := json.Unmarshal(params, &p); err != nil {
 			reply.Error = err.Error()
-			return reply, nil
+			return reply
 		}
 		raw, err := f.client.Raw(f.ctx, p)
 		if err != nil {
 			reply.Error = err.Error()
-			return reply, nil
+			return reply
 		}
 		reply.Result = raw
-		return reply, nil
+		return reply
 
 	case process.MethodFrameAttach:
 		res, err := f.client.FrameAttach(f.ctx, process.AttachParams{})
 		if err != nil {
 			reply.Error = err.Error()
-			return reply, nil
+			return reply
 		}
 		result, _ := json.Marshal(res)
 		reply.Result = result
-		return reply, nil
+		return reply
 
 	default:
 		reply.Error = fmt.Sprintf("unknown method %q", method)
-		return reply, nil
+		return reply
 	}
 }
 
