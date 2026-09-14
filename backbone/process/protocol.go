@@ -18,6 +18,12 @@ const (
 	// The editor decides this, not the client, because :q and :wq are
 	// ordinary commands that happen to destroy a frame.
 	MethodQuit = "quit"
+
+	// MethodAttach binds a client surface to a frame. Request.
+	MethodFrameAttach = "attach"
+
+	// MethodDetach releases the frame. Request.
+	MethodFrameDetach = "detach"
 )
 
 // InputParams carries keys in Vim notation, for example "ihello<Esc>".
@@ -61,4 +67,23 @@ type CommandInfo struct {
 	Summary string `json:"summary"`
 	MinArgs int    `json:"min_args"`
 	MaxArgs int    `json:"max_args"`
+}
+
+// Attach Request params
+type AttachParams struct {
+
+}
+
+// AttachResult tells the client which frame it owns and how big its grid is.
+// No content comes back here; the first redraw notification carries it.
+type AttachResult struct {
+	SessionID uint64 `json:"session_id"`
+	FrameID   uint64 `json:"frame_id"`
+}
+
+// CursorPos is where the client should draw the caret.
+type CursorPos struct {
+	Row     int  `json:"row"`
+	Column  int  `json:"column"`
+	Visible bool `json:"visible"`
 }
