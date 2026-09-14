@@ -40,5 +40,5 @@ func (c *Client) FrameAttach(ctx context.Context, params process.AttachParams) (
 }
 
 func (c *Client) FrameDetach(ctx context.Context) error {
-	return c.call(ctx, process.MethodFrameAttach, nil, nil)
+	return c.call(ctx, process.MethodFrameDetach, nil, nil)
 }
