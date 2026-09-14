@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"vague/backbone/process"
 
 	"github.com/abemedia/go-webview"
 	_ "github.com/abemedia/go-webview/embedded"
@@ -17,11 +18,23 @@ import (
 // Create new web view frame
 func (f *Frame) BuildWebView() error {
 	w := webview.New(true)
-	defer w.Destroy()
+	defer func() {
+		if err := f.client.FrameDetach(f.ctx); err != nil {
+			fmt.Errorf("Error Detach: %w", err)
+		}
+		w.Destroy()
+	}()
 
 	if err := w.Bind("ipcBinding", f.IpcBinding); err != nil {
 		return fmt.Errorf("Binding Ipc Failed: %w", err)
 	}
+
+	res, err := f.client.FrameAttach(f.ctx, process.AttachParams{})
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Got res: %s\n", res)
 
 	w.SetTitle("Vague")
 	w.SetSize(1200, 800, webview.HintNone)

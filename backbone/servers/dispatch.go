@@ -32,6 +32,19 @@ func (s *Server) dispatchRequest(ctx context.Context, sess *session.Session, msg
 		}
 		result, err := s.handleExecute(ctx, sess, params)
 		sess.Reply(msg.ID, result, err)
+	case process.MethodFrameAttach:
+		var params process.ExecuteParams
+		if err := msg.DecodeParams(&params); err != nil {
+			sess.Reply(msg.ID, nil, err)
+			return
+		}
+		result, err := s.handleFrameAttach(ctx, sess, params)
+		sess.Reply(msg.ID, result, err)
+
+	case process.MethodFrameDetach:
+		err := s.handleFrameDetach(ctx, sess)
+		sess.Reply(msg.ID, nil, err)
+
 	default:
 		sess.Reply(msg.ID, nil, fmt.Errorf("unknown method %q", msg.Method))
 	}
@@ -73,4 +86,30 @@ func (s *Server) handleInput(ctx context.Context, sess *session.Session, params 
 	_ = ctx
 	_ = sess
 	_ = params
+}
+
+// Dummy attach function to notify client
+func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, params process.ExecuteParams) (any, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+
+	return map[string]any{
+		"ok":   true,
+		"name": params.Name,
+		"args": params.Args,
+	}, nil
+}
+
+// Dummy detach function to notify client
+func (s *Server) handleFrameDetach(ctx context.Context, sess *session.Session) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
+	return nil
 }
