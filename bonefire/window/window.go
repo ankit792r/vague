@@ -36,9 +36,9 @@ type Window struct {
 }
 
 func NewWindow(windowId, frameId uint64) *Window {
-	return  &Window{
-		Id: windowId,
-		FrameId: frameId,
+	return &Window{
+		Id:            windowId,
+		FrameId:       frameId,
 		WindowOptions: DefaultWindowOptions(),
 	}
 }
