@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 	"fmt"
-	"vague/platform"
+	"vague/bonefire/frame"
 
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ var rootCmd = &cobra.Command{
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Run the server and client")
-		return platform.NewFrame(cmd.Context())
+		return frame.NewFrame(cmd.Context())
 	},
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
