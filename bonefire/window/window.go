@@ -23,10 +23,22 @@ type Window struct {
 
 	BufferId uint64
 
+	Axis Axis
+
+	Children []*Window `json:"children,omitempty"`
+
 	// cursor is a marker rather than a bare offset so it stays correct when
 	// the buffer is edited elsewhere, including by another window showing
 	// the same buffer.
 	// cursor *text.Marker
 
 	WindowOptions WindowOptions
+}
+
+func NewWindow(windowId, frameId uint64) *Window {
+	return  &Window{
+		Id: windowId,
+		FrameId: frameId,
+		WindowOptions: DefaultWindowOptions(),
+	}
 }
