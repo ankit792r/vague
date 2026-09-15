@@ -7,6 +7,7 @@ export type HostRequestMap = {
     bang?: boolean
     count?: number
   }
+  ready: Record<string, never>
   attach: Record<string, never>
 }
 
@@ -16,6 +17,10 @@ export type HostResultMap = {
   input: null
   execute: unknown
   attach: {
+    session_id: number
+    frame_id: number
+  }
+  ready: {
     session_id: number
     frame_id: number
   }
