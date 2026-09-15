@@ -55,5 +55,5 @@ func NewFrame(ctx context.Context) error {
 	// TODO: layout the root window
 
 	// This to be called in last, since it will block the other execution
-	return frame.BuildWebView(frame.Id)
+	return frame.BuildWebView()
 }

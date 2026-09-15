@@ -51,6 +51,14 @@ func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) Ho
 		reply.Result = result
 		return reply
 
+	case process.MethodFrameReady:
+		result, _ := json.Marshal(process.ReadyResult{
+			SessionID: f.Id,
+			FrameID:   f.Id,
+		})
+		reply.Result = result
+		return reply
+
 	default:
 		reply.Error = fmt.Sprintf("unknown method %q", method)
 		return reply
