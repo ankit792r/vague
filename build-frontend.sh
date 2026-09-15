@@ -2,7 +2,7 @@
 
 set -e
 
-cd platform/frontend
+cd frontend
 bun install
 bun run build
-cd ../..
+cd ..
