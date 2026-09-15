@@ -32,6 +32,7 @@ func (s *Server) dispatchRequest(ctx context.Context, sess *session.Session, msg
 		}
 		result, err := s.handleExecute(ctx, sess, params)
 		sess.Reply(msg.ID, result, err)
+
 	case process.MethodFrameAttach:
 		var params process.ExecuteParams
 		if err := msg.DecodeParams(&params); err != nil {
@@ -89,17 +90,16 @@ func (s *Server) handleInput(ctx context.Context, sess *session.Session, params 
 }
 
 // Dummy attach function to notify client
-func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, params process.ExecuteParams) (any, error) {
+func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, params process.ExecuteParams) (process.AttachResult, error) {
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return process.AttachResult{}, ctx.Err()
 	default:
 	}
 
-	return map[string]any{
-		"ok":   true,
-		"name": params.Name,
-		"args": params.Args,
+	return process.AttachResult{
+		SessionID: sess.Id,
+		FrameID:   sess.Id,
 	}, nil
 }
 
