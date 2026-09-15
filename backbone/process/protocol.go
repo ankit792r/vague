@@ -24,6 +24,9 @@ const (
 
 	// MethodDetach releases the frame. Request.
 	MethodFrameDetach = "detach"
+
+	// MethodFrameReady is sent when the client is ready to receive commands.
+	MethodFrameReady = "ready"
 )
 
 // InputParams carries keys in Vim notation, for example "ihello<Esc>".
@@ -71,12 +74,17 @@ type CommandInfo struct {
 
 // Attach Request params
 type AttachParams struct {
-
 }
 
 // AttachResult tells the client which frame it owns and how big its grid is.
 // No content comes back here; the first redraw notification carries it.
 type AttachResult struct {
+	SessionID uint64 `json:"session_id"`
+	FrameID   uint64 `json:"frame_id"`
+}
+
+// Ready Result tells the client about frame and window
+type ReadyResult struct {
 	SessionID uint64 `json:"session_id"`
 	FrameID   uint64 `json:"frame_id"`
 }
