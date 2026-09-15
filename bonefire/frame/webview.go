@@ -16,7 +16,7 @@ import (
 )
 
 // Create new web view frame
-func (f *Frame) BuildWebView(frameId uint64) error {
+func (f *Frame) BuildWebView() error {
 	w := webview.New(true)
 	defer w.Destroy()
 
@@ -47,8 +47,6 @@ func (f *Frame) BuildWebView(frameId uint64) error {
 	if err := w.Bind("hostRequest", f.HostRequest); err != nil {
 		return fmt.Errorf("Host Request Binding Failed: %w", err)
 	}
-
-	emitHostEvent(w, "attached", frameId)
 
 	w.SetTitle("Vague")
 	w.SetSize(1200, 800, webview.HintNone)
