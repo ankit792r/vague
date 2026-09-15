@@ -10,21 +10,15 @@ import (
 	"os"
 	"path"
 	"strings"
-	"vague/backbone/process"
 
 	"github.com/abemedia/go-webview"
 	_ "github.com/abemedia/go-webview/embedded"
 )
 
 // Create new web view frame
-func (f *Frame) BuildWebView() error {
+func (f *Frame) BuildWebView(frameId uint64) error {
 	w := webview.New(true)
-	defer func() {
-		if err := f.client.FrameDetach(f.ctx); err != nil {
-			fmt.Errorf("Error Detach: %w", err)
-		}
-		w.Destroy()
-	}()
+	defer w.Destroy()
 
 	w.Init(`
 	window.hostEvent = (() => {
@@ -50,20 +44,11 @@ func (f *Frame) BuildWebView() error {
 		}
 	}()
 
-	// if err := w.Bind("ipcBinding", f.IpcBinding); err != nil {
-	// 	return fmt.Errorf("Binding Ipc Failed: %w", err)
-	// }
-
 	if err := w.Bind("hostRequest", f.HostRequest); err != nil {
 		return fmt.Errorf("Host Request Binding Failed: %w", err)
 	}
 
-	res, err := f.client.FrameAttach(f.ctx, process.AttachParams{})
-	if err != nil {
-		return err
-	}
-
-	emitHostEvent(w, "attached", res)
+	emitHostEvent(w, "attached", frameId)
 
 	w.SetTitle("Vague")
 	w.SetSize(1200, 800, webview.HintNone)
