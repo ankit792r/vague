@@ -5,9 +5,9 @@ import { encodeKey } from "./utils/keys"
 
 export function App() {
   const [frameId, setFrameId] = useState<number | null>(null)
-  
+
   useEffect(() => {
-    void hostRequest("ready", {})
+    void hostRequest("ready", { height: 100, width: 100 })
       .then(({ frame_id, session_id }) => {
         console.log("host ready", session_id, frame_id)
         setFrameId(frame_id)

@@ -76,15 +76,21 @@ type CommandInfo struct {
 type AttachParams struct {
 }
 
-// AttachResult tells the client which frame it owns and how big its grid is.
-// No content comes back here; the first redraw notification carries it.
-type AttachResult struct {
+// Attach Request params
+type FrameReadyParams struct {
+	Height int `json:"height"`
+	Widht  int `json:"width"`
+}
+
+// Ready Result tells the client about frame and window
+type FrameReadyResult struct {
 	SessionID uint64 `json:"session_id"`
 	FrameID   uint64 `json:"frame_id"`
 }
 
-// Ready Result tells the client about frame and window
-type ReadyResult struct {
+// AttachResult tells the client which frame it owns and how big its grid is.
+// No content comes back here; the first redraw notification carries it.
+type AttachResult struct {
 	SessionID uint64 `json:"session_id"`
 	FrameID   uint64 `json:"frame_id"`
 }
