@@ -46,6 +46,15 @@ func (s *Server) dispatchRequest(ctx context.Context, sess *session.Session, msg
 		err := s.handleFrameDetach(ctx, sess)
 		sess.Reply(msg.ID, nil, err)
 
+	case process.MethodFrameReady:
+		var params process.FrameReadyParams
+		if err := msg.DecodeParams(&params); err != nil {
+			sess.Reply(msg.ID, nil, err)
+			return
+		}
+		result, err := s.handleFrameReady(ctx, sess, params)
+		sess.Reply(msg.ID, result, err)
+
 	default:
 		sess.Reply(msg.ID, nil, fmt.Errorf("unknown method %q", msg.Method))
 	}
@@ -112,4 +121,18 @@ func (s *Server) handleFrameDetach(ctx context.Context, sess *session.Session) e
 	}
 
 	return nil
+}
+
+// Dummy ready function to notify client
+func (s *Server) handleFrameReady(ctx context.Context, sess *session.Session, params process.FrameReadyParams) (process.FrameReadyResult, error) {
+	select {
+	case <-ctx.Done():
+		return process.FrameReadyResult{}, ctx.Err()
+	default:
+	}
+
+	return process.FrameReadyResult{
+		SessionID: sess.Id,
+		FrameID:   sess.Id,
+	}, nil
 }

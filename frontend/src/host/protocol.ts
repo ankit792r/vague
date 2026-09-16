@@ -7,7 +7,10 @@ export type HostRequestMap = {
     bang?: boolean
     count?: number
   }
-  ready: Record<string, never>
+  ready: {
+    height: number,
+    width: number
+  }
   attach: Record<string, never>
 }
 

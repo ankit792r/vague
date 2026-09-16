@@ -15,6 +15,8 @@ type HostReply struct {
 func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) HostReply {
 	reply := HostReply{ID: id}
 
+	fmt.Println(method)
+
 	switch method {
 	case process.MethodInput:
 		var p process.InputParams
@@ -52,10 +54,19 @@ func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) Ho
 		return reply
 
 	case process.MethodFrameReady:
-		result, _ := json.Marshal(process.ReadyResult{
-			SessionID: f.Id,
-			FrameID:   f.Id,
-		})
+		var p process.FrameReadyParams
+		if err := json.Unmarshal(params, &p); err != nil {
+			reply.Error = err.Error()
+			return reply
+		}
+
+		res, err := f.client.FrameReady(f.ctx, p)
+		if err != nil {
+			reply.Error = err.Error()
+			return reply
+		}
+
+		result, _ := json.Marshal(res)
 		reply.Result = result
 		return reply
 
