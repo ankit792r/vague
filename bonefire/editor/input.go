@@ -74,6 +74,8 @@ func (e *Editor) insertKey(frameID uint64, keys string) error {
 		return nil
 	case "<CR>":
 		return e.insertBytes(frame, win, buf, []byte("\n"))
+	case "<Space>":
+		return e.insertBytes(frame, win, buf, []byte(" "))
 	case "<BS>":
 		return e.deleteBack(frame, win, buf)
 	case "<Left>":

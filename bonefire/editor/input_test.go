@@ -81,8 +81,16 @@ func TestInsertModeEditsScratchBuffer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if string(buf.Text.Bytes()) != "hi!" {
-		t.Fatalf("got %q, want %q", buf.Text.Bytes(), "hi!")
+	if err := ed.HandleInput(frame.ID, "<Space>"); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ed.HandleInput(frame.ID, "x"); err != nil {
+		t.Fatal(err)
+	}
+
+	if string(buf.Text.Bytes()) != "hi! x" {
+		t.Fatalf("got %q, want %q", buf.Text.Bytes(), "hi! x")
 	}
 
 	if err := ed.HandleInput(frame.ID, "<Esc>"); err != nil {
