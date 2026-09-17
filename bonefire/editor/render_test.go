@@ -7,7 +7,7 @@ func TestRenderRedrawWrapsWithoutPadding(t *testing.T) {
 
 	ed := NewEditor()
 	buf := ed.Scratch("*scratch*")
-	buf.Text = "abcdefghijklmn"
+	buf.Text.SetBytes([]byte("abcdefghijklmn"))
 
 	frame, err := ed.NewFrame(13, 4)
 	if err != nil {
@@ -40,7 +40,7 @@ func TestRenderRedrawNoWrapTruncates(t *testing.T) {
 
 	ed := NewEditor()
 	buf := ed.Scratch("*scratch*")
-	buf.Text = "abcdefghijklmn"
+	buf.Text.SetBytes([]byte("abcdefghijklmn"))
 
 	frame, err := ed.NewFrame(13, 4)
 	if err != nil {

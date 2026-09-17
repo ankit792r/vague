@@ -2,6 +2,7 @@ package editor
 
 import (
 	"fmt"
+
 	"vague/bonefire/buffer"
 	"vague/bonefire/window"
 )
@@ -9,10 +10,10 @@ import (
 // HandleInput applies one key in Vim notation for the given frame.
 func (e *Editor) HandleInput(frameID uint64, keys string) error {
 	switch e.Mode {
-	case NormalMode:
-		return e.normalKey(frameID, keys)
+	case InsertMode:
+		return e.insertKey(frameID, keys)
 	default:
-		return nil
+		return e.normalKey(frameID, keys)
 	}
 }
 
@@ -22,24 +23,102 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 		return err
 	}
 
-	lines := splitLogicalLines(buf.Text)
-	cursor := windowPoint(win)
+	t := buf.Text
+	at := windowCursor(win)
 
 	switch keys {
-	case "h", "<Left>", "<BS>":
-		cursor = moveLeft(lines, cursor, 1)
+	case "i":
+		e.Mode = InsertMode
+		frame.dirty = true
+		return nil
+	case "a":
+		setWindowCursor(buf, win, moveRight(t, at, 1, true))
+		e.Mode = InsertMode
+		frame.dirty = true
+		return nil
+	case "h", "<Left>":
+		setWindowCursor(buf, win, moveLeft(t, at, 1))
 	case "l", "<Right>", "<Space>":
-		cursor = moveRight(lines, cursor, 1)
-	case "j", "<Down>", "<CR>":
-		cursor = moveVertical(lines, cursor, win.DesiredCol, 1)
+		setWindowCursor(buf, win, moveRight(t, at, 1, false))
+	case "j", "<Down>":
+		setWindowCursor(buf, win, moveVertical(t, at, win.DesiredCol, 1))
 	case "k", "<Up>":
-		cursor = moveVertical(lines, cursor, win.DesiredCol, -1)
+		setWindowCursor(buf, win, moveVertical(t, at, win.DesiredCol, -1))
 	default:
 		return nil
 	}
 
-	setWindowPoint(win, cursor)
-	rememberColumn(win, cursor)
+	rememberColumn(buf, win)
+	frame.dirty = true
+	return nil
+}
+
+func (e *Editor) insertKey(frameID uint64, keys string) error {
+	frame, win, buf, err := e.frameContext(frameID)
+	if err != nil {
+		return err
+	}
+
+	if buf.ReadOnly {
+		return buffer.ErrReadOnly
+	}
+
+	t := buf.Text
+
+	switch keys {
+	case "<Esc>":
+		e.Mode = NormalMode
+		setWindowCursor(buf, win, moveLeft(t, windowCursor(win), 1))
+		rememberColumn(buf, win)
+		frame.dirty = true
+		return nil
+	case "<CR>":
+		return e.insertBytes(frame, win, buf, []byte("\n"))
+	case "<BS>":
+		return e.deleteBack(frame, win, buf)
+	case "<Left>":
+		setWindowCursor(buf, win, moveLeft(t, windowCursor(win), 1))
+		frame.dirty = true
+		return nil
+	case "<Right>":
+		setWindowCursor(buf, win, moveRight(t, windowCursor(win), 1, true))
+		frame.dirty = true
+		return nil
+	case "<Up>":
+		setWindowCursor(buf, win, moveVertical(t, windowCursor(win), win.DesiredCol, -1))
+		frame.dirty = true
+		return nil
+	case "<Down>":
+		setWindowCursor(buf, win, moveVertical(t, windowCursor(win), win.DesiredCol, 1))
+		frame.dirty = true
+		return nil
+	}
+
+	if keys == "" || keys[0] == '<' {
+		return nil
+	}
+
+	return e.insertBytes(frame, win, buf, []byte(keys))
+}
+
+func (e *Editor) insertBytes(frame *Frame, win *window.Window, buf *buffer.Buffer, data []byte) error {
+	delta := buf.Text.Insert(windowCursor(win), data)
+	setWindowCursor(buf, win, delta.NewEnd)
+	rememberColumn(buf, win)
+	frame.dirty = true
+	return nil
+}
+
+func (e *Editor) deleteBack(frame *Frame, win *window.Window, buf *buffer.Buffer) error {
+	at := windowCursor(win)
+	if at <= 0 {
+		return nil
+	}
+
+	from := back(buf.Text, at)
+	buf.Text.Delete(from, at)
+	setWindowCursor(buf, win, from)
+	rememberColumn(buf, win)
 	frame.dirty = true
 	return nil
 }

@@ -1,11 +1,15 @@
 package editor
 
-import "testing"
+import (
+	"testing"
+
+	"vague/bonefire/text"
+)
 
 func TestVisualLinesWrapNoTrailingPadding(t *testing.T) {
 	t.Parallel()
 
-	got := visualLines([]string{"abcdefghijklmn"}, 13, 0, true)
+	got := visualLines(text.New([]byte("abcdefghijklmn")), 13, 0, true)
 	want := []string{"abcdefghijklm", "n"}
 
 	if len(got) != len(want) {
@@ -22,7 +26,7 @@ func TestVisualLinesWrapNoTrailingPadding(t *testing.T) {
 func TestVisualLinesNoWrapTruncates(t *testing.T) {
 	t.Parallel()
 
-	got := visualLines([]string{"abcdefghijklmn"}, 13, 0, false)
+	got := visualLines(text.New([]byte("abcdefghijklmn")), 13, 0, false)
 	want := []string{"abcdefghijklm"}
 
 	if len(got) != 1 || got[0] != want[0] {
@@ -33,7 +37,7 @@ func TestVisualLinesNoWrapTruncates(t *testing.T) {
 func TestVisualLinesRespectsMaxRows(t *testing.T) {
 	t.Parallel()
 
-	got := visualLines([]string{"abcdefghijklmnop"}, 4, 2, true)
+	got := visualLines(text.New([]byte("abcdefghijklmnop")), 4, 2, true)
 	want := []string{"abcd", "efgh"}
 
 	if len(got) != len(want) {
@@ -50,7 +54,7 @@ func TestVisualLinesRespectsMaxRows(t *testing.T) {
 func TestVisualLinesMultipleLogicalLines(t *testing.T) {
 	t.Parallel()
 
-	got := visualLines([]string{"ab", "cdef"}, 3, 0, true)
+	got := visualLines(text.New([]byte("ab\ncdef")), 3, 0, true)
 	want := []string{"ab", "cde", "f"}
 
 	if len(got) != len(want) {

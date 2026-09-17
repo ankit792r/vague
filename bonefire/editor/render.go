@@ -2,14 +2,12 @@ package editor
 
 import "vague/backbone/process"
 
-// InvalidateFrame forces the next redraw to include buffer content.
 func (e *Editor) InvalidateFrame(frameID uint64) {
 	if frame, ok := e.Frames[frameID]; ok {
 		frame.dirty = true
 	}
 }
 
-// RenderRedraw produces the update a client needs for a frame.
 func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 	frame, ok := e.Frames[frameID]
 	if !ok || !frame.dirty {
@@ -31,10 +29,9 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 		mode = "insert"
 	}
 
-	logical := splitLogicalLines(buf.Text)
-	view := layoutView(logical, frame.Width, frame.Height, win.WindowOptions.Wrap)
-	cursor := windowPoint(win)
-	row, col, visible := cursorScreenPos(view.Meta, cursor)
+	view := layoutView(buf.Text, frame.Width, frame.Height, win.WindowOptions.Wrap)
+	point := windowPoint(buf, win)
+	row, col, visible := cursorScreenPos(view.Meta, point)
 
 	frame.dirty = false
 
