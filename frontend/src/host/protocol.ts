@@ -33,12 +33,15 @@ export type HostResultMap = {
 /** Host → UI: event name → payload */
 export type RedrawPayload = {
   frame_id: number
+  columns: number
+  rows: number
+  wrap: boolean
   full?: boolean
   buffer: {
     id: number
     name: string
-    text: string
   }
+  lines: string[]
   mode: string
 }
 

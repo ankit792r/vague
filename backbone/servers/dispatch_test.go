@@ -59,8 +59,16 @@ func TestReadyPushesScratchBufferRedraw(t *testing.T) {
 			t.Fatalf("expected scratch buffer, got %q", redraw.Buffer.Name)
 		}
 
-		if redraw.Buffer.Text == "" {
-			t.Fatal("expected scratch buffer text")
+		if len(redraw.Lines) == 0 {
+			t.Fatal("expected redraw lines")
+		}
+
+		if redraw.Columns != 80 {
+			t.Fatalf("expected 80 columns, got %d", redraw.Columns)
+		}
+
+		if !redraw.Wrap {
+			t.Fatal("expected wrap enabled by default")
 		}
 
 		if !redraw.Full {

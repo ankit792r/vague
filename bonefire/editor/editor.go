@@ -1,6 +1,8 @@
 package editor
 
 import (
+	"fmt"
+
 	"vague/bonefire/buffer"
 	"vague/bonefire/window"
 )
@@ -74,6 +76,45 @@ func (e *Editor) NewFrame(width, height int) (*Frame, error) {
 	}
 
 	return frame, nil
+}
+
+// ResizeFrame updates the viewport size used for layout and wrapping.
+func (e *Editor) ResizeFrame(frameID uint64, width, height int) error {
+	frame, ok := e.Frames[frameID]
+	if !ok {
+		return errNotFound("frame", frameID)
+	}
+
+	if width > 0 {
+		frame.Width = width
+	}
+	if height > 0 {
+		frame.Height = height
+	}
+
+	frame.dirty = true
+	return nil
+}
+
+// SetWindowWrap toggles soft wrapping for the active window in a frame.
+func (e *Editor) SetWindowWrap(frameID uint64, wrap bool) error {
+	frame, ok := e.Frames[frameID]
+	if !ok {
+		return errNotFound("frame", frameID)
+	}
+
+	win, ok := e.Windows[frame.ActiveWindowID]
+	if !ok {
+		return errNotFound("window", frame.ActiveWindowID)
+	}
+
+	win.WindowOptions.Wrap = wrap
+	frame.dirty = true
+	return nil
+}
+
+func errNotFound(kind string, id uint64) error {
+	return fmt.Errorf("%s %d not found", kind, id)
 }
 
 func (e *Editor) currentBuffer() *buffer.Buffer {
