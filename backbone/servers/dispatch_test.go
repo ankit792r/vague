@@ -1,0 +1,75 @@
+package backbone_test
+
+import (
+	"context"
+	"encoding/json"
+	"testing"
+	"time"
+
+	client "vague/backbone/clients"
+	"vague/backbone/process"
+	server "vague/backbone/servers"
+)
+
+func TestReadyPushesScratchBufferRedraw(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	listener, err := process.Listen()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+
+	srv := server.NewServer()
+	go func() {
+		_ = srv.Serve(ctx, listener)
+	}()
+
+	c, err := client.ClientConnect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+
+	if _, err := c.FrameAttach(ctx, process.AttachParams{}); err != nil {
+		t.Fatal(err)
+	}
+
+	readyDone := make(chan struct{})
+	go func() {
+		if _, err := c.FrameReady(ctx, process.FrameReadyParams{Height: 24, Widht: 80}); err != nil {
+			t.Error(err)
+		}
+		close(readyDone)
+	}()
+
+	select {
+	case note := <-c.Notifications():
+		if note.Method != process.MethodRedraw {
+			t.Fatalf("expected redraw, got %q", note.Method)
+		}
+
+		var redraw process.Redraw
+		if err := json.Unmarshal(note.Params, &redraw); err != nil {
+			t.Fatal(err)
+		}
+
+		if redraw.Buffer.Name != "*scratch*" {
+			t.Fatalf("expected scratch buffer, got %q", redraw.Buffer.Name)
+		}
+
+		if redraw.Buffer.Text == "" {
+			t.Fatal("expected scratch buffer text")
+		}
+
+		if !redraw.Full {
+			t.Fatal("expected full redraw on first ready")
+		}
+
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for redraw")
+	}
+
+	<-readyDone
+}

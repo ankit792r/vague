@@ -31,9 +31,20 @@ export type HostResultMap = {
 
 
 /** Host → UI: event name → payload */
+export type RedrawPayload = {
+  frame_id: number
+  full?: boolean
+  buffer: {
+    id: number
+    name: string
+    text: string
+  }
+  mode: string
+}
+
 export type HostEventMap = {
   attached: HostResultMap["attach"]
-  redraw: unknown // replace with RedrawPayload when defined in Go
+  redraw: RedrawPayload
   quit: { frame_id: number }
 }
 export type HostRequestMethod = keyof HostRequestMap
