@@ -111,6 +111,7 @@ func (e *Editor) insertKey(frameID uint64, keys string) error {
 
 func (e *Editor) insertBytes(frame *Frame, win *window.Window, buf *buffer.Buffer, data []byte) error {
 	delta := buf.Text.Insert(windowCursor(win), data)
+	buf.NoteEdit()
 	setWindowCursor(buf, win, delta.NewEnd)
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)
@@ -126,6 +127,7 @@ func (e *Editor) deleteBack(frame *Frame, win *window.Window, buf *buffer.Buffer
 
 	from := back(buf.Text, at)
 	buf.Text.Delete(from, at)
+	buf.NoteEdit()
 	setWindowCursor(buf, win, from)
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)
