@@ -6,8 +6,7 @@ import { useEditorView } from "./hooks/useEditorView"
 export function App() {
   const editorRef = useRef<HTMLDivElement>(null)
   const view = useEditorView(editorRef)
+  const { commandLine } = useEditorInput(view.mode)
 
-  useEditorInput()
-
-  return <EmacsFrame editorRef={editorRef} {...view} />
+  return <EmacsFrame editorRef={editorRef} commandLine={commandLine} {...view} />
 }
