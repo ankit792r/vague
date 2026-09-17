@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"vague/backbone/process"
 	"vague/backbone/session"
+	"vague/bonefire/editor"
 )
 
 func (s *Server) dispatch(ctx context.Context, sess *session.Session, msg process.Message) {
@@ -34,7 +35,7 @@ func (s *Server) dispatchRequest(ctx context.Context, sess *session.Session, msg
 		sess.Reply(msg.ID, result, err)
 
 	case process.MethodFrameAttach:
-		var params process.ExecuteParams
+		var params process.AttachParams
 		if err := msg.DecodeParams(&params); err != nil {
 			sess.Reply(msg.ID, nil, err)
 			return
@@ -98,21 +99,38 @@ func (s *Server) handleInput(ctx context.Context, sess *session.Session, params 
 	_ = params
 }
 
-// Dummy attach function to notify client
-func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, params process.ExecuteParams) (process.AttachResult, error) {
+func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, params process.AttachParams) (process.AttachResult, error) {
 	select {
 	case <-ctx.Done():
 		return process.AttachResult{}, ctx.Err()
 	default:
 	}
 
-	return process.AttachResult{
-		SessionID: sess.Id,
-		FrameID:   sess.Id,
-	}, nil
+	_ = params
+
+	result, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+		frame, err := ed.NewFrame(0, 0)
+		if err != nil {
+			return nil, err
+		}
+
+		ed.InvalidateFrame(frame.ID)
+
+		return process.AttachResult{
+			SessionID: sess.Id,
+			FrameID:   frame.ID,
+		}, nil
+	})
+	if err != nil {
+		return process.AttachResult{}, err
+	}
+
+	attached := result.(process.AttachResult)
+	sess.SetFrameID(attached.FrameID)
+
+	return attached, nil
 }
 
-// Dummy detach function to notify client
 func (s *Server) handleFrameDetach(ctx context.Context, sess *session.Session) error {
 	select {
 	case <-ctx.Done():
@@ -120,10 +138,10 @@ func (s *Server) handleFrameDetach(ctx context.Context, sess *session.Session) e
 	default:
 	}
 
+	sess.SetFrameID(0)
 	return nil
 }
 
-// Dummy ready function to notify client
 func (s *Server) handleFrameReady(ctx context.Context, sess *session.Session, params process.FrameReadyParams) (process.FrameReadyResult, error) {
 	select {
 	case <-ctx.Done():
@@ -131,8 +149,60 @@ func (s *Server) handleFrameReady(ctx context.Context, sess *session.Session, pa
 	default:
 	}
 
+	frameID := sess.FrameID()
+	if frameID == 0 {
+		result, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+			frame, err := ed.NewFrame(params.Height, params.Widht)
+			if err != nil {
+				return nil, err
+			}
+
+			ed.InvalidateFrame(frame.ID)
+
+			return process.FrameReadyResult{
+				SessionID: sess.Id,
+				FrameID:   frame.ID,
+			}, nil
+		})
+		if err != nil {
+			return process.FrameReadyResult{}, err
+		}
+
+		ready := result.(process.FrameReadyResult)
+		sess.SetFrameID(ready.FrameID)
+		s.pushRedraw(ctx, sess, ready.FrameID)
+
+		return ready, nil
+	}
+
+	_, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+		ed.InvalidateFrame(frameID)
+		return nil, nil
+	})
+	if err != nil {
+		return process.FrameReadyResult{}, err
+	}
+
+	s.pushRedraw(ctx, sess, frameID)
+
 	return process.FrameReadyResult{
 		SessionID: sess.Id,
-		FrameID:   sess.Id,
+		FrameID:   frameID,
 	}, nil
+}
+
+func (s *Server) pushRedraw(ctx context.Context, sess *session.Session, frameID uint64) {
+	result, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+		redraw, ok := ed.RenderRedraw(frameID)
+		if !ok {
+			return nil, fmt.Errorf("frame %d has no pending redraw", frameID)
+		}
+
+		return redraw, nil
+	})
+	if err != nil {
+		return
+	}
+
+	sess.Notify(process.MethodRedraw, result.(process.Redraw))
 }

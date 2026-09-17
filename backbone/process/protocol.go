@@ -27,6 +27,9 @@ const (
 
 	// MethodFrameReady is sent when the client is ready to receive commands.
 	MethodFrameReady = "ready"
+
+	// MethodRedraw carries editor state to the client. Notification, server to client.
+	MethodRedraw = "redraw"
 )
 
 // InputParams carries keys in Vim notation, for example "ihello<Esc>".
@@ -100,4 +103,19 @@ type CursorPos struct {
 	Row     int  `json:"row"`
 	Column  int  `json:"column"`
 	Visible bool `json:"visible"`
+}
+
+// RedrawBuffer is the buffer content sent to webview clients.
+type RedrawBuffer struct {
+	ID   uint64 `json:"id"`
+	Name string `json:"name"`
+	Text string `json:"text"`
+}
+
+// Redraw brings a client's picture up to date.
+type Redraw struct {
+	FrameID uint64       `json:"frame_id"`
+	Full    bool         `json:"full,omitempty"`
+	Buffer  RedrawBuffer `json:"buffer"`
+	Mode    string       `json:"mode"`
 }

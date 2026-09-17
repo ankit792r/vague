@@ -10,6 +10,7 @@ import (
 	"time"
 	"vague/backbone/process"
 	"vague/backbone/session"
+	"vague/bonefire/runtime"
 )
 
 type Server struct {
@@ -17,6 +18,7 @@ type Server struct {
 	mu sync.Mutex
 
 	sessions map[*session.Session]struct{}
+	runtime  *runtime.Runtime
 
 	nextSessionID uint64
 }
@@ -24,13 +26,15 @@ type Server struct {
 func NewServer() *Server {
 	return &Server{
 		sessions: make(map[*session.Session]struct{}),
+		runtime:  runtime.NewRuntime(),
 	}
 }
 
 func (s *Server) Serve(ctx context.Context, listener *process.Listener) error {
 	defer listener.Close()
 
-	// Start the server runtime HERE
+	go s.runtime.Run()
+
 	slog.Info("Server listening")
 
 	go func() {
@@ -42,6 +46,8 @@ func (s *Server) Serve(ctx context.Context, listener *process.Listener) error {
 	acceptErr := s.accept(ctx, listener)
 
 	s.wg.Wait()
+	s.runtime.Shutdown()
+	s.runtime.Wait()
 
 	return acceptErr
 }

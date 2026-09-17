@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"embed"
 	"errors"
 	"fmt"
 	"os"
@@ -10,9 +9,6 @@ import (
 	"syscall"
 	"vague/backbone/command"
 )
-
-//go:embed "frontend/dist/*"
-var uiDist embed.FS
 
 func main() {
 

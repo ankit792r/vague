@@ -9,6 +9,8 @@ import (
 	"vague/backbone/process"
 )
 
+const outboundQueue = 256
+
 type Session struct {
 	Id       uint64
 	Conn     net.Conn
@@ -25,7 +27,7 @@ func NewSession(id uint64, conn net.Conn) *Session {
 		Id:       id,
 		Conn:     conn,
 		Reader:   bufio.NewReader(conn),
-		outbound: make(chan process.Message),
+		outbound: make(chan process.Message, outboundQueue),
 
 		done: make(chan struct{}),
 	}
@@ -35,6 +37,14 @@ func (s *Session) Close() {
 	s.doneOnce.Do(func() {
 		close(s.done)
 	})
+}
+
+func (s *Session) SetFrameID(id uint64) {
+	s.frameId = id
+}
+
+func (s *Session) FrameID() uint64 {
+	return s.frameId
 }
 
 // writeLoop drains the outbound queue until the session closes. Frames are
