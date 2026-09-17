@@ -29,9 +29,11 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 		mode = "insert"
 	}
 
-	view := layoutView(buf.Text, frame.Width, frame.Height, win.WindowOptions.Wrap)
+	fullView := layoutView(buf.Text, frame.Width, 0, win.WindowOptions.Wrap)
 	point := windowPoint(buf, win)
-	row, col, visible := cursorScreenPos(view.Meta, point)
+	ensureCursorVisible(win, frame, fullView, point)
+	view := sliceView(fullView, win.TopLine, frame.Height)
+	row, col, visible := cursorViewportPos(win.TopLine, fullView.Meta, point)
 
 	frame.dirty = false
 

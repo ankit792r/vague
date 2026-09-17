@@ -28,6 +28,9 @@ type Window struct {
 	// DesiredCol is the byte column j/k aim for after vertical movement.
 	DesiredCol int
 
+	// TopLine is the index of the first visible visual row in the layout.
+	TopLine int
+
 	WindowOptions WindowOptions
 }
 
