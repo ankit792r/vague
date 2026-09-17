@@ -139,5 +139,6 @@ func (e *Editor) Scratch(name string) *buffer.Buffer {
 func newWindow(id, frameID, bufferID uint64) *window.Window {
 	win := window.NewWindow(id, frameID)
 	win.BufferId = bufferID
+	win.DesiredCol = 0
 	return win
 }

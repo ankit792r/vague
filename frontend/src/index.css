@@ -75,6 +75,11 @@ button {
   min-height: 1.4em;
 }
 
+.cursor-cell {
+  background: var(--fg);
+  color: var(--bg);
+}
+
 .status-line {
   display: flex;
   align-items: center;

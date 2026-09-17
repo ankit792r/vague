@@ -15,8 +15,6 @@ type HostReply struct {
 func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) HostReply {
 	reply := HostReply{ID: id}
 
-	fmt.Println(method)
-
 	switch method {
 	case process.MethodInput:
 		var p process.InputParams
