@@ -42,6 +42,11 @@ export type RedrawPayload = {
     name: string
   }
   lines: string[]
+  cursor: {
+    row: number
+    column: number
+    visible: boolean
+  }
   mode: string
 }
 

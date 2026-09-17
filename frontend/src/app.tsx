@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "preact/hooks"
+import { Fragment } from "preact/jsx-runtime"
 import { hostRequest, onHostEvent } from "./host/client"
 import type { RedrawPayload } from "./host/protocol"
 import { encodeKey } from "./utils/keys"
 
-const DUMMY_MODE = "Normal"
 const DUMMY_COMMAND = "open-file"
 
 function measureEditor(el: HTMLElement) {
@@ -18,17 +18,53 @@ function measureEditor(el: HTMLElement) {
   }
 }
 
+function renderLine(
+  line: string,
+  row: number,
+  cursor: RedrawPayload["cursor"],
+) {
+  const display = line === "" ? "\u00a0" : line
+
+  if (!cursor?.visible || cursor.row !== row) {
+    return display
+  }
+
+  const before = display.slice(0, cursor.column)
+  const at = display[cursor.column] ?? "\u00a0"
+  const after = display.slice(cursor.column + 1)
+
+  return (
+    <Fragment>
+      {before}
+      <span class="cursor-cell">{at}</span>
+      {after}
+    </Fragment>
+  )
+}
+
 export function App() {
   const editorRef = useRef<HTMLDivElement>(null)
   const [lines, setLines] = useState<string[]>([])
   const [bufferName, setBufferName] = useState("*scratch*")
+  const [mode, setMode] = useState("normal")
+  const [cursor, setCursor] = useState<RedrawPayload["cursor"]>({
+    row: 0,
+    column: 0,
+    visible: true,
+  })
 
   useEffect(() => {
     const unsubscribe = onHostEvent("redraw", (payload) => {
-      const redraw = payload as RedrawPayload
-      setBufferName(redraw.buffer.name)
-      setLines(redraw.lines)
+      const redraw = payload as Partial<RedrawPayload>
+      setBufferName(redraw.buffer?.name ?? "*scratch*")
+      setLines(Array.isArray(redraw.lines) ? redraw.lines : [])
+      setMode(redraw.mode ?? "normal")
+      setCursor(
+        redraw.cursor ?? { row: 0, column: 0, visible: false },
+      )
     })
+
+    let readyTimer: ReturnType<typeof setTimeout> | undefined
 
     const sendReady = () => {
       const el = editorRef.current
@@ -36,10 +72,13 @@ export function App() {
         return
       }
 
-      const { rows, cols } = measureEditor(el)
-      void hostRequest("ready", { height: rows, width: cols }).catch((err) => {
-        console.error("ready failed", err)
-      })
+      clearTimeout(readyTimer)
+      readyTimer = setTimeout(() => {
+        const { rows, cols } = measureEditor(el)
+        void hostRequest("ready", { height: rows, width: cols }).catch((err) => {
+          console.error("ready failed", err)
+        })
+      }, 50)
     }
 
     sendReady()
@@ -50,6 +89,7 @@ export function App() {
     }
 
     return () => {
+      clearTimeout(readyTimer)
       unsubscribe()
       observer.disconnect()
     }
@@ -58,7 +98,12 @@ export function App() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       e.preventDefault()
-      void hostRequest("input", { keys: encodeKey(e) }).catch((err: unknown) => {
+      const keys = encodeKey(e)
+      if (!keys) {
+        return
+      }
+
+      void hostRequest("input", { keys }).catch((err: unknown) => {
         console.error("input failed", err)
       })
     }
@@ -70,18 +115,16 @@ export function App() {
   return (
     <div class="emacs-frame">
       <div ref={editorRef} class="editor-area" aria-label="editor">
-        {lines.length > 0
-          ? lines.map((line, index) => (
-              <div key={index} class="editor-line">
-                {line === "" ? "\u00a0" : line}
-              </div>
-            ))
-          : null}
+        {(lines ?? []).map((line, index) => (
+          <div key={index} class="editor-line">
+            {renderLine(line, index, cursor)}
+          </div>
+        ))}
       </div>
 
       <div class="status-line" aria-label="status line">
         <span class="status-left">--**- {bufferName}</span>
-        <span class="status-right">({DUMMY_MODE})</span>
+        <span class="status-right">({mode})</span>
       </div>
 
       <div class="command-line" aria-label="command line">

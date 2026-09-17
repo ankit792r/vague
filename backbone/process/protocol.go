@@ -120,5 +120,6 @@ type Redraw struct {
 	Full    bool         `json:"full,omitempty"`
 	Buffer  RedrawBuffer `json:"buffer"`
 	Lines   []string     `json:"lines"`
+	Cursor  CursorPos    `json:"cursor"`
 	Mode    string       `json:"mode"`
 }

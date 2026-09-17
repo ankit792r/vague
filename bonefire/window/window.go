@@ -27,10 +27,13 @@ type Window struct {
 
 	Children []*Window `json:"children,omitempty"`
 
-	// cursor is a marker rather than a bare offset so it stays correct when
-	// the buffer is edited elsewhere, including by another window showing
-	// the same buffer.
-	// cursor *text.Marker
+	// CursorLine and CursorCol are the cursor in buffer coordinates.
+	// Col is a rune index within the line.
+	CursorLine int
+	CursorCol  int
+
+	// DesiredCol is the rune column j/k aim for after vertical movement.
+	DesiredCol int
 
 	WindowOptions WindowOptions
 }

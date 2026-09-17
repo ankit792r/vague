@@ -31,12 +31,10 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 		mode = "insert"
 	}
 
-	lines := visualLines(
-		splitLogicalLines(buf.Text),
-		frame.Width,
-		frame.Height,
-		win.WindowOptions.Wrap,
-	)
+	logical := splitLogicalLines(buf.Text)
+	view := layoutView(logical, frame.Width, frame.Height, win.WindowOptions.Wrap)
+	cursor := windowPoint(win)
+	row, col, visible := cursorScreenPos(view.Meta, cursor)
 
 	frame.dirty = false
 
@@ -50,7 +48,12 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 			ID:   buf.ID,
 			Name: buf.Name,
 		},
-		Lines: lines,
-		Mode:  mode,
+		Lines: view.Lines,
+		Cursor: process.CursorPos{
+			Row:     row,
+			Column:  col,
+			Visible: visible,
+		},
+		Mode: mode,
 	}, true
 }

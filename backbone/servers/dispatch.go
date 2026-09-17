@@ -116,10 +116,19 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 }
 
 func (s *Server) handleInput(ctx context.Context, sess *session.Session, params process.InputParams) {
-	// TODO: feed keys into the editor model.
-	_ = ctx
-	_ = sess
-	_ = params
+	frameID := sess.FrameID()
+	if frameID == 0 {
+		return
+	}
+
+	_, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+		return nil, ed.HandleInput(frameID, params.Keys)
+	})
+	if err != nil {
+		return
+	}
+
+	s.pushRedraw(ctx, sess, frameID)
 }
 
 func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, params process.AttachParams) (process.AttachResult, error) {
