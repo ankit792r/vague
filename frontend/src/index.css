@@ -8,6 +8,10 @@
 
   --bg: #141415;
   --fg: #cdcdcd;
+  --modeline-bg: #2a2a2b;
+  --modeline-fg: #b0b0b0;
+  --minibuffer-bg: #1a1a1b;
+  --border: #3a3a3b;
 }
 
 * {
@@ -18,18 +22,18 @@
 
 html,
 body,
-#root {
-  margin: 0;
-  min-height: 100%;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-ui);
+#app {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-  font-size: 20px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 16px;
   font-weight: normal;
-  line-height: 1;
+  line-height: 1.4;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -51,6 +55,68 @@ button {
   color: var(--bg);
 }
 
-a {
-  color: var(--accent);
+.emacs-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.editor-area {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-text);
+}
+
+.editor-line {
+  white-space: pre;
+  min-height: 1.4em;
+}
+
+.status-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+  height: 1.5rem;
+  padding: 0 0.75rem;
+  background: var(--modeline-bg);
+  color: var(--modeline-fg);
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+.status-left,
+.status-right {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-line {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: 1.75rem;
+  padding: 0 0.75rem;
+  background: var(--minibuffer-bg);
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+  line-height: 1.75rem;
+}
+
+.command-prompt {
+  color: var(--modeline-fg);
+  margin-right: 0.25rem;
+}
+
+.command-text {
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
