@@ -121,8 +121,23 @@ button {
   margin-right: 0.25rem;
 }
 
+.command-line-active {
+  outline: 1px solid var(--border);
+  outline-offset: -1px;
+}
+
 .command-text {
   color: var(--fg);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-error {
+  color: #ff6b6b;
+  margin-left: 0.75rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
