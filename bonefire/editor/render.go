@@ -31,16 +31,26 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 		mode = "insert"
 	}
 
+	lines := visualLines(
+		splitLogicalLines(buf.Text),
+		frame.Width,
+		frame.Height,
+		win.WindowOptions.Wrap,
+	)
+
 	frame.dirty = false
 
 	return process.Redraw{
 		FrameID: frameID,
 		Full:    true,
+		Columns: frame.Width,
+		Rows:    frame.Height,
+		Wrap:    win.WindowOptions.Wrap,
 		Buffer: process.RedrawBuffer{
 			ID:   buf.ID,
 			Name: buf.Name,
-			Text: buf.Text,
 		},
-		Mode: mode,
+		Lines: lines,
+		Mode:  mode,
 	}, true
 }

@@ -82,6 +82,29 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		return nil, ctx.Err()
 	default:
 	}
+
+	frameID := sess.FrameID()
+	switch params.Name {
+	case "wrap", "nowrap":
+		if frameID == 0 {
+			return nil, fmt.Errorf("session is not attached to a frame")
+		}
+
+		wrap := params.Name == "wrap"
+		result, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+			if err := ed.SetWindowWrap(frameID, wrap); err != nil {
+				return nil, err
+			}
+			return map[string]any{"wrap": wrap}, nil
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return result, nil
+	}
+
 	// Temporary echo so client-connect can prove the round-trip works.
 	return map[string]any{
 		"ok":    true,
@@ -176,6 +199,9 @@ func (s *Server) handleFrameReady(ctx context.Context, sess *session.Session, pa
 	}
 
 	_, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+		if err := ed.ResizeFrame(frameID, params.Widht, params.Height); err != nil {
+			return nil, err
+		}
 		ed.InvalidateFrame(frameID)
 		return nil, nil
 	})

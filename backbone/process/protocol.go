@@ -105,17 +105,20 @@ type CursorPos struct {
 	Visible bool `json:"visible"`
 }
 
-// RedrawBuffer is the buffer content sent to webview clients.
+// RedrawBuffer identifies the buffer being drawn.
 type RedrawBuffer struct {
 	ID   uint64 `json:"id"`
 	Name string `json:"name"`
-	Text string `json:"text"`
 }
 
 // Redraw brings a client's picture up to date.
 type Redraw struct {
 	FrameID uint64       `json:"frame_id"`
+	Columns int          `json:"columns"`
+	Rows    int          `json:"rows"`
+	Wrap    bool         `json:"wrap"`
 	Full    bool         `json:"full,omitempty"`
 	Buffer  RedrawBuffer `json:"buffer"`
+	Lines   []string     `json:"lines"`
 	Mode    string       `json:"mode"`
 }
