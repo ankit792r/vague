@@ -3,20 +3,9 @@ import { Fragment } from "preact/jsx-runtime"
 import { hostRequest, onHostEvent } from "./host/client"
 import type { RedrawPayload } from "./host/protocol"
 import { encodeKey } from "./utils/keys"
+import { measureEditor } from "./utils/measure"
 
 const DUMMY_COMMAND = "open-file"
-
-function measureEditor(el: HTMLElement) {
-  const style = getComputedStyle(el)
-  const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.4
-  const fontSize = parseFloat(style.fontSize) || 16
-  const charWidth = fontSize * 0.6
-
-  return {
-    rows: Math.max(1, Math.floor(el.clientHeight / lineHeight)),
-    cols: Math.max(1, Math.floor(el.clientWidth / charWidth)),
-  }
-}
 
 function renderLine(
   line: string,
@@ -74,9 +63,16 @@ export function App() {
 
       clearTimeout(readyTimer)
       readyTimer = setTimeout(() => {
-        const { rows, cols } = measureEditor(el)
-        void hostRequest("ready", { height: rows, width: cols }).catch((err) => {
-          console.error("ready failed", err)
+        void document.fonts.ready.then(() => {
+          const el = editorRef.current
+          if (!el) {
+            return
+          }
+
+          const { rows, cols } = measureEditor(el)
+          void hostRequest("ready", { height: rows, width: cols }).catch((err) => {
+            console.error("ready failed", err)
+          })
         })
       }, 50)
     }
