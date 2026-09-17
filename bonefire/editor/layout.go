@@ -1,6 +1,6 @@
 package editor
 
-import "strings"
+import "vague/bonefire/text"
 
 // visualLine is one screen row and where it came from in the buffer.
 type visualLine struct {
@@ -15,21 +15,20 @@ type viewLayout struct {
 	Meta  []visualLine
 }
 
-// layoutView turns logical buffer lines into screen rows and mapping metadata.
-func layoutView(logical []string, width, maxRows int, wrap bool) viewLayout {
+// layoutView turns buffer text into screen rows and mapping metadata.
+// StartCol and EndCol are byte offsets within each buffer line.
+func layoutView(t *text.Text, width, maxRows int, wrap bool) viewLayout {
 	if width < 1 {
 		width = defaultFrameWidth
 	}
 
 	var out viewLayout
 
-	for bufLine, line := range logical {
-		runes := []rune(line)
-		if len(runes) == 0 {
+	for bufLine := 0; bufLine < t.LineCount(); bufLine++ {
+		line := t.Line(bufLine)
+		if len(line) == 0 {
 			out.appendVisual(visualLine{
 				BufferLine: bufLine,
-				StartCol:   0,
-				EndCol:     0,
 				Text:       "",
 			}, maxRows)
 			if maxRows > 0 && len(out.Lines) >= maxRows {
@@ -38,34 +37,36 @@ func layoutView(logical []string, width, maxRows int, wrap bool) viewLayout {
 			continue
 		}
 
-		if !wrap && len(runes) > width {
-			runes = runes[:width]
-		}
-
 		if !wrap {
+			chunk := line
+			if len(chunk) > width {
+				chunk = line[:width]
+			}
+
 			out.appendVisual(visualLine{
 				BufferLine: bufLine,
 				StartCol:   0,
-				EndCol:     len(runes),
-				Text:       string(runes),
+				EndCol:     len(chunk),
+				Text:       string(chunk),
 			}, maxRows)
+
 			if maxRows > 0 && len(out.Lines) >= maxRows {
 				return out
 			}
 			continue
 		}
 
-		for start := 0; start < len(runes); start += width {
+		for start := 0; start < len(line); start += width {
 			end := start + width
-			if end > len(runes) {
-				end = len(runes)
+			if end > len(line) {
+				end = len(line)
 			}
 
 			out.appendVisual(visualLine{
 				BufferLine: bufLine,
 				StartCol:   start,
 				EndCol:     end,
-				Text:       string(runes[start:end]),
+				Text:       string(line[start:end]),
 			}, maxRows)
 
 			if maxRows > 0 && len(out.Lines) >= maxRows {
@@ -86,17 +87,28 @@ func (v *viewLayout) appendVisual(row visualLine, maxRows int) {
 	v.Meta = append(v.Meta, row)
 }
 
-func cursorScreenPos(meta []visualLine, cursor Point) (row, col int, visible bool) {
+func cursorScreenPos(meta []visualLine, point text.Point) (row, col int, visible bool) {
+	lastIdx := -1
 	for i, vl := range meta {
-		if vl.BufferLine != cursor.Line {
+		if vl.BufferLine == point.Line {
+			lastIdx = i
+		}
+	}
+
+	for i, vl := range meta {
+		if vl.BufferLine != point.Line {
 			continue
 		}
 
-		if cursor.Col >= vl.StartCol && cursor.Col < vl.EndCol {
-			return i, cursor.Col - vl.StartCol, true
+		if point.Col >= vl.StartCol && point.Col < vl.EndCol {
+			return i, point.Col - vl.StartCol, true
 		}
 
-		if vl.StartCol == vl.EndCol && cursor.Col == 0 {
+		if point.Col == vl.EndCol && i == lastIdx {
+			return i, point.Col - vl.StartCol, true
+		}
+
+		if vl.StartCol == vl.EndCol && point.Col == 0 {
 			return i, 0, true
 		}
 	}
@@ -104,15 +116,6 @@ func cursorScreenPos(meta []visualLine, cursor Point) (row, col int, visible boo
 	return 0, 0, false
 }
 
-func splitLogicalLines(text string) []string {
-	if text == "" {
-		return []string{""}
-	}
-
-	return strings.Split(text, "\n")
-}
-
-// visualLines turns logical buffer lines into screen rows.
-func visualLines(logical []string, width, maxRows int, wrap bool) []string {
-	return layoutView(logical, width, maxRows, wrap).Lines
+func visualLines(t *text.Text, width, maxRows int, wrap bool) []string {
+	return layoutView(t, width, maxRows, wrap).Lines
 }

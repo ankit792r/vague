@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"vague/bonefire/buffer"
+	"vague/bonefire/text"
 	"vague/bonefire/window"
 )
 
@@ -64,6 +65,7 @@ func (e *Editor) NewFrame(width, height int) (*Frame, error) {
 	e.nextFrameID++
 
 	win := newWindow(e.nextWindowID, frame.ID, buf.ID)
+	win.Cursor = buf.Text.AddMarker(0, text.GravityRight)
 	e.nextWindowID++
 	e.Windows[win.Id] = win
 
