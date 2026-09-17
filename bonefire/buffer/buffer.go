@@ -2,6 +2,7 @@ package buffer
 
 import (
 	"errors"
+	"time"
 
 	"vague/bonefire/text"
 )
@@ -29,6 +30,8 @@ type Buffer struct {
 	startedEmpty bool
 	onDisk       bool
 	diskSize     int64
+	diskModTime  time.Time
+	editSeq      int
 	savedSeq     int
 }
 

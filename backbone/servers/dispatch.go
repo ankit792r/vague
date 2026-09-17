@@ -85,6 +85,59 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 
 	frameID := sess.FrameID()
 	switch params.Name {
+	case "edit", "e":
+		if frameID == 0 {
+			return nil, fmt.Errorf("session is not attached to a frame")
+		}
+		if len(params.Args) == 0 {
+			return nil, fmt.Errorf("edit: file name required")
+		}
+
+		path := params.Args[0]
+		result, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+			buf, err := ed.OpenFile(frameID, path, params.Bang)
+			if err != nil {
+				return nil, editor.OpenFileError(path, err)
+			}
+			return editor.BufferInfo(buf, true), nil
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return result, nil
+
+	case "write", "w":
+		if frameID == 0 {
+			return nil, fmt.Errorf("session is not attached to a frame")
+		}
+
+		path := ""
+		if len(params.Args) > 0 {
+			path = params.Args[0]
+		}
+
+		result, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+			_, win, buf, err := ed.FrameContext(frameID)
+			if err != nil {
+				return nil, err
+			}
+			_ = win
+
+			if err := ed.WriteFile(frameID, path, params.Bang); err != nil {
+				return nil, editor.WriteFileError(path, err)
+			}
+
+			return editor.BufferInfo(buf, true), nil
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return result, nil
+
 	case "wrap", "nowrap":
 		if frameID == 0 {
 			return nil, fmt.Errorf("session is not attached to a frame")
