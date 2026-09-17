@@ -41,14 +41,15 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 	case "l", "<Right>", "<Space>":
 		setWindowCursor(buf, win, moveRight(t, at, 1, false))
 	case "j", "<Down>":
-		setWindowCursor(buf, win, moveVertical(t, at, win.DesiredCol, 1))
+		setWindowCursor(buf, win, moveVerticalForWindow(t, win, frame, at, 1, false))
 	case "k", "<Up>":
-		setWindowCursor(buf, win, moveVertical(t, at, win.DesiredCol, -1))
+		setWindowCursor(buf, win, moveVerticalForWindow(t, win, frame, at, -1, false))
 	default:
 		return nil
 	}
 
-	rememberColumn(buf, win)
+	view := layoutViewForWindow(t, win, frame)
+	rememberColumn(buf, win, view)
 	frame.dirty = true
 	return nil
 }
@@ -69,7 +70,8 @@ func (e *Editor) insertKey(frameID uint64, keys string) error {
 	case "<Esc>":
 		e.Mode = NormalMode
 		setWindowCursor(buf, win, moveLeft(t, windowCursor(win), 1))
-		rememberColumn(buf, win)
+		view := layoutViewForWindow(t, win, frame)
+		rememberColumn(buf, win, view)
 		frame.dirty = true
 		return nil
 	case "<CR>":
@@ -87,12 +89,16 @@ func (e *Editor) insertKey(frameID uint64, keys string) error {
 		frame.dirty = true
 		return nil
 	case "<Up>":
-		setWindowCursor(buf, win, moveVertical(t, windowCursor(win), win.DesiredCol, -1))
+		setWindowCursor(buf, win, moveVerticalForWindow(t, win, frame, windowCursor(win), -1, true))
 		frame.dirty = true
+		view := layoutViewForWindow(t, win, frame)
+		rememberColumn(buf, win, view)
 		return nil
 	case "<Down>":
-		setWindowCursor(buf, win, moveVertical(t, windowCursor(win), win.DesiredCol, 1))
+		setWindowCursor(buf, win, moveVerticalForWindow(t, win, frame, windowCursor(win), 1, true))
 		frame.dirty = true
+		view := layoutViewForWindow(t, win, frame)
+		rememberColumn(buf, win, view)
 		return nil
 	}
 
@@ -106,7 +112,8 @@ func (e *Editor) insertKey(frameID uint64, keys string) error {
 func (e *Editor) insertBytes(frame *Frame, win *window.Window, buf *buffer.Buffer, data []byte) error {
 	delta := buf.Text.Insert(windowCursor(win), data)
 	setWindowCursor(buf, win, delta.NewEnd)
-	rememberColumn(buf, win)
+	view := layoutViewForWindow(buf.Text, win, frame)
+	rememberColumn(buf, win, view)
 	frame.dirty = true
 	return nil
 }
@@ -120,7 +127,8 @@ func (e *Editor) deleteBack(frame *Frame, win *window.Window, buf *buffer.Buffer
 	from := back(buf.Text, at)
 	buf.Text.Delete(from, at)
 	setWindowCursor(buf, win, from)
-	rememberColumn(buf, win)
+	view := layoutViewForWindow(buf.Text, win, frame)
+	rememberColumn(buf, win, view)
 	frame.dirty = true
 	return nil
 }

@@ -36,6 +36,28 @@ func TestMoveVerticalKeepsDesiredColumn(t *testing.T) {
 	}
 }
 
+func TestMoveVerticalVisualWithinWrappedLine(t *testing.T) {
+	t.Parallel()
+
+	tex := text.New([]byte("abcdefgh"))
+	view := layoutView(tex, 4, 0, true)
+
+	start := tex.OffsetOf(text.Point{Line: 0, Col: 0})
+	got := moveVerticalVisual(view, tex, start, 0, 1, false)
+	point := tex.PointOf(got)
+
+	if point.Line != 0 || point.Col != 4 {
+		t.Fatalf("move down: got line=%d col=%d, want line 0 col 4", point.Line, point.Col)
+	}
+
+	got = moveVerticalVisual(view, tex, got, 0, -1, false)
+	point = tex.PointOf(got)
+
+	if point.Line != 0 || point.Col != 0 {
+		t.Fatalf("move up: got line=%d col=%d, want line 0 col 0", point.Line, point.Col)
+	}
+}
+
 func TestCursorScreenPosWithWrap(t *testing.T) {
 	t.Parallel()
 
