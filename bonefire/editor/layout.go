@@ -88,6 +88,11 @@ func (v *viewLayout) appendVisual(row visualLine, maxRows int) {
 }
 
 func cursorScreenPos(meta []visualLine, point text.Point) (row, col int, visible bool) {
+	row, col, visible = visualRowAt(meta, point)
+	return row, col, visible
+}
+
+func visualRowAt(meta []visualLine, point text.Point) (row, colInRow int, ok bool) {
 	lastIdx := -1
 	for i, vl := range meta {
 		if vl.BufferLine == point.Line {

@@ -29,8 +29,16 @@ func windowPoint(buf *buffer.Buffer, win *window.Window) text.Point {
 	return buf.Text.PointOf(windowCursor(win))
 }
 
-func rememberColumn(buf *buffer.Buffer, win *window.Window) {
-	win.DesiredCol = windowPoint(buf, win).Col
+func rememberColumn(buf *buffer.Buffer, win *window.Window, view *viewLayout) {
+	point := windowPoint(buf, win)
+	if view != nil {
+		if _, col, ok := visualRowAt(view.Meta, point); ok {
+			win.DesiredCol = col
+			return
+		}
+	}
+
+	win.DesiredCol = point.Col
 }
 
 func moveLeft(t *text.Text, off text.Offset, count int) text.Offset {
@@ -65,6 +73,7 @@ func moveRight(t *text.Text, off text.Offset, count int, past bool) text.Offset 
 	return t.OffsetOf(point)
 }
 
+// moveVertical moves by buffer lines when wrap is off.
 func moveVertical(t *text.Text, off text.Offset, desiredCol, delta int) text.Offset {
 	point := t.PointOf(off)
 
@@ -80,6 +89,49 @@ func moveVertical(t *text.Text, off text.Offset, desiredCol, delta int) text.Off
 	}
 
 	return t.OffsetOf(text.Point{Line: target, Col: col})
+}
+
+// moveVerticalVisual moves by screen rows through wrapped lines.
+func moveVerticalVisual(view viewLayout, t *text.Text, off text.Offset, desiredCol, delta int, past bool) text.Offset {
+	point := t.PointOf(off)
+	currentRow, _, ok := visualRowAt(view.Meta, point)
+	if !ok {
+		return off
+	}
+
+	targetRow := currentRow + delta
+	if targetRow < 0 || targetRow >= len(view.Meta) {
+		return off
+	}
+
+	vl := view.Meta[targetRow]
+	col := clampVisualCol(vl, desiredCol, past)
+
+	return t.OffsetOf(text.Point{Line: vl.BufferLine, Col: vl.StartCol + col})
+}
+
+func clampVisualCol(vl visualLine, desiredCol int, past bool) int {
+	segLen := vl.EndCol - vl.StartCol
+	if segLen <= 0 {
+		return 0
+	}
+
+	if past {
+		if desiredCol > segLen {
+			return segLen
+		}
+		return desiredCol
+	}
+
+	if desiredCol >= segLen {
+		return segLen - 1
+	}
+
+	if desiredCol < 0 {
+		return 0
+	}
+
+	return desiredCol
 }
 
 func back(t *text.Text, off text.Offset) text.Offset {
@@ -119,4 +171,29 @@ func clampInt(v, lo, hi int) int {
 		return hi
 	}
 	return v
+}
+
+func moveVerticalForWindow(
+	t *text.Text,
+	win *window.Window,
+	frame *Frame,
+	off text.Offset,
+	delta int,
+	past bool,
+) text.Offset {
+	if !win.WindowOptions.Wrap {
+		return moveVertical(t, off, win.DesiredCol, delta)
+	}
+
+	view := layoutView(t, frame.Width, 0, true)
+	return moveVerticalVisual(view, t, off, win.DesiredCol, delta, past)
+}
+
+func layoutViewForWindow(t *text.Text, win *window.Window, frame *Frame) *viewLayout {
+	if !win.WindowOptions.Wrap {
+		return nil
+	}
+
+	view := layoutView(t, frame.Width, 0, true)
+	return &view
 }
