@@ -66,8 +66,10 @@ button {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 0.5rem 0.75rem;
+  padding: 0;
   font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 .editor-line {
