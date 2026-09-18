@@ -44,8 +44,9 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 		Rows:    frame.Height,
 		Wrap:    win.WindowOptions.Wrap,
 		Buffer: process.RedrawBuffer{
-			ID:   buf.ID,
-			Name: buf.Name,
+			ID:       buf.ID,
+			Name:     buf.Name,
+			Modified: buf.Modified(),
 		},
 		Lines: view.Lines,
 		Cursor: process.CursorPos{

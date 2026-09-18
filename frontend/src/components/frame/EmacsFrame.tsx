@@ -14,6 +14,7 @@ export function EmacsFrame({
   editorRef,
   lines,
   bufferName,
+  modified,
   mode,
   cursor,
   commandLine,
@@ -28,7 +29,11 @@ export function EmacsFrame({
         cursor={cursor}
         hideCursor={commandLine.active}
       />
-      <StatusLine bufferName={bufferName} mode={statusMode} />
+      <StatusLine
+        bufferName={bufferName}
+        modified={modified}
+        mode={statusMode}
+      />
       <CommandLine
         active={commandLine.active}
         text={commandLine.text}
