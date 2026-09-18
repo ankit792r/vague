@@ -6,6 +6,80 @@ import (
 	"testing"
 )
 
+func TestNewFrameOpensExistingFile(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "hello.py")
+	content := []byte("print('hi')\n")
+
+	if err := os.WriteFile(path, content, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	ed := NewEditor()
+	frame, err := ed.NewFrame(80, 10, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	win := ed.Windows[frame.ActiveWindowID]
+	buf := ed.Buffers[win.BufferId]
+
+	if buf.Name != "hello.py" {
+		t.Fatalf("name = %q, want hello.py", buf.Name)
+	}
+
+	if string(buf.Text.Bytes()) != string(content) {
+		t.Fatalf("got %q, want %q", buf.Text.Bytes(), content)
+	}
+
+	redraw, ok := ed.RenderRedraw(frame.ID)
+	if !ok {
+		t.Fatal("expected redraw")
+	}
+
+	if redraw.Buffer.Name != "hello.py" {
+		t.Fatalf("redraw buffer = %q, want hello.py", redraw.Buffer.Name)
+	}
+}
+
+func TestNewFrameOpensMissingFileAsEmptyBuffer(t *testing.T) {
+	t.Parallel()
+
+	path := filepath.Join(t.TempDir(), "new.py")
+
+	ed := NewEditor()
+	frame, err := ed.NewFrame(80, 10, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	win := ed.Windows[frame.ActiveWindowID]
+	buf := ed.Buffers[win.BufferId]
+
+	if buf.Name != "new.py" {
+		t.Fatalf("name = %q, want new.py", buf.Name)
+	}
+
+	if buf.Text.Len() != 0 {
+		t.Fatalf("expected empty buffer, got %q", buf.Text.Bytes())
+	}
+
+	if buf.Modified() {
+		t.Fatal("expected unmodified new file buffer")
+	}
+
+	redraw, ok := ed.RenderRedraw(frame.ID)
+	if !ok {
+		t.Fatal("expected redraw")
+	}
+
+	if redraw.Buffer.Name != "new.py" {
+		t.Fatalf("redraw buffer = %q, want new.py", redraw.Buffer.Name)
+	}
+}
+
 func TestOpenFileLoadsIntoFrame(t *testing.T) {
 	t.Parallel()
 

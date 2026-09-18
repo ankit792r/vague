@@ -75,8 +75,9 @@ type CommandInfo struct {
 	MaxArgs int    `json:"max_args"`
 }
 
-// Attach Request params
+// AttachParams carries optional startup files for a new client surface.
 type AttachParams struct {
+	Files []string `json:"files,omitempty"`
 }
 
 // Attach Request params

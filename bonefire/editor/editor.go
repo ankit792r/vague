@@ -44,8 +44,9 @@ func NewEditor() *Editor {
 }
 
 // NewFrame creates a display surface showing the current buffer.
-// If nothing is open yet, a scratch buffer is created first.
-func (e *Editor) NewFrame(width, height int) (*Frame, error) {
+// When initialPath is set, that file is opened instead of creating a scratch buffer.
+// If nothing is open yet and no path is given, a scratch buffer is created first.
+func (e *Editor) NewFrame(width, height int, initialPath ...string) (*Frame, error) {
 	if width <= 0 {
 		width = defaultFrameWidth
 	}
@@ -53,8 +54,17 @@ func (e *Editor) NewFrame(width, height int) (*Frame, error) {
 		height = defaultFrameHeight
 	}
 
-	buf := e.currentBuffer()
-	if buf == nil {
+	var (
+		buf *buffer.Buffer
+		err error
+	)
+
+	if len(initialPath) > 0 && initialPath[0] != "" {
+		buf, err = e.loadBufferPath(initialPath[0])
+		if err != nil {
+			return nil, err
+		}
+	} else if buf = e.currentBuffer(); buf == nil {
 		buf = e.Scratch("*scratch*")
 	}
 

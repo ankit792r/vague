@@ -26,6 +26,25 @@ func (e *Editor) OpenFile(frameID uint64, path string, force bool) (*buffer.Buff
 		return e.switchBuffer(frameID, existing)
 	}
 
+	buf, err := e.loadBufferPath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return e.switchBuffer(frameID, buf)
+}
+
+func (e *Editor) loadBufferPath(path string) (*buffer.Buffer, error) {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if existing := e.findBuffer(abs); existing != nil {
+		e.CurrentBuffer = existing.ID
+		return existing, nil
+	}
+
 	loaded, err := buffer.Load(abs)
 	if err != nil {
 		return nil, err
@@ -34,8 +53,9 @@ func (e *Editor) OpenFile(frameID uint64, path string, force bool) (*buffer.Buff
 	loaded.ID = e.nextBufferID
 	e.nextBufferID++
 	e.Buffers[loaded.ID] = loaded
+	e.CurrentBuffer = loaded.ID
 
-	return e.switchBuffer(frameID, loaded)
+	return loaded, nil
 }
 
 // WriteFile saves the frame's buffer. An empty path writes to the buffer path.
