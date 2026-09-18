@@ -1,2 +1,0 @@
-Thsd sais is scratch buffer
-Modified contents are not saved.
