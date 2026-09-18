@@ -225,10 +225,15 @@ func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, p
 	default:
 	}
 
-	_ = params
-
 	result, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
-		frame, err := ed.NewFrame(0, 0)
+		var frame *editor.Frame
+		var err error
+
+		if len(params.Files) > 0 && params.Files[0] != "" {
+			frame, err = ed.NewFrame(0, 0, params.Files[0])
+		} else {
+			frame, err = ed.NewFrame(0, 0)
+		}
 		if err != nil {
 			return nil, err
 		}

@@ -22,7 +22,7 @@ type Frame struct {
 }
 
 // TODO: take frame Id from FrameAttach event which is provided by server
-func NewFrame(ctx context.Context) error {
+func NewFrame(ctx context.Context, files ...string) error {
 	conn, err := backbone.ClientConnect()
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func NewFrame(ctx context.Context) error {
 		conn.Close()
 	}()
 
-	attachResult, err := conn.FrameAttach(ctx, process.AttachParams{})
+	attachResult, err := conn.FrameAttach(ctx, process.AttachParams{Files: files})
 	if err != nil {
 		return err
 	}
