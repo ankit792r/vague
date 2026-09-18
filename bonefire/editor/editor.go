@@ -24,6 +24,7 @@ type Editor struct {
 	CurrentBuffer uint64
 	CurrentFrameID uint64
 	insertGroup    uint64
+	pendingKey     string
 
 	nextBufferID uint64
 	nextFrameID  uint64

@@ -26,7 +26,21 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 	t := buf.Text
 	at := windowCursor(win)
 
+	if e.pendingKey == "d" && keys == "d" {
+		e.pendingKey = ""
+		return e.deleteLine(frame, win, buf)
+	}
+
+	if e.pendingKey != "" {
+		e.pendingKey = ""
+	}
+
 	switch keys {
+	case "d":
+		e.pendingKey = "d"
+		return nil
+	case "x", "<Del>":
+		return e.deleteChar(frame, win, buf)
 	case "i":
 		return e.enterInsert(frame, win, buf, at)
 	case "a":
