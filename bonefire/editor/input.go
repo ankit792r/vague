@@ -45,6 +45,9 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 		return e.enterInsert(frame, win, buf, at)
 	case "a":
 		return e.enterInsert(frame, win, buf, moveRight(t, at, 1, true))
+	case "A":
+		point := t.PointOf(at)
+		return e.enterInsert(frame, win, buf, t.LineEnd(point.Line))
 	case "o":
 		return e.openLine(frame, win, buf, false)
 	case "O":
