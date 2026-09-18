@@ -17,6 +17,7 @@ export function EmacsFrame({
   modified,
   mode,
   cursor,
+  echo,
   commandLine,
 }: EmacsFrameProps) {
   const statusMode = commandLine.active ? "command" : mode
@@ -38,6 +39,7 @@ export function EmacsFrame({
         active={commandLine.active}
         text={commandLine.text}
         error={commandLine.error}
+        echo={echo}
       />
     </div>
   )

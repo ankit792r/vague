@@ -16,4 +16,5 @@ type Frame struct {
 
 	ActiveWindowID uint64
 	dirty          bool
+	echo           StatusEcho
 }

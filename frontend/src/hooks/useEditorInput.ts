@@ -65,9 +65,8 @@ export function useEditorInput(editorMode: string) {
             .then(() => {
               cancelCommand()
             })
-            .catch((err: unknown) => {
-              const message = err instanceof Error ? err.message : String(err)
-              syncCommand({ ...cmd, error: message })
+            .catch(() => {
+              cancelCommand()
             })
           return
         }
