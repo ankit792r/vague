@@ -5,6 +5,7 @@ export type ParsedExecute = HostRequestMap["execute"]
 const ALIASES: Record<string, string> = {
   e: "edit",
   w: "write",
+  q: "quit",
 }
 
 export function parseCommandLine(input: string): ParsedExecute | null {

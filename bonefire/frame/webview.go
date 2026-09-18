@@ -13,6 +13,7 @@ import (
 
 	"github.com/abemedia/go-webview"
 	_ "github.com/abemedia/go-webview/embedded"
+	"vague/backbone/process"
 )
 
 // Create new web view frame
@@ -38,9 +39,14 @@ func (f *Frame) BuildWebView() error {
 
 	go func() {
 		for note := range f.client.Notifications() {
+			if note.Method == process.MethodQuit {
+				w.Terminate()
+				return
+			}
+
 			var payload any
 			_ = json.Unmarshal(note.Params, &payload)
-			emitHostEvent(w, note.Method, payload) // "redraw", "quit", etc.
+			emitHostEvent(w, note.Method, payload)
 		}
 	}()
 
