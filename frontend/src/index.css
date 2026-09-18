@@ -116,11 +116,6 @@ button {
   line-height: 1.75rem;
 }
 
-.command-prompt {
-  color: var(--modeline-fg);
-  margin-right: 0.25rem;
-}
-
 .command-line-active {
   outline: 1px solid var(--border);
   outline-offset: -1px;
