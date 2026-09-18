@@ -112,6 +112,12 @@ type RedrawBuffer struct {
 	Modified bool   `json:"modified,omitempty"`
 }
 
+// StatusEcho carries a short message for the client status line.
+type StatusEcho struct {
+	Message string `json:"message"`
+	Kind    string `json:"kind,omitempty"`
+}
+
 // Redraw brings a client's picture up to date.
 type Redraw struct {
 	FrameID uint64       `json:"frame_id"`
@@ -123,4 +129,5 @@ type Redraw struct {
 	Lines   []string     `json:"lines"`
 	Cursor  CursorPos    `json:"cursor"`
 	Mode    string       `json:"mode"`
+	Echo    *StatusEcho  `json:"echo,omitempty"`
 }

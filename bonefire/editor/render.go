@@ -37,6 +37,14 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 
 	frame.dirty = false
 
+	var echo *process.StatusEcho
+	if frame.echo.Message != "" {
+		echo = &process.StatusEcho{
+			Message: frame.echo.Message,
+			Kind:    frame.echo.Kind,
+		}
+	}
+
 	return process.Redraw{
 		FrameID: frameID,
 		Full:    true,
@@ -55,5 +63,6 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 			Visible: visible,
 		},
 		Mode: mode,
+		Echo: echo,
 	}, true
 }

@@ -1,4 +1,4 @@
-import type { RedrawPayload } from "../host/protocol"
+import type { RedrawPayload, StatusEcho } from "../host/protocol"
 
 export type EditorCursor = RedrawPayload["cursor"]
 
@@ -8,6 +8,7 @@ export type EditorViewState = {
   modified: boolean
   mode: string
   cursor: EditorCursor
+  echo: StatusEcho | null
 }
 
 export function initialEditorViewState(): EditorViewState {
@@ -17,6 +18,7 @@ export function initialEditorViewState(): EditorViewState {
     modified: false,
     mode: "normal",
     cursor: { row: 0, column: 0, visible: true },
+    echo: null,
   }
 }
 
@@ -29,5 +31,6 @@ export function editorViewFromRedraw(
     lines: Array.isArray(redraw.lines) ? redraw.lines : [],
     mode: redraw.mode ?? "normal",
     cursor: redraw.cursor ?? { row: 0, column: 0, visible: false },
+    echo: redraw.echo?.message ? redraw.echo : null,
   }
 }

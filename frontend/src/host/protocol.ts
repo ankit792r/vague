@@ -31,6 +31,11 @@ export type HostResultMap = {
 
 
 /** Host → UI: event name → payload */
+export type StatusEcho = {
+  message: string
+  kind?: "info" | "error"
+}
+
 export type RedrawPayload = {
   frame_id: number
   columns: number
@@ -49,6 +54,7 @@ export type RedrawPayload = {
     visible: boolean
   }
   mode: string
+  echo?: StatusEcho
 }
 
 export type HostEventMap = {

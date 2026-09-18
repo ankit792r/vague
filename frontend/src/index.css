@@ -130,10 +130,20 @@ button {
   white-space: nowrap;
 }
 
-.command-error {
-  color: #ff6b6b;
-  margin-left: 0.75rem;
+.command-echo {
+  color: var(--fg);
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.command-echo-error {
+  color: #ff6b6b;
+}
+
+.command-echo-after-input {
+  flex: 0 1 auto;
+  margin-left: 0.75rem;
 }

@@ -84,13 +84,20 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 	}
 
 	frameID := sess.FrameID()
+	fail := func(err error) (any, error) {
+		if frameID != 0 && err != nil {
+			s.pushEcho(ctx, sess, frameID, err.Error(), editor.EchoError)
+		}
+		return nil, err
+	}
+
 	switch params.Name {
 	case "edit", "e":
 		if frameID == 0 {
-			return nil, fmt.Errorf("session is not attached to a frame")
+			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
 		if len(params.Args) == 0 {
-			return nil, fmt.Errorf("edit: file name required")
+			return fail(fmt.Errorf("edit: file name required"))
 		}
 
 		path := params.Args[0]
@@ -99,10 +106,13 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 			if err != nil {
 				return nil, editor.OpenFileError(path, err)
 			}
+			if err := ed.SetEcho(frameID, fmt.Sprintf(`"%s"`, buf.Name), editor.EchoInfo); err != nil {
+				return nil, err
+			}
 			return editor.BufferInfo(buf, true), nil
 		})
 		if err != nil {
-			return nil, err
+			return fail(err)
 		}
 
 		s.pushRedraw(ctx, sess, frameID)
@@ -110,7 +120,7 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 
 	case "write", "w":
 		if frameID == 0 {
-			return nil, fmt.Errorf("session is not attached to a frame")
+			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
 
 		path := ""
@@ -129,10 +139,14 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 				return nil, editor.WriteFileError(path, err)
 			}
 
+			if err := ed.SetEcho(frameID, editor.WriteEchoMessage(buf), editor.EchoInfo); err != nil {
+				return nil, err
+			}
+
 			return editor.BufferInfo(buf, true), nil
 		})
 		if err != nil {
-			return nil, err
+			return fail(err)
 		}
 
 		s.pushRedraw(ctx, sess, frameID)
@@ -140,14 +154,14 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 
 	case "quit", "q":
 		if frameID == 0 {
-			return nil, fmt.Errorf("session is not attached to a frame")
+			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
 
 		_, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
 			return nil, ed.QuitFrame(frameID, params.Bang)
 		})
 		if err != nil {
-			return nil, err
+			return fail(err)
 		}
 
 		sess.SetFrameID(0)
@@ -157,32 +171,33 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 
 	case "wrap", "nowrap":
 		if frameID == 0 {
-			return nil, fmt.Errorf("session is not attached to a frame")
+			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
 
 		wrap := params.Name == "wrap"
+		msg := "wrap off"
+		if wrap {
+			msg = "wrap on"
+		}
+
 		result, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
 			if err := ed.SetWindowWrap(frameID, wrap); err != nil {
+				return nil, err
+			}
+			if err := ed.SetEcho(frameID, msg, editor.EchoInfo); err != nil {
 				return nil, err
 			}
 			return map[string]any{"wrap": wrap}, nil
 		})
 		if err != nil {
-			return nil, err
+			return fail(err)
 		}
 
 		s.pushRedraw(ctx, sess, frameID)
 		return result, nil
 	}
 
-	// Temporary echo so client-connect can prove the round-trip works.
-	return map[string]any{
-		"ok":    true,
-		"name":  params.Name,
-		"args":  params.Args,
-		"bang":  params.Bang,
-		"count": params.Count,
-	}, nil
+	return fail(fmt.Errorf("Unknown command: %s", params.Name))
 }
 
 func (s *Server) handleInput(ctx context.Context, sess *session.Session, params process.InputParams) {
@@ -192,9 +207,11 @@ func (s *Server) handleInput(ctx context.Context, sess *session.Session, params 
 	}
 
 	_, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+		ed.ClearEcho(frameID)
 		return nil, ed.HandleInput(frameID, params.Keys)
 	})
 	if err != nil {
+		s.pushEcho(ctx, sess, frameID, err.Error(), editor.EchoError)
 		return
 	}
 
@@ -310,4 +327,15 @@ func (s *Server) pushRedraw(ctx context.Context, sess *session.Session, frameID 
 	}
 
 	sess.Notify(process.MethodRedraw, result.(process.Redraw))
+}
+
+func (s *Server) pushEcho(ctx context.Context, sess *session.Session, frameID uint64, message, kind string) {
+	_, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+		return nil, ed.SetEcho(frameID, message, kind)
+	})
+	if err != nil {
+		return
+	}
+
+	s.pushRedraw(ctx, sess, frameID)
 }
