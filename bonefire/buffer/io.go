@@ -37,6 +37,7 @@ func Load(path string) (*Buffer, error) {
 		Name:         filepath.Base(abs),
 		Path:         abs,
 		Text:         text.New(normalized),
+		History:      text.NewUndoTree(),
 		NoEOL:        noEOL,
 		LineEnding:   lineEnding,
 		Binary:       bytes.IndexByte(data, 0) >= 0,
@@ -62,6 +63,7 @@ func (b *Buffer) Reload() error {
 	}
 
 	b.Text.SetBytes(loaded.Text.Bytes())
+	b.History = text.NewUndoTree()
 	b.NoEOL = loaded.NoEOL
 	b.LineEnding = loaded.LineEnding
 	b.Binary = loaded.Binary
@@ -70,8 +72,7 @@ func (b *Buffer) Reload() error {
 	b.diskSize = loaded.diskSize
 	b.diskModTime = loaded.diskModTime
 	b.startedEmpty = loaded.startedEmpty
-	b.editSeq = 0
-	b.savedSeq = 0
+	b.savedSeq = b.History.Seq()
 
 	return nil
 }
@@ -179,18 +180,13 @@ func (b *Buffer) saveTo(path string, force bool) error {
 	b.onDisk = true
 	b.diskSize = info.Size()
 	b.diskModTime = info.ModTime()
-	b.savedSeq = b.editSeq
+	b.savedSeq = b.History.Seq()
 	return nil
 }
 
 // Modified reports whether the buffer has unsaved edits.
 func (b *Buffer) Modified() bool {
-	return b.editSeq != b.savedSeq
-}
-
-// NoteEdit marks the buffer as changed.
-func (b *Buffer) NoteEdit() {
-	b.editSeq++
+	return b.History.Seq() != b.savedSeq
 }
 
 func (b *Buffer) encodeForDisk() []byte {
@@ -243,6 +239,7 @@ func newEmptyFile(abs string) *Buffer {
 		Name:         filepath.Base(abs),
 		Path:         abs,
 		Text:         text.New(nil),
+		History:      text.NewUndoTree(),
 		startedEmpty: true,
 	}
 }

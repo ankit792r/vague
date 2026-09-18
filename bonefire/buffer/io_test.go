@@ -133,7 +133,9 @@ func TestModifiedAfterEdit(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	buf.NoteEdit()
+	if _, err := buf.Insert(buf.Text.Len(), []byte("!")); err != nil {
+		t.Fatal(err)
+	}
 	if !buf.Modified() {
 		t.Fatal("expected modified after edit")
 	}

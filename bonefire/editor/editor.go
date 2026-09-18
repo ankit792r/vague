@@ -23,6 +23,7 @@ type Editor struct {
 	Windows       map[uint64]*window.Window
 	CurrentBuffer uint64
 	CurrentFrameID uint64
+	insertGroup    uint64
 
 	nextBufferID uint64
 	nextFrameID  uint64

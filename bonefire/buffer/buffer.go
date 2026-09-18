@@ -21,6 +21,7 @@ type Buffer struct {
 	Path string
 
 	Text *text.Text
+	History *text.UndoTree
 
 	NoEOL      bool
 	LineEnding LineEnding
@@ -31,7 +32,6 @@ type Buffer struct {
 	onDisk       bool
 	diskSize     int64
 	diskModTime  time.Time
-	editSeq      int
 	savedSeq     int
 }
 
@@ -39,8 +39,9 @@ type Buffer struct {
 func NewScratch(id uint64, name string) *Buffer {
 	initial := []byte("This is scratch buffer\nModified contents are not saved.")
 	return &Buffer{
-		ID:   id,
-		Name: name,
-		Text: text.New(initial),
+		ID:      id,
+		Name:    name,
+		Text:    text.New(initial),
+		History: text.NewUndoTree(),
 	}
 }

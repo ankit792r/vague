@@ -28,14 +28,13 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 
 	switch keys {
 	case "i":
-		e.Mode = InsertMode
-		frame.dirty = true
-		return nil
+		return e.enterInsert(frame, win, buf, at)
 	case "a":
-		setWindowCursor(buf, win, moveRight(t, at, 1, true))
-		e.Mode = InsertMode
-		frame.dirty = true
-		return nil
+		return e.enterInsert(frame, win, buf, moveRight(t, at, 1, true))
+	case "u":
+		return e.undoTo(frame, win, buf, false)
+	case "<C-r>":
+		return e.undoTo(frame, win, buf, true)
 	case "h", "<Left>":
 		setWindowCursor(buf, win, moveLeft(t, at, 1))
 	case "l", "<Right>", "<Space>":
@@ -68,7 +67,7 @@ func (e *Editor) insertKey(frameID uint64, keys string) error {
 
 	switch keys {
 	case "<Esc>":
-		e.Mode = NormalMode
+		e.leaveInsert(win, buf)
 		setWindowCursor(buf, win, moveLeft(t, windowCursor(win), 1))
 		view := layoutViewForWindow(t, win, frame)
 		rememberColumn(buf, win, view)
@@ -110,8 +109,11 @@ func (e *Editor) insertKey(frameID uint64, keys string) error {
 }
 
 func (e *Editor) insertBytes(frame *Frame, win *window.Window, buf *buffer.Buffer, data []byte) error {
-	delta := buf.Text.Insert(windowCursor(win), data)
-	buf.NoteEdit()
+	delta, err := buf.Insert(windowCursor(win), data)
+	if err != nil {
+		return err
+	}
+
 	setWindowCursor(buf, win, delta.NewEnd)
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)
@@ -126,8 +128,10 @@ func (e *Editor) deleteBack(frame *Frame, win *window.Window, buf *buffer.Buffer
 	}
 
 	from := back(buf.Text, at)
-	buf.Text.Delete(from, at)
-	buf.NoteEdit()
+	if _, err := buf.Delete(from, at); err != nil {
+		return err
+	}
+
 	setWindowCursor(buf, win, from)
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)
