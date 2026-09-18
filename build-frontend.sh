@@ -1,8 +1,3 @@
-#!/bin/bash
-
-set -e
-
-cd frontend
-bun install
-bun run build
-cd ..
+#!/usr/bin/env bash
+set -euo pipefail
+exec "$(dirname "$0")/scripts/build.sh" "$@"
