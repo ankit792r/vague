@@ -1,0 +1,13 @@
+[Unit]
+Description=Vague editor IPC server
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=@BINDIR@/vague server-start
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=10
+
+[Install]
+WantedBy=default.target

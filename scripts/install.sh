@@ -9,17 +9,20 @@ BINDIR="${BINDIR:-$PREFIX/bin}"
 DATADIR="${DATADIR:-$PREFIX/share}"
 APPDIR="${APPDIR:-$DATADIR/applications}"
 ICONDIR="${ICONDIR:-$DATADIR/icons/hicolor/256x256/apps}"
+SYSTEMD_USER_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 APPNAME="vague"
 BIN="${ROOT}/bin/${APPNAME}"
 DESKTOP_SRC="${ROOT}/vague.desktop"
 ICON_SRC="${ROOT}/logo.png"
+SERVICE_SRC="${ROOT}/vague.service"
+SERVICE_DST="${SYSTEMD_USER_DIR}/${APPNAME}.service"
 
 usage() {
   cat <<EOF
 Usage: $(basename "$0") <install|uninstall>
 
-  install    Build if needed, install binary, desktop entry, and icon
-  uninstall  Remove binary, desktop entry, icon, and runtime data
+  install    Build if needed, install binary, desktop entry, icon, and user service
+  uninstall  Remove binary, desktop entry, icon, service, and runtime data
 
 Environment:
   PREFIX     Install root (default: ~/.local)
@@ -31,6 +34,32 @@ require_build() {
     echo "Binary not found. Running build..."
     "$ROOT/scripts/build.sh"
   fi
+}
+
+install_systemd_service() {
+  if [ ! -f "$SERVICE_SRC" ]; then
+    echo "error: missing $SERVICE_SRC" >&2
+    exit 1
+  fi
+
+  install -d "$SYSTEMD_USER_DIR"
+  sed "s|@BINDIR@|$BINDIR|g" "$SERVICE_SRC" > "$SERVICE_DST"
+
+  if ! command -v systemctl >/dev/null 2>&1; then
+    echo "warning: systemctl not found — skipped enabling ${APPNAME}.service"
+    return 0
+  fi
+
+  systemctl --user daemon-reload
+}
+
+uninstall_systemd_service() {
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl --user disable --now "${APPNAME}.service" 2>/dev/null || true
+    systemctl --user daemon-reload 2>/dev/null || true
+  fi
+
+  rm -f "$SERVICE_DST"
 }
 
 install_app() {
@@ -51,6 +80,8 @@ install_app() {
   install -m 644 "$DESKTOP_SRC" "$APPDIR/$APPNAME.desktop"
   install -m 644 "$ICON_SRC" "$ICONDIR/$APPNAME.png"
 
+  install_systemd_service
+
   if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database "$APPDIR" 2>/dev/null || true
   fi
@@ -64,9 +95,14 @@ Installed vague:
   binary:  $BINDIR/$APPNAME
   desktop: $APPDIR/$APPNAME.desktop
   icon:    $ICONDIR/$APPNAME.png
+  service: $SERVICE_DST
 
 Ensure $BINDIR is on your PATH.
-Launch from the app menu or run: vague
+Manage the server with:
+  systemctl --user status ${APPNAME}.service
+  systemctl --user restart ${APPNAME}.service
+
+Launch the editor from the app menu or run: vague
 EOF
 }
 
@@ -80,6 +116,8 @@ remove_runtime_data() {
 }
 
 uninstall_app() {
+  uninstall_systemd_service
+
   rm -f "$BINDIR/$APPNAME"
   rm -f "$APPDIR/$APPNAME.desktop"
   rm -f "$ICONDIR/$APPNAME.png"
@@ -94,7 +132,7 @@ uninstall_app() {
     gtk-update-icon-cache -f -t "$DATADIR/icons/hicolor" 2>/dev/null || true
   fi
 
-  echo "Removed vague from $PREFIX and cleared runtime data."
+  echo "Removed vague from $PREFIX, disabled the user service, and cleared runtime data."
 }
 
 case "${1:-}" in
