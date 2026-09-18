@@ -63,6 +63,9 @@ func StartDetachedServer() error {
 	cmd.Stdout = logFile
 	cmd.Stderr = logFile
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	if home, err := os.UserHomeDir(); err == nil {
+		cmd.Dir = home
+	}
 
 	if err := cmd.Start(); err != nil {
 		logFile.Close()

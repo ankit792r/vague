@@ -9,7 +9,7 @@ func TestUndoInsertSession(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestUndoRedoRoundTrip(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("ab"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}

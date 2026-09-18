@@ -9,7 +9,7 @@ func TestRenderRedrawWrapsWithoutPadding(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("abcdefghijklmn"))
 
-	frame, err := ed.NewFrame(13, 4)
+	frame, err := ed.NewFrame(13, 4, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func TestRenderRedrawNoWrapTruncates(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("abcdefghijklmn"))
 
-	frame, err := ed.NewFrame(13, 4)
+	frame, err := ed.NewFrame(13, 4, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestRenderRedrawModified(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}

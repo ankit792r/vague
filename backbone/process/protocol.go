@@ -77,7 +77,8 @@ type CommandInfo struct {
 
 // AttachParams carries optional startup files for a new client surface.
 type AttachParams struct {
-	Files []string `json:"files,omitempty"`
+	Files   []string `json:"files,omitempty"`
+	WorkDir string   `json:"work_dir,omitempty"`
 }
 
 // Attach Request params

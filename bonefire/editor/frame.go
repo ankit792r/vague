@@ -15,6 +15,7 @@ type Frame struct {
 	Root   *window.Node
 
 	ActiveWindowID uint64
+	WorkDir        string
 	dirty          bool
 	echo           StatusEcho
 }

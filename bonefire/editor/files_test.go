@@ -18,7 +18,7 @@ func TestNewFrameOpensExistingFile(t *testing.T) {
 	}
 
 	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10, path)
+	frame, err := ed.NewFrame(80, 10, dir, path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,10 +47,11 @@ func TestNewFrameOpensExistingFile(t *testing.T) {
 func TestNewFrameOpensMissingFileAsEmptyBuffer(t *testing.T) {
 	t.Parallel()
 
-	path := filepath.Join(t.TempDir(), "new.py")
+	dir := t.TempDir()
+	path := filepath.Join(dir, "new.py")
 
 	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10, path)
+	frame, err := ed.NewFrame(80, 10, dir, path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +93,7 @@ func TestOpenFileLoadsIntoFrame(t *testing.T) {
 	}
 
 	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,7 +124,7 @@ func TestWriteFilePersistsEdits(t *testing.T) {
 	path := filepath.Join(dir, "out.txt")
 
 	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +170,7 @@ func TestOpenFileReusesExistingBuffer(t *testing.T) {
 	}
 
 	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +201,7 @@ func TestOpenFileForceReloads(t *testing.T) {
 	}
 
 	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -228,5 +229,34 @@ func TestOpenFileForceReloads(t *testing.T) {
 
 	if string(buf.Text.Bytes()) != "v2\n" {
 		t.Fatalf("with bang got %q, want v2\\n", buf.Text.Bytes())
+	}
+}
+
+func TestWriteRelativePathUsesFrameWorkDir(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+
+	ed := NewEditor()
+	frame, err := ed.NewFrame(80, 10, dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ed.HandleInput(frame.ID, "i"); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ed.HandleInput(frame.ID, "x"); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ed.WriteFile(frame.ID, "hello.py", false); err != nil {
+		t.Fatal(err)
+	}
+
+	got := filepath.Join(dir, "hello.py")
+	if _, err := os.Stat(got); err != nil {
+		t.Fatalf("expected %q to exist: %v", got, err)
 	}
 }

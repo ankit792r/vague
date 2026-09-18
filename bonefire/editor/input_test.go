@@ -9,7 +9,7 @@ func TestNormalKeyMovesCursor(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("ab\ncd"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func TestGoToTopAndBottom(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("one\ntwo\nthree"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func TestInsertAtFirstNonBlank(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("  hi"))
 
-	frame, _ := ed.NewFrame(80, 10)
+	frame, _ := ed.NewFrame(80, 10, "")
 	win := ed.Windows[frame.ActiveWindowID]
 
 	setWindowCursor(buf, win, buf.Text.LineEnd(0))
@@ -114,7 +114,7 @@ func TestLineStartAndEndKeys(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hello"))
 
-	frame, _ := ed.NewFrame(80, 10)
+	frame, _ := ed.NewFrame(80, 10, "")
 	win := ed.Windows[frame.ActiveWindowID]
 
 	if err := ed.HandleInput(frame.ID, "$"); err != nil {
@@ -143,7 +143,7 @@ func TestAppendEndOfLineEntersInsertAtEnd(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, _ := ed.NewFrame(80, 10)
+	frame, _ := ed.NewFrame(80, 10, "")
 	win := ed.Windows[frame.ActiveWindowID]
 
 	if err := ed.HandleInput(frame.ID, "A"); err != nil {
@@ -174,7 +174,7 @@ func TestAppendMovesCursorPastLastChar(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, _ := ed.NewFrame(80, 10)
+	frame, _ := ed.NewFrame(80, 10, "")
 	win := ed.Windows[frame.ActiveWindowID]
 
 	_ = ed.HandleInput(frame.ID, "l")
@@ -192,7 +192,7 @@ func TestInsertModeEditsScratchBuffer(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}

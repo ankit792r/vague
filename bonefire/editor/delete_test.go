@@ -9,7 +9,7 @@ func TestDeleteChar(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("abcd"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func TestDeleteCharOnEmptyLineNoOp(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hello\n\nworld"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestDeleteLine(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("keep\nremove\nstay"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestDeleteCharUndo(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("ab"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestDeleteLineUndo(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("one\ntwo"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -150,7 +150,7 @@ func TestPendingDThenMotionClears(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("ab"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}

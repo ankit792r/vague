@@ -8,7 +8,7 @@ func TestSetEchoIncludedInRedraw(t *testing.T) {
 	ed := NewEditor()
 	ed.Scratch("*scratch*")
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,7 @@ func TestClearEchoOnRedraw(t *testing.T) {
 	ed := NewEditor()
 	ed.Scratch("*scratch*")
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
