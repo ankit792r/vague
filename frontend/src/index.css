@@ -68,7 +68,7 @@ button {
   overflow: auto;
   padding: 0;
   font-family: var(--font-text);
-  font-size: 16px;
+  font-size: 20px;
   line-height: 1.4;
 }
 
@@ -89,7 +89,7 @@ button {
   gap: 1rem;
   flex-shrink: 0;
   height: 1.5rem;
-  padding: 0 0.75rem;
+  padding: 0 0.25rem;
   background: var(--modeline-bg);
   color: var(--modeline-fg);
   border-top: 1px solid var(--border);
@@ -109,7 +109,7 @@ button {
   align-items: center;
   flex-shrink: 0;
   height: 1.75rem;
-  padding: 0 0.75rem;
+  padding: 0 0.25rem;
   background: var(--minibuffer-bg);
   border-top: 1px solid var(--border);
   font-size: 0.875rem;
