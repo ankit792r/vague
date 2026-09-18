@@ -9,8 +9,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "vague",
+	Use:   "vague [files...]",
 	Short: "A Vim-inspired text editor",
+	Args:  cobra.ArbitraryArgs,
 
 	// Usage text is only helpful for malformed invocations, not for runtime
 	// failures. Errors are printed once, by main.
