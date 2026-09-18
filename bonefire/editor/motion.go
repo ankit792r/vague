@@ -72,6 +72,17 @@ func firstNonBlank(t *text.Text, off text.Offset) text.Offset {
 	return t.LineStart(point.Line)
 }
 
+func moveToBufferLine(t *text.Text, win *window.Window, line int) text.Offset {
+	line = clampInt(line, 0, t.LineCount()-1)
+	target := t.Line(line)
+	col := win.DesiredCol
+	if col > lastColumn(target) {
+		col = lastColumn(target)
+	}
+
+	return t.OffsetOf(text.Point{Line: line, Col: col})
+}
+
 func moveLeft(t *text.Text, off text.Offset, count int) text.Offset {
 	point := t.PointOf(off)
 	line := t.Line(point.Line)

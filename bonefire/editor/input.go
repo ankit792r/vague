@@ -26,6 +26,15 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 	t := buf.Text
 	at := windowCursor(win)
 
+	if e.pendingKey == "g" && keys == "g" {
+		e.pendingKey = ""
+		setWindowCursor(buf, win, moveToBufferLine(t, win, 0))
+		view := layoutViewForWindow(t, win, frame)
+		rememberColumn(buf, win, view)
+		frame.dirty = true
+		return nil
+	}
+
 	if e.pendingKey == "d" && keys == "d" {
 		e.pendingKey = ""
 		return e.deleteLine(frame, win, buf)
@@ -49,6 +58,11 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 		return e.enterInsert(frame, win, buf, moveRight(t, at, 1, true))
 	case "A":
 		return e.enterInsert(frame, win, buf, moveToLineEnd(t, at, true))
+	case "g":
+		e.pendingKey = "g"
+		return nil
+	case "G":
+		setWindowCursor(buf, win, moveToBufferLine(t, win, t.LineCount()-1))
 	case "0":
 		setWindowCursor(buf, win, moveToLineStart(t, at))
 	case "$":

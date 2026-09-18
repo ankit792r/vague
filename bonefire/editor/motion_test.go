@@ -4,7 +4,27 @@ import (
 	"testing"
 
 	"vague/bonefire/text"
+	"vague/bonefire/window"
 )
+
+func TestMoveToBufferLine(t *testing.T) {
+	t.Parallel()
+
+	tex := text.New([]byte("aa\nbbbb\ncc"))
+	win := &window.Window{DesiredCol: 3}
+
+	if got := tex.PointOf(moveToBufferLine(tex, win, 1)); got.Line != 1 || got.Col != 3 {
+		t.Fatalf("middle line: got line=%d col=%d, want 1,3", got.Line, got.Col)
+	}
+
+	if got := tex.PointOf(moveToBufferLine(tex, win, 0)); got.Line != 0 || got.Col != 1 {
+		t.Fatalf("top line: got line=%d col=%d, want 0,1", got.Line, got.Col)
+	}
+
+	if got := tex.PointOf(moveToBufferLine(tex, win, 2)); got.Line != 2 || got.Col != 1 {
+		t.Fatalf("last line: got line=%d col=%d, want 2,1", got.Line, got.Col)
+	}
+}
 
 func TestMoveToLineStartAndEnd(t *testing.T) {
 	t.Parallel()
