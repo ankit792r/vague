@@ -138,6 +138,23 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		s.pushRedraw(ctx, sess, frameID)
 		return result, nil
 
+	case "quit", "q":
+		if frameID == 0 {
+			return nil, fmt.Errorf("session is not attached to a frame")
+		}
+
+		_, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
+			return nil, ed.QuitFrame(frameID, params.Bang)
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		sess.SetFrameID(0)
+		sess.Notify(process.MethodQuit, process.QuitParams{FrameID: frameID})
+
+		return map[string]any{"quit": true}, nil
+
 	case "wrap", "nowrap":
 		if frameID == 0 {
 			return nil, fmt.Errorf("session is not attached to a frame")
