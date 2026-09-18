@@ -35,6 +35,44 @@ func TestNormalKeyMovesCursor(t *testing.T) {
 	}
 }
 
+func TestGoToTopAndBottom(t *testing.T) {
+	t.Parallel()
+
+	ed := NewEditor()
+	buf := ed.Scratch("*scratch*")
+	buf.Text.SetBytes([]byte("one\ntwo\nthree"))
+
+	frame, err := ed.NewFrame(80, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	win := ed.Windows[frame.ActiveWindowID]
+
+	setWindowCursor(buf, win, buf.Text.LineStart(2))
+
+	if err := ed.HandleInput(frame.ID, "g"); err != nil {
+		t.Fatal(err)
+	}
+	if err := ed.HandleInput(frame.ID, "g"); err != nil {
+		t.Fatal(err)
+	}
+
+	point := buf.Text.PointOf(windowCursor(win))
+	if point.Line != 0 {
+		t.Fatalf("after gg: line = %d, want 0", point.Line)
+	}
+
+	if err := ed.HandleInput(frame.ID, "G"); err != nil {
+		t.Fatal(err)
+	}
+
+	point = buf.Text.PointOf(windowCursor(win))
+	if point.Line != 2 {
+		t.Fatalf("after G: line = %d, want 2", point.Line)
+	}
+}
+
 func TestInsertAtFirstNonBlank(t *testing.T) {
 	t.Parallel()
 
