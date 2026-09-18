@@ -35,6 +35,37 @@ func TestNormalKeyMovesCursor(t *testing.T) {
 	}
 }
 
+func TestAppendEndOfLineEntersInsertAtEnd(t *testing.T) {
+	t.Parallel()
+
+	ed := NewEditor()
+	buf := ed.Scratch("*scratch*")
+	buf.Text.SetBytes([]byte("hi"))
+
+	frame, _ := ed.NewFrame(80, 10)
+	win := ed.Windows[frame.ActiveWindowID]
+
+	if err := ed.HandleInput(frame.ID, "A"); err != nil {
+		t.Fatal(err)
+	}
+
+	if ed.Mode != InsertMode {
+		t.Fatal("expected insert mode after A")
+	}
+
+	if got := windowCursor(win); got != 2 {
+		t.Fatalf("cursor after A = %d, want 2", got)
+	}
+
+	if err := ed.HandleInput(frame.ID, "!"); err != nil {
+		t.Fatal(err)
+	}
+
+	if string(buf.Text.Bytes()) != "hi!" {
+		t.Fatalf("got %q, want %q", buf.Text.Bytes(), "hi!")
+	}
+}
+
 func TestAppendMovesCursorPastLastChar(t *testing.T) {
 	t.Parallel()
 
