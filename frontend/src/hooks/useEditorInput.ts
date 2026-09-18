@@ -7,13 +7,13 @@ import {
 import { parseCommandLine } from "../utils/command"
 import { encodeKey } from "../utils/keys"
 
-function appendCommandChar(keys: string): string | null {
-  if (keys === "<Space>") {
+function commandCharFromEvent(e: KeyboardEvent): string | null {
+  if (e.key === " ") {
     return " "
   }
 
-  if (keys.length === 1) {
-    return keys
+  if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    return e.key
   }
 
   return null
@@ -81,7 +81,7 @@ export function useEditorInput(editorMode: string) {
           return
         }
 
-        const ch = appendCommandChar(keys)
+        const ch = commandCharFromEvent(e)
         if (ch !== null) {
           syncCommand({
             ...cmd,
