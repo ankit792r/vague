@@ -77,6 +77,12 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 		return e.undoTo(frame, win, buf, true)
 	case "h", "<Left>":
 		setWindowCursor(buf, win, moveLeft(t, at, 1))
+	case "w":
+		setWindowCursor(buf, win, moveWordForward(t, at, 1))
+	case "b":
+		setWindowCursor(buf, win, moveWordBack(t, at, 1))
+	case "e":
+		setWindowCursor(buf, win, moveWordEnd(t, at, 1))
 	case "l", "<Right>", "<Space>":
 		setWindowCursor(buf, win, moveRight(t, at, 1, false))
 	case "j", "<Down>":
