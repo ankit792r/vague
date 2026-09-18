@@ -11,7 +11,7 @@ import (
 
 // OpenFile loads path into the frame's window, reusing an existing buffer when possible.
 func (e *Editor) OpenFile(frameID uint64, path string, force bool) (*buffer.Buffer, error) {
-	abs, err := filepath.Abs(path)
+	abs, err := e.resolvePath(frameID, path)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (e *Editor) OpenFile(frameID uint64, path string, force bool) (*buffer.Buff
 		return e.switchBuffer(frameID, existing)
 	}
 
-	buf, err := e.loadBufferPath(path)
+	buf, err := e.loadBufferPathAt("", abs)
 	if err != nil {
 		return nil, err
 	}
@@ -36,6 +36,15 @@ func (e *Editor) OpenFile(frameID uint64, path string, force bool) (*buffer.Buff
 
 func (e *Editor) loadBufferPath(path string) (*buffer.Buffer, error) {
 	abs, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return e.loadBufferPathAt("", abs)
+}
+
+func (e *Editor) loadBufferPathAt(workDir, path string) (*buffer.Buffer, error) {
+	abs, err := resolvePathAgainst(workDir, path)
 	if err != nil {
 		return nil, err
 	}
@@ -66,10 +75,15 @@ func (e *Editor) WriteFile(frameID uint64, path string, force bool) error {
 	}
 
 	if path != "" {
-		if force {
-			return buf.SaveAsForce(path)
+		abs, err := e.resolvePath(frameID, path)
+		if err != nil {
+			return err
 		}
-		return buf.SaveAs(path)
+
+		if force {
+			return buf.SaveAsForce(abs)
+		}
+		return buf.SaveAs(abs)
 	}
 
 	if force {

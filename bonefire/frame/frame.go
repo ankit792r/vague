@@ -3,6 +3,7 @@ package frame
 import (
 	"context"
 	"log/slog"
+	"os"
 	backbone "vague/backbone/clients"
 	"vague/backbone/process"
 	"vague/bonefire/window"
@@ -35,7 +36,15 @@ func NewFrame(ctx context.Context, files ...string) error {
 		conn.Close()
 	}()
 
-	attachResult, err := conn.FrameAttach(ctx, process.AttachParams{Files: files})
+	workDir, err := clientWorkDir()
+	if err != nil {
+		return err
+	}
+
+	attachResult, err := conn.FrameAttach(ctx, process.AttachParams{
+		Files:   files,
+		WorkDir: workDir,
+	})
 	if err != nil {
 		return err
 	}
@@ -56,4 +65,19 @@ func NewFrame(ctx context.Context, files ...string) error {
 
 	// This to be called in last, since it will block the other execution
 	return frame.BuildWebView()
+}
+
+func clientWorkDir() (string, error) {
+	workDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	if workDir == "" || workDir == "/" {
+		if home, err := os.UserHomeDir(); err == nil {
+			return home, nil
+		}
+	}
+
+	return workDir, nil
 }

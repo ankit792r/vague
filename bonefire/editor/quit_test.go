@@ -12,7 +12,7 @@ func TestQuitFrameRefusesModifiedBuffer(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +38,7 @@ func TestQuitFrameForceCloses(t *testing.T) {
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +62,7 @@ func TestQuitFrameCleanBuffer(t *testing.T) {
 	ed := NewEditor()
 	ed.Scratch("*scratch*")
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}

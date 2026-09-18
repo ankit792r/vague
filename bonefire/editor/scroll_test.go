@@ -74,7 +74,7 @@ func TestRenderRedrawScrollsToCursor(t *testing.T) {
 	}
 	buf.Text.SetBytes([]byte(lines.String()))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +119,7 @@ func TestHandleInputScrollsViewport(t *testing.T) {
 	}
 	buf.Text.SetBytes([]byte(lines.String()))
 
-	frame, err := ed.NewFrame(80, 10)
+	frame, err := ed.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}

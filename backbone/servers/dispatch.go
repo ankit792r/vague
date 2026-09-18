@@ -230,9 +230,9 @@ func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, p
 		var err error
 
 		if len(params.Files) > 0 && params.Files[0] != "" {
-			frame, err = ed.NewFrame(0, 0, params.Files[0])
+			frame, err = ed.NewFrame(0, 0, params.WorkDir, params.Files[0])
 		} else {
-			frame, err = ed.NewFrame(0, 0)
+			frame, err = ed.NewFrame(0, 0, params.WorkDir)
 		}
 		if err != nil {
 			return nil, err
@@ -276,7 +276,7 @@ func (s *Server) handleFrameReady(ctx context.Context, sess *session.Session, pa
 	frameID := sess.FrameID()
 	if frameID == 0 {
 		result, err := s.runtime.Do(ctx, func(ed *editor.Editor) (any, error) {
-			frame, err := ed.NewFrame(params.Height, params.Widht)
+			frame, err := ed.NewFrame(params.Height, params.Widht, "")
 			if err != nil {
 				return nil, err
 			}
