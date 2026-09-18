@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Vague
+GenericName=Text Editor
+Comment=Vim-inspired text editor
+Exec=vague %F
+TryExec=vague
+Icon=vague
+Terminal=false
+Categories=Utility;TextEditor;Development;
+MimeType=text/plain;text/markdown;text/x-python;text/x-go;text/x-rust;text/javascript;text/css;text/html;
+Keywords=editor;vim;text;code;
+StartupNotify=true
