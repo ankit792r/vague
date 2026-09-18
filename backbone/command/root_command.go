@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"vague/backbone/process"
 	"vague/bonefire/frame"
 
 	"github.com/spf13/cobra"
@@ -16,6 +17,10 @@ var rootCmd = &cobra.Command{
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := process.EnsureServer(cmd.Context()); err != nil {
+			return err
+		}
+
 		return frame.NewFrame(cmd.Context(), args...)
 	},
 	CompletionOptions: cobra.CompletionOptions{
