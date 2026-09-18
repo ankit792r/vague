@@ -11,6 +11,7 @@ func (e *Editor) enterInsert(frame *Frame, win *window.Window, buf *buffer.Buffe
 		return buffer.ErrReadOnly
 	}
 
+	e.pendingKey = ""
 	setWindowCursor(buf, win, at)
 	e.Mode = InsertMode
 	e.beginInsertGroup(buf, at)
