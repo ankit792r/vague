@@ -41,6 +41,37 @@ func rememberColumn(buf *buffer.Buffer, win *window.Window, view *viewLayout) {
 	win.DesiredCol = point.Col
 }
 
+func moveToLineStart(t *text.Text, off text.Offset) text.Offset {
+	point := t.PointOf(off)
+	return t.LineStart(point.Line)
+}
+
+func moveToLineEnd(t *text.Text, off text.Offset, past bool) text.Offset {
+	point := t.PointOf(off)
+	line := t.Line(point.Line)
+	if past {
+		return t.LineEnd(point.Line)
+	}
+
+	return t.OffsetOf(text.Point{Line: point.Line, Col: lastColumn(line)})
+}
+
+func firstNonBlank(t *text.Text, off text.Offset) text.Offset {
+	point := t.PointOf(off)
+	line := t.Line(point.Line)
+	col := 0
+
+	for col < len(line) {
+		r, size := utf8.DecodeRune(line[col:])
+		if r != ' ' && r != '\t' {
+			return t.OffsetOf(text.Point{Line: point.Line, Col: col})
+		}
+		col += size
+	}
+
+	return t.LineStart(point.Line)
+}
+
 func moveLeft(t *text.Text, off text.Offset, count int) text.Offset {
 	point := t.PointOf(off)
 	line := t.Line(point.Line)

@@ -43,11 +43,16 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 		return e.deleteChar(frame, win, buf)
 	case "i":
 		return e.enterInsert(frame, win, buf, at)
+	case "I":
+		return e.enterInsert(frame, win, buf, firstNonBlank(t, at))
 	case "a":
 		return e.enterInsert(frame, win, buf, moveRight(t, at, 1, true))
 	case "A":
-		point := t.PointOf(at)
-		return e.enterInsert(frame, win, buf, t.LineEnd(point.Line))
+		return e.enterInsert(frame, win, buf, moveToLineEnd(t, at, true))
+	case "0":
+		setWindowCursor(buf, win, moveToLineStart(t, at))
+	case "$":
+		setWindowCursor(buf, win, moveToLineEnd(t, at, false))
 	case "o":
 		return e.openLine(frame, win, buf, false)
 	case "O":

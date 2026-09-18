@@ -6,6 +6,41 @@ import (
 	"vague/bonefire/text"
 )
 
+func TestMoveToLineStartAndEnd(t *testing.T) {
+	t.Parallel()
+
+	tex := text.New([]byte("hello"))
+
+	start := tex.OffsetOf(text.Point{Line: 0, Col: 2})
+	if got := tex.PointOf(moveToLineStart(tex, start)); got.Col != 0 {
+		t.Fatalf("line start: got col %d, want 0", got.Col)
+	}
+
+	if got := tex.PointOf(moveToLineEnd(tex, start, false)); got.Col != 4 {
+		t.Fatalf("line end: got col %d, want 4", got.Col)
+	}
+
+	if got := moveToLineEnd(tex, start, true); got != 5 {
+		t.Fatalf("line end past: got offset %d, want 5", got)
+	}
+}
+
+func TestFirstNonBlank(t *testing.T) {
+	t.Parallel()
+
+	tex := text.New([]byte("  hello"))
+	mid := tex.OffsetOf(text.Point{Line: 0, Col: 4})
+
+	if got := tex.PointOf(firstNonBlank(tex, mid)); got.Col != 2 {
+		t.Fatalf("first non-blank: got col %d, want 2", got.Col)
+	}
+
+	blank := text.New([]byte("   "))
+	if got := blank.PointOf(firstNonBlank(blank, 0)); got.Col != 0 {
+		t.Fatalf("blank line: got col %d, want 0", got.Col)
+	}
+}
+
 func TestMoveLeftRight(t *testing.T) {
 	t.Parallel()
 
