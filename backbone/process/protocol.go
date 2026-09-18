@@ -107,8 +107,9 @@ type CursorPos struct {
 
 // RedrawBuffer identifies the buffer being drawn.
 type RedrawBuffer struct {
-	ID   uint64 `json:"id"`
-	Name string `json:"name"`
+	ID       uint64 `json:"id"`
+	Name     string `json:"name"`
+	Modified bool   `json:"modified,omitempty"`
 }
 
 // Redraw brings a client's picture up to date.

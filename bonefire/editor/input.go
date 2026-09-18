@@ -45,6 +45,10 @@ func (e *Editor) normalKey(frameID uint64, keys string) error {
 		return e.enterInsert(frame, win, buf, at)
 	case "a":
 		return e.enterInsert(frame, win, buf, moveRight(t, at, 1, true))
+	case "o":
+		return e.openLine(frame, win, buf, false)
+	case "O":
+		return e.openLine(frame, win, buf, true)
 	case "u":
 		return e.undoTo(frame, win, buf, false)
 	case "<C-r>":

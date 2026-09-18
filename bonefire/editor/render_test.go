@@ -59,3 +59,39 @@ func TestRenderRedrawNoWrapTruncates(t *testing.T) {
 		t.Fatalf("got %v, want truncated line", redraw.Lines)
 	}
 }
+
+func TestRenderRedrawModified(t *testing.T) {
+	t.Parallel()
+
+	ed := NewEditor()
+	buf := ed.Scratch("*scratch*")
+	buf.Text.SetBytes([]byte("hi"))
+
+	frame, err := ed.NewFrame(80, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	redraw, ok := ed.RenderRedraw(frame.ID)
+	if !ok {
+		t.Fatal("expected redraw")
+	}
+
+	if redraw.Buffer.Modified {
+		t.Fatal("expected clean buffer before edit")
+	}
+
+	ed.InvalidateFrame(frame.ID)
+	if _, err := buf.Insert(buf.Text.Len(), []byte("!")); err != nil {
+		t.Fatal(err)
+	}
+
+	redraw, ok = ed.RenderRedraw(frame.ID)
+	if !ok {
+		t.Fatal("expected redraw after edit")
+	}
+
+	if !redraw.Buffer.Modified {
+		t.Fatal("expected modified buffer after edit")
+	}
+}

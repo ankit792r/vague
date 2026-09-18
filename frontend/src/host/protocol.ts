@@ -40,6 +40,7 @@ export type RedrawPayload = {
   buffer: {
     id: number
     name: string
+    modified?: boolean
   }
   lines: string[]
   cursor: {
