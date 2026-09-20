@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install or uninstall vague for the current user (Linux).
+
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

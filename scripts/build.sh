@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build vague: install deps, frontend, and a standalone Go binary in bin/
+
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
