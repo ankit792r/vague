@@ -23,6 +23,8 @@ type Editor struct {
 	pendingKey    string
 	pendingOp     opKind
 	visualAnchor  text.Offset
+	searchPattern string
+	searchForward bool
 	reg           register
 
 	nextBufferID uint64

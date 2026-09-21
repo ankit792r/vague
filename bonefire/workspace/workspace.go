@@ -204,6 +204,20 @@ func (w *Workspace) HandleInput(frameID uint64, keys string) error {
 	return w.Editor.HandleInput(frame, win, buf, keys)
 }
 
+func (w *Workspace) Search(frameID uint64, pattern string, forward bool) error {
+	frame, win, buf, err := w.FrameContext(frameID)
+	if err != nil {
+		return err
+	}
+
+	if err := w.Editor.Search(frame, win, buf, pattern, forward); err != nil {
+		return err
+	}
+
+	w.ClearEcho(frameID)
+	return nil
+}
+
 func (w *Workspace) OpenFile(frameID uint64, path string, force bool) (*buffer.Buffer, error) {
 	abs, err := w.resolvePath(frameID, path)
 	if err != nil {

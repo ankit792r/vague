@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "preact/hooks"
 import { hostRequest } from "../host/client"
 import {
   initialCommandLineState,
+  isSearchPrompt,
   type CommandLineState,
+  type PromptKind,
 } from "../types/command"
 import { parseCommandLine } from "../utils/command"
 import { encodeKey } from "../utils/keys"
@@ -26,9 +28,13 @@ function executeErrorMessage(err: unknown): string {
   return "Command failed"
 }
 
+function openPrompt(kind: PromptKind): CommandLineState {
+  return { active: true, kind, text: "", error: null }
+}
+
 export function useEditorInput(editorMode: string) {
   const [commandLine, setCommandLine] = useState<CommandLineState>(
-    initialCommandLineState,
+    initialCommandLineState(),
   )
   const modeRef = useRef(editorMode)
   const commandRef = useRef(commandLine)
@@ -62,6 +68,24 @@ export function useEditorInput(editorMode: string) {
         }
 
         if (keys === "<CR>") {
+          if (isSearchPrompt(cmd.kind)) {
+            void hostRequest("execute", {
+              name: "search",
+              args: [cmd.text],
+              bang: cmd.kind === "search-backward",
+            })
+              .then(() => {
+                cancelCommand()
+              })
+              .catch((err: unknown) => {
+                syncCommand({
+                  ...cmd,
+                  error: executeErrorMessage(err),
+                })
+              })
+            return
+          }
+
           const parsed = parseCommandLine(cmd.text)
           if (!parsed) {
             syncCommand({ ...cmd, error: "No command" })
@@ -102,9 +126,19 @@ export function useEditorInput(editorMode: string) {
         return
       }
 
-      if (modeRef.current === "normal" && keys === ":") {
-        syncCommand({ active: true, text: "", error: null })
-        return
+      if (modeRef.current === "normal") {
+        if (keys === ":") {
+          syncCommand(openPrompt("command"))
+          return
+        }
+        if (keys === "/") {
+          syncCommand(openPrompt("search-forward"))
+          return
+        }
+        if (keys === "?") {
+          syncCommand(openPrompt("search-backward"))
+          return
+        }
       }
 
       void hostRequest("input", { keys }).catch((err: unknown) => {

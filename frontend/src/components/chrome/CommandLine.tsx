@@ -1,11 +1,25 @@
 import type { StatusEcho } from "../../host/protocol"
-import type { CommandLineState } from "../../types/command"
+import {
+  type CommandLineState,
+  type PromptKind,
+} from "../../types/command"
 
-type CommandLineProps = Pick<CommandLineState, "active" | "text" | "error"> & {
+type CommandLineProps = Pick<CommandLineState, "active" | "kind" | "text" | "error"> & {
   echo: StatusEcho | null
 }
 
-export function CommandLine({ active, text, error, echo }: CommandLineProps) {
+function promptPrefix(kind: PromptKind): string {
+  switch (kind) {
+    case "search-forward":
+      return "/"
+    case "search-backward":
+      return "?"
+    default:
+      return ":"
+  }
+}
+
+export function CommandLine({ active, kind, text, error, echo }: CommandLineProps) {
   const echoMessage = !active && echo?.message ? echo.message : null
   const echoIsError = echo?.kind === "error"
 
@@ -16,7 +30,10 @@ export function CommandLine({ active, text, error, echo }: CommandLineProps) {
     >
       {active ? (
         <>
-          <span class="command-text">:{text}</span>
+          <span class="command-text">
+            {promptPrefix(kind)}
+            {text}
+          </span>
           {error ? (
             <span class="command-echo command-echo-error command-echo-after-input">
               {error}
