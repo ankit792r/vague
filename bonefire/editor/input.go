@@ -17,7 +17,6 @@ func (e *Editor) HandleInput(frame *frame.Frame, win *window.Window, buf *buffer
 }
 
 func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, keys string) error {
-
 	t := buf.Text
 	at := windowCursor(win)
 
@@ -30,14 +29,26 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return nil
 	}
 
-	if e.pendingKey == "d" && keys == "d" {
-		e.pendingKey = ""
-		return e.deleteLine(frame, win, buf)
+	if e.pendingOp == opDelete && keys == "d" {
+		e.clearPendingOp()
+		return e.applyOperatorMotion(frame, win, buf, opDelete, motionLine)
+	}
+	if e.pendingOp == opYank && keys == "y" {
+		e.clearPendingOp()
+		return e.applyOperatorMotion(frame, win, buf, opYank, motionLine)
+	}
+	if e.pendingOp == opChange && keys == "c" {
+		e.clearPendingOp()
+		return e.applyOperatorMotion(frame, win, buf, opChange, motionLine)
 	}
 
-	if e.pendingKey == "y" && keys == "y" {
-		e.pendingKey = ""
-		return e.yankLine(frame, win, buf)
+	if e.pendingOp != opNone {
+		op := e.pendingOp
+		if motion, ok := motionForKey(keys); ok {
+			e.clearPendingOp()
+			return e.applyOperatorMotion(frame, win, buf, op, motion)
+		}
+		e.clearPendingOp()
 	}
 
 	if e.pendingKey != "" {
@@ -46,15 +57,22 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 
 	switch keys {
 	case "d":
-		e.pendingKey = "d"
+		e.pendingOp = opDelete
 		return nil
 	case "y":
-		e.pendingKey = "y"
+		e.pendingOp = opYank
 		return nil
+	case "c":
+		e.pendingOp = opChange
+		return nil
+	case "D":
+		return e.applyOperatorMotion(frame, win, buf, opDelete, motionToEOL)
 	case "p":
 		return e.pasteAfter(frame, win, buf)
 	case "P":
 		return e.pasteBefore(frame, win, buf)
+	case "J":
+		return e.joinLines(frame, win, buf)
 	case "x", "<Del>":
 		return e.deleteChar(frame, win, buf)
 	case "i":

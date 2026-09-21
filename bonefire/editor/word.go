@@ -59,6 +59,29 @@ func moveWordForward(t *text.Text, off text.Offset, count int) text.Offset {
 	return off
 }
 
+// wordEndExclusive is the end of the word at off, without trailing whitespace.
+func wordEndExclusive(t *text.Text, off text.Offset) text.Offset {
+	if off >= t.Len() {
+		return off
+	}
+
+	cls, _, _ := charAt(t, off)
+	if cls == wcWhitespace {
+		return off
+	}
+
+	end := off
+	for end < t.Len() {
+		c, _, n := charAt(t, end)
+		if c != cls {
+			break
+		}
+		end = n
+	}
+
+	return end
+}
+
 func moveWordForwardOnce(t *text.Text, off text.Offset) text.Offset {
 	start := off
 	if off >= t.Len() {
