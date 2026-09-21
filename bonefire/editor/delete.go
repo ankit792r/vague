@@ -31,6 +31,7 @@ func (e *Editor) deleteChar(frame *frame.Frame, win *window.Window, buf *buffer.
 	view := layoutViewForWindow(t, win, frame)
 	rememberColumn(buf, win, view)
 	frame.Dirty = true
+	e.recordDeleteCharChange()
 	return nil
 }
 

@@ -110,6 +110,8 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return e.RepeatSearch(frame, win, buf, true)
 	case "N":
 		return e.RepeatSearch(frame, win, buf, false)
+	case ".":
+		return e.repeatLastChange(frame, win, buf)
 	case "u":
 		return e.undoTo(frame, win, buf, false)
 	case "<C-r>":

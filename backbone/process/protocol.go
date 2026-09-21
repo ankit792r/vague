@@ -121,6 +121,12 @@ type StatusEcho struct {
 	Kind    string `json:"kind,omitempty"`
 }
 
+// BufferPosition is the 1-based cursor position in the buffer for the status line.
+type BufferPosition struct {
+	Line   int `json:"line"`
+	Column int `json:"column"`
+}
+
 // Redraw brings a client's picture up to date.
 type Redraw struct {
 	FrameID uint64       `json:"frame_id"`
@@ -133,5 +139,6 @@ type Redraw struct {
 	Cursor    CursorPos    `json:"cursor"`
 	Selection *Selection   `json:"selection,omitempty"`
 	Mode      string       `json:"mode"`
+	Position  BufferPosition `json:"position"`
 	Echo    *StatusEcho  `json:"echo,omitempty"`
 }

@@ -161,7 +161,14 @@ func (e *Editor) applyOperatorMotion(
 	}
 
 	landing := landingAfterDelete(t, from, to, motion)
-	return e.applyOperatorRange(frame, win, buf, op, from, to, linewise, landing)
+	err := e.applyOperatorRange(frame, win, buf, op, from, to, linewise, landing)
+	if err != nil {
+		return err
+	}
+	if (op == opDelete || op == opChange) && to > from {
+		e.recordOperatorChange(op, motion)
+	}
+	return nil
 }
 
 func (e *Editor) joinLines(frame *frame.Frame, win *window.Window, buf *buffer.Buffer) error {
@@ -208,5 +215,6 @@ func (e *Editor) joinLines(frame *frame.Frame, win *window.Window, buf *buffer.B
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)
 	frame.Dirty = true
+	e.recordJoinChange()
 	return nil
 }

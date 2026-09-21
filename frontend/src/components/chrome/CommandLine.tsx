@@ -42,7 +42,7 @@ export function CommandLine({ active, kind, text, error, echo }: CommandLineProp
         </>
       ) : echoMessage ? (
         <span
-          class={`command-echo${echoIsError ? " command-echo-error" : ""}`}
+          class={`command-echo${echoIsError ? " command-echo-error" : ""}${echoMessage?.includes("\n") ? " command-echo-multiline" : ""}`}
           aria-live="polite"
         >
           {echoMessage}

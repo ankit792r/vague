@@ -218,6 +218,52 @@ func (w *Workspace) Search(frameID uint64, pattern string, forward bool) error {
 	return nil
 }
 
+func (w *Workspace) SwitchToNextBuffer(frameID uint64) (*buffer.Buffer, error) {
+	_, _, buf, err := w.FrameContext(frameID)
+	if err != nil {
+		return nil, err
+	}
+
+	next := w.Editor.NextBuffer(buf.ID)
+	if next == nil {
+		return nil, editor.ErrBufferNotFound
+	}
+
+	return w.switchBuffer(frameID, next)
+}
+
+func (w *Workspace) SwitchToPrevBuffer(frameID uint64) (*buffer.Buffer, error) {
+	_, _, buf, err := w.FrameContext(frameID)
+	if err != nil {
+		return nil, err
+	}
+
+	prev := w.Editor.PrevBuffer(buf.ID)
+	if prev == nil {
+		return nil, editor.ErrBufferNotFound
+	}
+
+	return w.switchBuffer(frameID, prev)
+}
+
+func (w *Workspace) SwitchToBuffer(frameID uint64, spec string) (*buffer.Buffer, error) {
+	target, err := w.Editor.ResolveBuffer(spec)
+	if err != nil {
+		return nil, err
+	}
+
+	return w.switchBuffer(frameID, target)
+}
+
+func (w *Workspace) BufferListMessage(frameID uint64) (string, error) {
+	_, _, buf, err := w.FrameContext(frameID)
+	if err != nil {
+		return "", err
+	}
+
+	return w.Editor.FormatBufferList(buf.ID), nil
+}
+
 func (w *Workspace) OpenFile(frameID uint64, path string, force bool) (*buffer.Buffer, error) {
 	abs, err := w.resolvePath(frameID, path)
 	if err != nil {

@@ -3,6 +3,7 @@ package backbone
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"vague/backbone/process"
@@ -215,6 +216,101 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 
 		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
 			if err := ws.Search(frameID, pattern, forward); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
+	case "bnext", "bn":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+
+		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			buf, err := ws.SwitchToNextBuffer(frameID)
+			if err != nil {
+				return nil, err
+			}
+			if err := ws.SetEcho(frameID, fmt.Sprintf(`"%s"`, buf.Name), editor.EchoInfo); err != nil {
+				return nil, err
+			}
+			return editor.BufferInfo(buf, true), nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return result, nil
+
+	case "bprev", "bp":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+
+		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			buf, err := ws.SwitchToPrevBuffer(frameID)
+			if err != nil {
+				return nil, err
+			}
+			if err := ws.SetEcho(frameID, fmt.Sprintf(`"%s"`, buf.Name), editor.EchoInfo); err != nil {
+				return nil, err
+			}
+			return editor.BufferInfo(buf, true), nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return result, nil
+
+	case "buffer", "b":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		if len(params.Args) == 0 {
+			return fail(fmt.Errorf("buffer: name or number required"))
+		}
+
+		spec := strings.Join(params.Args, " ")
+		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			buf, err := ws.SwitchToBuffer(frameID, spec)
+			if err != nil {
+				return nil, err
+			}
+			if err := ws.SetEcho(frameID, fmt.Sprintf(`"%s"`, buf.Name), editor.EchoInfo); err != nil {
+				return nil, err
+			}
+			return editor.BufferInfo(buf, true), nil
+		})
+		if err != nil {
+			if errors.Is(err, editor.ErrBufferNotFound) {
+				return fail(fmt.Errorf("Buffer not found"))
+			}
+			return fail(err)
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return result, nil
+
+	case "buffers", "ls":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			msg, err := ws.BufferListMessage(frameID)
+			if err != nil {
+				return nil, err
+			}
+			if err := ws.SetEcho(frameID, msg, editor.EchoInfo); err != nil {
 				return nil, err
 			}
 			return nil, nil

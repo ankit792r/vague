@@ -58,6 +58,10 @@ export type RedrawPayload = {
     end: { row: number; column: number }
   }
   mode: string
+  position: {
+    line: number
+    column: number
+  }
   echo?: StatusEcho
 }
 
