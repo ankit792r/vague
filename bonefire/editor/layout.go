@@ -1,7 +1,7 @@
 package editor
 
 import (
-	"vague/bonefire/display"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/text"
 )
 
@@ -22,7 +22,7 @@ type viewLayout struct {
 // StartCol and EndCol are byte offsets within each buffer line.
 func layoutView(t *text.Text, width, maxRows int, wrap bool) viewLayout {
 	if width < 1 {
-		width = display.DefaultWidth
+		width = frame.DefaultWidth
 	}
 
 	var out viewLayout

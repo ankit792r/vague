@@ -2,11 +2,11 @@ package editor
 
 import (
 	"vague/bonefire/buffer"
-	"vague/bonefire/display"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/window"
 )
 
-func (e *Editor) openLine(frame *display.Frame, win *window.Window, buf *buffer.Buffer, above bool) error {
+func (e *Editor) openLine(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, above bool) error {
 	if buf.ReadOnly {
 		return buffer.ErrReadOnly
 	}

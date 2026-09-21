@@ -2,7 +2,7 @@ package editor
 
 import (
 	"vague/bonefire/buffer"
-	"vague/bonefire/display"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/text"
 	"vague/bonefire/window"
 )
@@ -23,6 +23,6 @@ func LayoutViewForTest(t *text.Text, width, maxRows int, wrap bool) viewLayout {
 }
 
 // EnsureCursorVisibleForTest runs scroll logic in tests.
-func EnsureCursorVisibleForTest(win *window.Window, frame *display.Frame, view viewLayout, point text.Point) {
+func EnsureCursorVisibleForTest(win *window.Window, frame *frame.Frame, view viewLayout, point text.Point) {
 	ensureCursorVisible(win, frame, view, point)
 }

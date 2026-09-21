@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"vague/bonefire/display"
 	"vague/bonefire/editor"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/text"
 	"vague/bonefire/window"
 	"vague/bonefire/workspace"
@@ -27,7 +27,7 @@ func TestEnsureCursorVisibleScrollsDown(t *testing.T) {
 	view := editor.LayoutViewForTest(tex, 80, 0, false)
 
 	win := window.NewWindow(1, 1)
-	frame := &display.Frame{Height: 10, Width: 80}
+	frame := &frame.Frame{Height: 10, Width: 80}
 
 	point := text.Point{Line: 29, Col: 0}
 	editor.EnsureCursorVisibleForTest(win, frame, view, point)
@@ -53,7 +53,7 @@ func TestEnsureCursorVisibleScrollsUp(t *testing.T) {
 
 	win := window.NewWindow(1, 1)
 	win.TopLine = 20
-	frame := &display.Frame{Height: 10, Width: 80}
+	frame := &frame.Frame{Height: 10, Width: 80}
 
 	point := text.Point{Line: 5, Col: 0}
 	editor.EnsureCursorVisibleForTest(win, frame, view, point)

@@ -4,12 +4,12 @@ import (
 	"unicode/utf8"
 
 	"vague/bonefire/buffer"
-	"vague/bonefire/display"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/text"
 	"vague/bonefire/window"
 )
 
-func (e *Editor) deleteChar(frame *display.Frame, win *window.Window, buf *buffer.Buffer) error {
+func (e *Editor) deleteChar(frame *frame.Frame, win *window.Window, buf *buffer.Buffer) error {
 	if buf.ReadOnly {
 		return buffer.ErrReadOnly
 	}
@@ -34,7 +34,7 @@ func (e *Editor) deleteChar(frame *display.Frame, win *window.Window, buf *buffe
 	return nil
 }
 
-func (e *Editor) deleteLine(frame *display.Frame, win *window.Window, buf *buffer.Buffer) error {
+func (e *Editor) deleteLine(frame *frame.Frame, win *window.Window, buf *buffer.Buffer) error {
 	if buf.ReadOnly {
 		return buffer.ErrReadOnly
 	}

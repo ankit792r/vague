@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
 	"vague/bonefire/buffer"
-	"vague/bonefire/display"
 	"vague/bonefire/editor"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/text"
 	"vague/bonefire/window"
 )
@@ -16,7 +15,7 @@ import (
 type Workspace struct {
 	Editor *editor.Editor
 
-	Frames  map[uint64]*display.Frame
+	Frames  map[uint64]*frame.Frame
 	Windows map[uint64]*window.Window
 
 	CurrentFrameID uint64
@@ -27,7 +26,7 @@ type Workspace struct {
 func New() *Workspace {
 	return &Workspace{
 		Editor:       editor.NewEditor(),
-		Frames:       make(map[uint64]*display.Frame),
+		Frames:       make(map[uint64]*frame.Frame),
 		Windows:      make(map[uint64]*window.Window),
 		nextFrameID:  1,
 		nextWindowID: 1,
@@ -38,7 +37,7 @@ func errNotFound(kind string, id uint64) error {
 	return fmt.Errorf("%s %d not found", kind, id)
 }
 
-func (w *Workspace) FrameContext(frameID uint64) (*display.Frame, *window.Window, *buffer.Buffer, error) {
+func (w *Workspace) FrameContext(frameID uint64) (*frame.Frame, *window.Window, *buffer.Buffer, error) {
 	frame, ok := w.Frames[frameID]
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("frame %d not found", frameID)
@@ -114,12 +113,12 @@ func newWindow(id, frameID, bufferID uint64) *window.Window {
 }
 
 // NewFrame creates a display surface showing the current buffer.
-func (w *Workspace) NewFrame(width, height int, workDir string, initialPath ...string) (*display.Frame, error) {
+func (w *Workspace) NewFrame(width, height int, workDir string, initialPath ...string) (*frame.Frame, error) {
 	if width <= 0 {
-		width = display.DefaultWidth
+		width = frame.DefaultWidth
 	}
 	if height <= 0 {
-		height = display.DefaultHeight
+		height = frame.DefaultHeight
 	}
 
 	frameWorkDir := initialWorkDir(workDir, initialPath...)
@@ -138,7 +137,7 @@ func (w *Workspace) NewFrame(width, height int, workDir string, initialPath ...s
 		buf = w.Editor.Scratch("*scratch*")
 	}
 
-	frame := &display.Frame{
+	frame := &frame.Frame{
 		ID:      w.nextFrameID,
 		Width:   width,
 		Height:  height,
