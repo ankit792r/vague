@@ -68,13 +68,13 @@ func selectionInViewport(
 		}
 	}
 
-	startOff, endOff := anchor, head
-	if anchor > head {
-		startOff, endOff = head, anchor
+	from, to, _ := ed.visualRange(t, win)
+	if to <= from {
+		return nil
 	}
 
-	startPt := t.PointOf(startOff)
-	endPt := t.PointOf(endOff)
+	startPt := t.PointOf(from)
+	endPt := t.PointOf(to - 1)
 
 	sr, sc, ok1 := visualRowAt(meta, startPt)
 	er, ec, ok2 := visualRowAt(meta, endPt)

@@ -28,6 +28,7 @@ export function EmacsFrame({
       <EditorArea
         editorRef={editorRef}
         lines={lines}
+        mode={mode}
         cursor={cursor}
         selection={selection}
         hideCursor={commandLine.active}
