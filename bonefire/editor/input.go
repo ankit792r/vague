@@ -11,6 +11,8 @@ func (e *Editor) HandleInput(frame *frame.Frame, win *window.Window, buf *buffer
 	switch e.Mode {
 	case InsertMode:
 		return e.insertKey(frame, win, buf, keys)
+	case VisualMode, VisualLineMode:
+		return e.visualKey(frame, win, buf, keys)
 	default:
 		return e.normalKey(frame, win, buf, keys)
 	}
@@ -75,6 +77,14 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return e.joinLines(frame, win, buf)
 	case "x", "<Del>":
 		return e.deleteChar(frame, win, buf)
+	case "v":
+		e.enterVisualChar(win)
+		frame.Dirty = true
+		return nil
+	case "V":
+		e.enterVisualLine(win)
+		frame.Dirty = true
+		return nil
 	case "i":
 		return e.enterInsert(frame, win, buf, at)
 	case "I":

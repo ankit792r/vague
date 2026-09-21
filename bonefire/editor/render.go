@@ -8,14 +8,19 @@ import (
 )
 
 // RenderRedraw builds the wire payload for a dirty frame.
-func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, mode Mode) (process.Redraw, bool) {
+func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed *Editor) (process.Redraw, bool) {
 	if frame == nil || !frame.Dirty {
 		return process.Redraw{}, false
 	}
 
 	modeName := "normal"
-	if mode == InsertMode {
+	switch ed.Mode {
+	case InsertMode:
 		modeName = "insert"
+	case VisualMode:
+		modeName = "visual"
+	case VisualLineMode:
+		modeName = "visual-line"
 	}
 
 	fullView := layoutView(buf.Text, frame.Width, 0, win.WindowOptions.Wrap)
@@ -23,6 +28,7 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, mo
 	ensureCursorVisible(win, frame, fullView, point)
 	view := sliceView(fullView, win.TopLine, frame.Height)
 	row, col, visible := cursorViewportPos(win.TopLine, fullView.Meta, point)
+	sel := selectionInViewport(ed, win, win.TopLine, fullView.Meta, view.Lines, buf.Text)
 
 	frame.Dirty = false
 
@@ -51,7 +57,8 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, mo
 			Column:  col,
 			Visible: visible,
 		},
-		Mode: modeName,
-		Echo: echo,
+		Selection: sel,
+		Mode:      modeName,
+		Echo:      echo,
 	}, true
 }

@@ -51,6 +51,12 @@ export type RedrawPayload = {
     column: number
     visible: boolean
   }
+  selection?: {
+    visible: boolean
+    linewise?: boolean
+    start: { row: number; column: number }
+    end: { row: number; column: number }
+  }
   mode: string
   echo?: StatusEcho
 }

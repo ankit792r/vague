@@ -94,6 +94,20 @@ type CursorPos struct {
 	Visible bool `json:"visible"`
 }
 
+// SelectionPoint is a cell in the viewport selection highlight.
+type SelectionPoint struct {
+	Row    int `json:"row"`
+	Column int `json:"column"`
+}
+
+// Selection describes highlighted text in the viewport.
+type Selection struct {
+	Visible  bool           `json:"visible"`
+	Linewise bool           `json:"linewise,omitempty"`
+	Start    SelectionPoint `json:"start"`
+	End      SelectionPoint `json:"end"`
+}
+
 // RedrawBuffer identifies the buffer being drawn.
 type RedrawBuffer struct {
 	ID       uint64 `json:"id"`
@@ -115,8 +129,9 @@ type Redraw struct {
 	Wrap    bool         `json:"wrap"`
 	Full    bool         `json:"full,omitempty"`
 	Buffer  RedrawBuffer `json:"buffer"`
-	Lines   []string     `json:"lines"`
-	Cursor  CursorPos    `json:"cursor"`
-	Mode    string       `json:"mode"`
+	Lines     []string     `json:"lines"`
+	Cursor    CursorPos    `json:"cursor"`
+	Selection *Selection   `json:"selection,omitempty"`
+	Mode      string       `json:"mode"`
 	Echo    *StatusEcho  `json:"echo,omitempty"`
 }

@@ -17,6 +17,7 @@ export function EmacsFrame({
   modified,
   mode,
   cursor,
+  selection,
   echo,
   commandLine,
 }: EmacsFrameProps) {
@@ -28,6 +29,7 @@ export function EmacsFrame({
         editorRef={editorRef}
         lines={lines}
         cursor={cursor}
+        selection={selection}
         hideCursor={commandLine.active}
       />
       <StatusLine
