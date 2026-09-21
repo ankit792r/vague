@@ -4,6 +4,7 @@ package backbone
 import (
 	"context"
 	"fmt"
+	"strings"
 	"vague/backbone/process"
 	"vague/backbone/session"
 	"vague/bonefire/editor"
@@ -203,9 +204,31 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 
 		s.pushRedraw(ctx, sess, frameID)
 		return result, nil
-	}
 
-	return fail(fmt.Errorf("Unknown command: %s", params.Name))
+	case "search":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+
+		pattern := strings.Join(params.Args, " ")
+		forward := !params.Bang
+
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			if err := ws.Search(frameID, pattern, forward); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
+	default:
+		return fail(fmt.Errorf("Unknown command: %s", params.Name))
+	}
 }
 
 func (s *Server) handleInput(ctx context.Context, sess *session.Session, params process.InputParams) {

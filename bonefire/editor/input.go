@@ -106,6 +106,10 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return e.openLine(frame, win, buf, false)
 	case "O":
 		return e.openLine(frame, win, buf, true)
+	case "n":
+		return e.RepeatSearch(frame, win, buf, true)
+	case "N":
+		return e.RepeatSearch(frame, win, buf, false)
 	case "u":
 		return e.undoTo(frame, win, buf, false)
 	case "<C-r>":

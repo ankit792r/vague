@@ -2,7 +2,8 @@ import type { RefObject } from "preact"
 import { CommandLine } from "../chrome/CommandLine"
 import { StatusLine } from "../chrome/StatusLine"
 import { EditorArea } from "../editor/EditorArea"
-import type { CommandLineState } from "../../types/command"
+import type { CommandLineState, PromptKind } from "../../types/command"
+import { isSearchPrompt } from "../../types/command"
 import type { EditorViewState } from "../../types/editor"
 
 type EmacsFrameProps = EditorViewState & {
@@ -21,7 +22,9 @@ export function EmacsFrame({
   echo,
   commandLine,
 }: EmacsFrameProps) {
-  const statusMode = commandLine.active ? "command" : mode
+  const statusMode = commandLine.active
+    ? promptStatusMode(commandLine.kind)
+    : mode
 
   return (
     <div class="emacs-frame">
@@ -40,10 +43,18 @@ export function EmacsFrame({
       />
       <CommandLine
         active={commandLine.active}
+        kind={commandLine.kind}
         text={commandLine.text}
         error={commandLine.error}
         echo={echo}
       />
     </div>
   )
+}
+
+function promptStatusMode(kind: PromptKind): string {
+  if (isSearchPrompt(kind)) {
+    return "search"
+  }
+  return "command"
 }
