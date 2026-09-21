@@ -7,28 +7,26 @@ export type HostRequestMap = {
     bang?: boolean
     count?: number
   }
-  ready: {
-    height: number,
+  ui_ready: {
+    height: number
     width: number
   }
-  attach: Record<string, never>
+  ui_attach: Record<string, never>
 }
-
 
 /** UI → host: method name → success result */
 export type HostResultMap = {
   input: null
   execute: unknown
-  attach: {
+  ui_attach: {
     session_id: number
     frame_id: number
   }
-  ready: {
+  ui_ready: {
     session_id: number
     frame_id: number
   }
 }
-
 
 /** Host → UI: event name → payload */
 export type StatusEcho = {
@@ -58,7 +56,7 @@ export type RedrawPayload = {
 }
 
 export type HostEventMap = {
-  attached: HostResultMap["attach"]
+  attached: HostResultMap["ui_attach"]
   redraw: RedrawPayload
   quit: { frame_id: number }
 }

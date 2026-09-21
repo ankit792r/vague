@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [preact()],
   base: "./",
   build: {
-    outDir: "../bonefire/frame/output",
+    outDir: "../bonefire/webview/output",
     assetsDir: "assets",
     sourcemap: false,
     minify: true,

@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 	"vague/backbone/process"
-	"vague/bonefire/frame"
+	"vague/bonefire/webview"
 
 	"github.com/spf13/cobra"
 )
@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		return frame.NewFrame(cmd.Context(), args...)
+		return webview.Run(cmd.Context(), args...)
 	},
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
