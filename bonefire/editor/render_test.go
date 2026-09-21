@@ -1,20 +1,25 @@
-package editor
+package editor_test
 
-import "testing"
+import (
+	"testing"
+
+	"vague/bonefire/workspace"
+)
 
 func TestRenderRedrawWrapsWithoutPadding(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("abcdefghijklmn"))
 
-	frame, err := ed.NewFrame(13, 4, "")
+	frame, err := ws.NewFrame(13, 4, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -38,19 +43,20 @@ func TestRenderRedrawWrapsWithoutPadding(t *testing.T) {
 func TestRenderRedrawNoWrapTruncates(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("abcdefghijklmn"))
 
-	frame, err := ed.NewFrame(13, 4, "")
+	frame, err := ws.NewFrame(13, 4, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	win := ed.Windows[frame.ActiveWindowID]
+	win := ws.Windows[frame.ActiveWindowID]
 	win.WindowOptions.Wrap = false
 
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -63,16 +69,17 @@ func TestRenderRedrawNoWrapTruncates(t *testing.T) {
 func TestRenderRedrawModified(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -81,12 +88,12 @@ func TestRenderRedrawModified(t *testing.T) {
 		t.Fatal("expected clean buffer before edit")
 	}
 
-	ed.InvalidateFrame(frame.ID)
+	ws.InvalidateFrame(frame.ID)
 	if _, err := buf.Insert(buf.Text.Len(), []byte("!")); err != nil {
 		t.Fatal(err)
 	}
 
-	redraw, ok = ed.RenderRedraw(frame.ID)
+	redraw, ok = ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw after edit")
 	}

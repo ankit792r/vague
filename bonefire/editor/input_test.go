@@ -1,35 +1,41 @@
-package editor
+package editor_test
 
-import "testing"
+import (
+	"vague/bonefire/editor"
+	"testing"
+
+	"vague/bonefire/workspace"
+)
 
 func TestNormalKeyMovesCursor(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("ab\ncd"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	win := ed.Windows[frame.ActiveWindowID]
+	win := ws.Windows[frame.ActiveWindowID]
 
-	if err := ed.HandleInput(frame.ID, "l"); err != nil {
+	if err := ws.HandleInput(frame.ID, "l"); err != nil {
 		t.Fatal(err)
 	}
 
-	point := buf.Text.PointOf(windowCursor(win))
+	point := buf.Text.PointOf(editor.WindowCursorForTest(win))
 	if point.Line != 0 || point.Col != 1 {
 		t.Fatalf("after l: got line=%d col=%d, want 0,1", point.Line, point.Col)
 	}
 
-	if err := ed.HandleInput(frame.ID, "j"); err != nil {
+	if err := ws.HandleInput(frame.ID, "j"); err != nil {
 		t.Fatal(err)
 	}
 
-	point = buf.Text.PointOf(windowCursor(win))
+	point = buf.Text.PointOf(editor.WindowCursorForTest(win))
 	if point.Line != 1 || point.Col != 1 {
 		t.Fatalf("after j: got line=%d col=%d, want 1,1", point.Line, point.Col)
 	}
@@ -38,36 +44,37 @@ func TestNormalKeyMovesCursor(t *testing.T) {
 func TestGoToTopAndBottom(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("one\ntwo\nthree"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	win := ed.Windows[frame.ActiveWindowID]
+	win := ws.Windows[frame.ActiveWindowID]
 
-	setWindowCursor(buf, win, buf.Text.LineStart(2))
+	editor.SetWindowCursorForTest(buf, win, buf.Text.LineStart(2))
 
-	if err := ed.HandleInput(frame.ID, "g"); err != nil {
+	if err := ws.HandleInput(frame.ID, "g"); err != nil {
 		t.Fatal(err)
 	}
-	if err := ed.HandleInput(frame.ID, "g"); err != nil {
+	if err := ws.HandleInput(frame.ID, "g"); err != nil {
 		t.Fatal(err)
 	}
 
-	point := buf.Text.PointOf(windowCursor(win))
+	point := buf.Text.PointOf(editor.WindowCursorForTest(win))
 	if point.Line != 0 {
 		t.Fatalf("after gg: line = %d, want 0", point.Line)
 	}
 
-	if err := ed.HandleInput(frame.ID, "G"); err != nil {
+	if err := ws.HandleInput(frame.ID, "G"); err != nil {
 		t.Fatal(err)
 	}
 
-	point = buf.Text.PointOf(windowCursor(win))
+	point = buf.Text.PointOf(editor.WindowCursorForTest(win))
 	if point.Line != 2 {
 		t.Fatalf("after G: line = %d, want 2", point.Line)
 	}
@@ -76,29 +83,30 @@ func TestGoToTopAndBottom(t *testing.T) {
 func TestInsertAtFirstNonBlank(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("  hi"))
 
-	frame, _ := ed.NewFrame(80, 10, "")
-	win := ed.Windows[frame.ActiveWindowID]
+	frame, _ := ws.NewFrame(80, 10, "")
+	win := ws.Windows[frame.ActiveWindowID]
 
-	setWindowCursor(buf, win, buf.Text.LineEnd(0))
+	editor.SetWindowCursorForTest(buf, win, buf.Text.LineEnd(0))
 
-	if err := ed.HandleInput(frame.ID, "I"); err != nil {
+	if err := ws.HandleInput(frame.ID, "I"); err != nil {
 		t.Fatal(err)
 	}
 
-	if ed.Mode != InsertMode {
+	if ed.Mode != editor.InsertMode {
 		t.Fatal("expected insert mode after I")
 	}
 
-	point := buf.Text.PointOf(windowCursor(win))
+	point := buf.Text.PointOf(editor.WindowCursorForTest(win))
 	if point.Col != 2 {
 		t.Fatalf("cursor after I = col %d, want 2", point.Col)
 	}
 
-	if err := ed.HandleInput(frame.ID, "X"); err != nil {
+	if err := ws.HandleInput(frame.ID, "X"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -110,27 +118,28 @@ func TestInsertAtFirstNonBlank(t *testing.T) {
 func TestLineStartAndEndKeys(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hello"))
 
-	frame, _ := ed.NewFrame(80, 10, "")
-	win := ed.Windows[frame.ActiveWindowID]
+	frame, _ := ws.NewFrame(80, 10, "")
+	win := ws.Windows[frame.ActiveWindowID]
 
-	if err := ed.HandleInput(frame.ID, "$"); err != nil {
+	if err := ws.HandleInput(frame.ID, "$"); err != nil {
 		t.Fatal(err)
 	}
 
-	point := buf.Text.PointOf(windowCursor(win))
+	point := buf.Text.PointOf(editor.WindowCursorForTest(win))
 	if point.Col != 4 {
 		t.Fatalf("after $: col = %d, want 4", point.Col)
 	}
 
-	if err := ed.HandleInput(frame.ID, "0"); err != nil {
+	if err := ws.HandleInput(frame.ID, "0"); err != nil {
 		t.Fatal(err)
 	}
 
-	point = buf.Text.PointOf(windowCursor(win))
+	point = buf.Text.PointOf(editor.WindowCursorForTest(win))
 	if point.Col != 0 {
 		t.Fatalf("after 0: col = %d, want 0", point.Col)
 	}
@@ -139,26 +148,27 @@ func TestLineStartAndEndKeys(t *testing.T) {
 func TestAppendEndOfLineEntersInsertAtEnd(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, _ := ed.NewFrame(80, 10, "")
-	win := ed.Windows[frame.ActiveWindowID]
+	frame, _ := ws.NewFrame(80, 10, "")
+	win := ws.Windows[frame.ActiveWindowID]
 
-	if err := ed.HandleInput(frame.ID, "A"); err != nil {
+	if err := ws.HandleInput(frame.ID, "A"); err != nil {
 		t.Fatal(err)
 	}
 
-	if ed.Mode != InsertMode {
+	if ed.Mode != editor.InsertMode {
 		t.Fatal("expected insert mode after A")
 	}
 
-	if got := windowCursor(win); got != 2 {
+	if got := editor.WindowCursorForTest(win); got != 2 {
 		t.Fatalf("cursor after A = %d, want 2", got)
 	}
 
-	if err := ed.HandleInput(frame.ID, "!"); err != nil {
+	if err := ws.HandleInput(frame.ID, "!"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -170,17 +180,18 @@ func TestAppendEndOfLineEntersInsertAtEnd(t *testing.T) {
 func TestAppendMovesCursorPastLastChar(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, _ := ed.NewFrame(80, 10, "")
-	win := ed.Windows[frame.ActiveWindowID]
+	frame, _ := ws.NewFrame(80, 10, "")
+	win := ws.Windows[frame.ActiveWindowID]
 
-	_ = ed.HandleInput(frame.ID, "l")
-	_ = ed.HandleInput(frame.ID, "a")
+	_ = ws.HandleInput(frame.ID, "l")
+	_ = ws.HandleInput(frame.ID, "a")
 
-	if got := windowCursor(win); got != 2 {
+	if got := editor.WindowCursorForTest(win); got != 2 {
 		t.Fatalf("cursor after a = %d, want 2", got)
 	}
 }
@@ -188,36 +199,37 @@ func TestAppendMovesCursorPastLastChar(t *testing.T) {
 func TestInsertModeEditsScratchBuffer(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "l"); err != nil {
+	if err := ws.HandleInput(frame.ID, "l"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "a"); err != nil {
+	if err := ws.HandleInput(frame.ID, "a"); err != nil {
 		t.Fatal(err)
 	}
 
-	if ed.Mode != InsertMode {
+	if ed.Mode != editor.InsertMode {
 		t.Fatal("expected insert mode")
 	}
 
-	if err := ed.HandleInput(frame.ID, "!"); err != nil {
+	if err := ws.HandleInput(frame.ID, "!"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "<Space>"); err != nil {
+	if err := ws.HandleInput(frame.ID, "<Space>"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "x"); err != nil {
+	if err := ws.HandleInput(frame.ID, "x"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -225,11 +237,11 @@ func TestInsertModeEditsScratchBuffer(t *testing.T) {
 		t.Fatalf("got %q, want %q", buf.Text.Bytes(), "hi! x")
 	}
 
-	if err := ed.HandleInput(frame.ID, "<Esc>"); err != nil {
+	if err := ws.HandleInput(frame.ID, "<Esc>"); err != nil {
 		t.Fatal(err)
 	}
 
-	if ed.Mode != NormalMode {
+	if ed.Mode != editor.NormalMode {
 		t.Fatal("expected normal mode after Esc")
 	}
 }

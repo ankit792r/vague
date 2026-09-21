@@ -1,24 +1,30 @@
-package editor
+package editor_test
 
-import "testing"
+import (
+	"vague/bonefire/editor"
+	"testing"
+
+	"vague/bonefire/workspace"
+)
 
 func TestDeleteChar(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("abcd"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "l"); err != nil {
+	if err := ws.HandleInput(frame.ID, "l"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "x"); err != nil {
+	if err := ws.HandleInput(frame.ID, "x"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -30,20 +36,21 @@ func TestDeleteChar(t *testing.T) {
 func TestDeleteCharOnEmptyLineNoOp(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hello\n\nworld"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "j"); err != nil {
+	if err := ws.HandleInput(frame.ID, "j"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "x"); err != nil {
+	if err := ws.HandleInput(frame.ID, "x"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -55,24 +62,25 @@ func TestDeleteCharOnEmptyLineNoOp(t *testing.T) {
 func TestDeleteLine(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("keep\nremove\nstay"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "j"); err != nil {
+	if err := ws.HandleInput(frame.ID, "j"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "d"); err != nil {
+	if err := ws.HandleInput(frame.ID, "d"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "d"); err != nil {
+	if err := ws.HandleInput(frame.ID, "d"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -84,16 +92,17 @@ func TestDeleteLine(t *testing.T) {
 func TestDeleteCharUndo(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("ab"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "x"); err != nil {
+	if err := ws.HandleInput(frame.ID, "x"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -101,7 +110,7 @@ func TestDeleteCharUndo(t *testing.T) {
 		t.Fatalf("after x got %q", buf.Text.Bytes())
 	}
 
-	if err := ed.HandleInput(frame.ID, "u"); err != nil {
+	if err := ws.HandleInput(frame.ID, "u"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -113,20 +122,21 @@ func TestDeleteCharUndo(t *testing.T) {
 func TestDeleteLineUndo(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("one\ntwo"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "d"); err != nil {
+	if err := ws.HandleInput(frame.ID, "d"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "d"); err != nil {
+	if err := ws.HandleInput(frame.ID, "d"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -134,7 +144,7 @@ func TestDeleteLineUndo(t *testing.T) {
 		t.Fatalf("after dd got %q", buf.Text.Bytes())
 	}
 
-	if err := ed.HandleInput(frame.ID, "u"); err != nil {
+	if err := ws.HandleInput(frame.ID, "u"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -146,22 +156,23 @@ func TestDeleteLineUndo(t *testing.T) {
 func TestPendingDThenMotionClears(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("ab"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	win := ed.Windows[frame.ActiveWindowID]
+	win := ws.Windows[frame.ActiveWindowID]
 
-	if err := ed.HandleInput(frame.ID, "d"); err != nil {
+	if err := ws.HandleInput(frame.ID, "d"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "l"); err != nil {
+	if err := ws.HandleInput(frame.ID, "l"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -169,7 +180,7 @@ func TestPendingDThenMotionClears(t *testing.T) {
 		t.Fatalf("d then l should not delete, got %q", buf.Text.Bytes())
 	}
 
-	point := buf.Text.PointOf(windowCursor(win))
+	point := buf.Text.PointOf(editor.WindowCursorForTest(win))
 	if point.Col != 1 {
 		t.Fatalf("cursor col = %d, want 1", point.Col)
 	}

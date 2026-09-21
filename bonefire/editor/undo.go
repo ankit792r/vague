@@ -2,11 +2,12 @@ package editor
 
 import (
 	"vague/bonefire/buffer"
+	"vague/bonefire/display"
 	"vague/bonefire/text"
 	"vague/bonefire/window"
 )
 
-func (e *Editor) enterInsert(frame *Frame, win *window.Window, buf *buffer.Buffer, at text.Offset) error {
+func (e *Editor) enterInsert(frame *display.Frame, win *window.Window, buf *buffer.Buffer, at text.Offset) error {
 	if buf.ReadOnly {
 		return buffer.ErrReadOnly
 	}
@@ -15,7 +16,7 @@ func (e *Editor) enterInsert(frame *Frame, win *window.Window, buf *buffer.Buffe
 	setWindowCursor(buf, win, at)
 	e.Mode = InsertMode
 	e.beginInsertGroup(buf, at)
-	frame.dirty = true
+	frame.Dirty = true
 	return nil
 }
 
@@ -42,7 +43,7 @@ func (e *Editor) leaveInsert(win *window.Window, buf *buffer.Buffer) {
 	e.insertGroup = 0
 }
 
-func (e *Editor) undoTo(frame *Frame, win *window.Window, buf *buffer.Buffer, redo bool) error {
+func (e *Editor) undoTo(frame *display.Frame, win *window.Window, buf *buffer.Buffer, redo bool) error {
 	var (
 		at text.Offset
 		ok bool
@@ -61,7 +62,7 @@ func (e *Editor) undoTo(frame *Frame, win *window.Window, buf *buffer.Buffer, re
 	setWindowCursor(buf, win, clampToLine(buf.Text, at))
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)
-	frame.dirty = true
+	frame.Dirty = true
 	return nil
 }
 

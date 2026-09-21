@@ -1,11 +1,7 @@
 package editor
 
 import (
-	"fmt"
-
 	"vague/bonefire/buffer"
-	"vague/bonefire/text"
-	"vague/bonefire/window"
 )
 
 type Mode int
@@ -18,128 +14,41 @@ const (
 type Editor struct {
 	Mode Mode
 
-	Buffers       map[uint64]*buffer.Buffer
-	Frames        map[uint64]*Frame
-	Windows       map[uint64]*window.Window
-	CurrentBuffer uint64
-	CurrentFrameID uint64
-	insertGroup    uint64
-	pendingKey     string
+	Buffers        map[uint64]*buffer.Buffer
+	currentBuffer  uint64
+	insertGroup   uint64
+	pendingKey    string
 
 	nextBufferID uint64
-	nextFrameID  uint64
-	nextWindowID uint64
 }
 
 func NewEditor() *Editor {
 	return &Editor{
 		Mode:         NormalMode,
 		Buffers:      make(map[uint64]*buffer.Buffer),
-		Frames:       make(map[uint64]*Frame),
-		Windows:      make(map[uint64]*window.Window),
 		nextBufferID: 1,
-		nextFrameID:  1,
-		nextWindowID: 1,
 	}
 }
 
-// NewFrame creates a display surface showing the current buffer.
-// workDir is the client's current directory; relative paths resolve against it.
-// When initialPath is set, that file is opened instead of creating a scratch buffer.
-func (e *Editor) NewFrame(width, height int, workDir string, initialPath ...string) (*Frame, error) {
-	if width <= 0 {
-		width = defaultFrameWidth
-	}
-	if height <= 0 {
-		height = defaultFrameHeight
-	}
-
-	frameWorkDir := initialWorkDir(workDir, initialPath...)
-
-	var (
-		buf *buffer.Buffer
-		err error
-	)
-
-	if len(initialPath) > 0 && initialPath[0] != "" {
-		buf, err = e.loadBufferPathAt(frameWorkDir, initialPath[0])
-		if err != nil {
-			return nil, err
-		}
-	} else if buf = e.currentBuffer(); buf == nil {
-		buf = e.Scratch("*scratch*")
-	}
-
-	frame := &Frame{
-		ID:      e.nextFrameID,
-		Width:   width,
-		Height:  height,
-		WorkDir: frameWorkDir,
-		dirty:   true,
-	}
-	e.nextFrameID++
-
-	win := newWindow(e.nextWindowID, frame.ID, buf.ID)
-	win.Cursor = buf.Text.AddMarker(0, text.GravityRight)
-	e.nextWindowID++
-	e.Windows[win.Id] = win
-
-	frame.Root = win.LeafNode()
-	frame.ActiveWindowID = win.Id
-
-	e.Frames[frame.ID] = frame
-	if e.CurrentFrameID == 0 {
-		e.CurrentFrameID = frame.ID
-	}
-
-	return frame, nil
+func (e *Editor) SetMode(mode Mode) {
+	e.Mode = mode
 }
 
-// ResizeFrame updates the viewport size used for layout and wrapping.
-func (e *Editor) ResizeFrame(frameID uint64, width, height int) error {
-	frame, ok := e.Frames[frameID]
-	if !ok {
-		return errNotFound("frame", frameID)
-	}
-
-	if width > 0 {
-		frame.Width = width
-	}
-	if height > 0 {
-		frame.Height = height
-	}
-
-	frame.dirty = true
-	return nil
+func (e *Editor) ResetInputState() {
+	e.insertGroup = 0
+	e.pendingKey = ""
 }
 
-// SetWindowWrap toggles soft wrapping for the active window in a frame.
-func (e *Editor) SetWindowWrap(frameID uint64, wrap bool) error {
-	frame, ok := e.Frames[frameID]
-	if !ok {
-		return errNotFound("frame", frameID)
-	}
-
-	win, ok := e.Windows[frame.ActiveWindowID]
-	if !ok {
-		return errNotFound("window", frame.ActiveWindowID)
-	}
-
-	win.WindowOptions.Wrap = wrap
-	frame.dirty = true
-	return nil
-}
-
-func errNotFound(kind string, id uint64) error {
-	return fmt.Errorf("%s %d not found", kind, id)
-}
-
-func (e *Editor) currentBuffer() *buffer.Buffer {
-	if e.CurrentBuffer == 0 {
+func (e *Editor) CurrentBuffer() *buffer.Buffer {
+	if e.currentBuffer == 0 {
 		return nil
 	}
 
-	return e.Buffers[e.CurrentBuffer]
+	return e.Buffers[e.currentBuffer]
+}
+
+func (e *Editor) SetCurrentBuffer(id uint64) {
+	e.currentBuffer = id
 }
 
 // Scratch creates a buffer with no backing file.
@@ -148,14 +57,17 @@ func (e *Editor) Scratch(name string) *buffer.Buffer {
 
 	e.nextBufferID++
 	e.Buffers[buffer.ID] = buffer
-	e.CurrentBuffer = buffer.ID
+	e.currentBuffer = buffer.ID
 
 	return buffer
 }
 
-func newWindow(id, frameID, bufferID uint64) *window.Window {
-	win := window.NewWindow(id, frameID)
-	win.BufferId = bufferID
-	win.DesiredCol = 0
-	return win
+func (e *Editor) FindBuffer(path string) *buffer.Buffer {
+	for _, buf := range e.Buffers {
+		if buf.Path == path {
+			return buf
+		}
+	}
+
+	return nil
 }

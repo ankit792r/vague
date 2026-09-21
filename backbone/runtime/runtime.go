@@ -7,10 +7,10 @@ import (
 	"log/slog"
 	"runtime/debug"
 	"sync"
-	"vague/bonefire/editor"
+	"vague/bonefire/workspace"
 )
 
-// ErrShutdown is returned by Do once the runtime has stopped.
+// ErrShutdown is returned by Do once the runtime has shut down.
 var ErrShutdown = errors.New("editor runtime is shut down")
 
 type reply struct {
@@ -19,18 +19,13 @@ type reply struct {
 }
 
 type job struct {
-	fn    func(*editor.Editor) (any, error)
+	fn    func(*workspace.Workspace) (any, error)
 	reply chan reply // buffered, cap 1 - a sender must never block
 }
 
 // Runtime serialises all access to editor state onto a single goroutine.
-//
-// Nothing else may touch the Editor. Connection goroutines hand work in
-// through Do and wait for a value copy back, which is what makes the editor
-// free of locks and free of data races without any of the state being
-// thread-safe itself.
 type Runtime struct {
-	editor *editor.Editor // only the loop goroutine may touch this
+	ws *workspace.Workspace // only the loop goroutine may touch this
 	jobs   chan job
 
 	quit     chan struct{}
@@ -40,19 +35,15 @@ type Runtime struct {
 
 func NewRuntime() *Runtime {
 	return &Runtime{
-		editor: editor.NewEditor(),
-		jobs:   make(chan job, 64),
-		quit:   make(chan struct{}),
-		done:   make(chan struct{}),
+		ws:   workspace.New(),
+		jobs: make(chan job, 64),
+		quit: make(chan struct{}),
+		done: make(chan struct{}),
 	}
 }
 
 // Do runs fn on the runtime goroutine and waits for its result.
-//
-// fn must not retain or return pointers into editor state; return value
-// copies only. A pointer that escapes this closure is read on the caller's
-// goroutine while the loop may be mutating it.
-func (r *Runtime) Do(ctx context.Context, fn func(*editor.Editor) (any, error)) (any, error) {
+func (r *Runtime) Do(ctx context.Context, fn func(*workspace.Workspace) (any, error)) (any, error) {
 	j := job{fn: fn, reply: make(chan reply, 1)}
 
 	select {
@@ -95,10 +86,7 @@ func (r *Runtime) Shutdown() {
 // Wait blocks until the loop has stopped.
 func (r *Runtime) Wait() { <-r.done }
 
-// exec guarantees a reply even if fn panics, so a bug in one command turns
-// into one failed request rather than a dead loop goroutine and a server
-// where every subsequent request blocks forever.
-func (r *Runtime) exec(fn func(*editor.Editor) (any, error)) (res reply) {
+func (r *Runtime) exec(fn func(*workspace.Workspace) (any, error)) (res reply) {
 	defer func() {
 		if p := recover(); p != nil {
 			slog.Error("command panicked",
@@ -109,7 +97,7 @@ func (r *Runtime) exec(fn func(*editor.Editor) (any, error)) (res reply) {
 		}
 	}()
 
-	val, err := fn(r.editor)
+	val, err := fn(r.ws)
 
 	return reply{val: val, err: err}
 }

@@ -1,6 +1,9 @@
 package editor
 
-import "vague/bonefire/text"
+import (
+	"vague/bonefire/display"
+	"vague/bonefire/text"
+)
 
 // visualLine is one screen row and where it came from in the buffer.
 type visualLine struct {
@@ -19,7 +22,7 @@ type viewLayout struct {
 // StartCol and EndCol are byte offsets within each buffer line.
 func layoutView(t *text.Text, width, maxRows int, wrap bool) viewLayout {
 	if width < 1 {
-		width = defaultFrameWidth
+		width = display.DefaultWidth
 	}
 
 	var out viewLayout

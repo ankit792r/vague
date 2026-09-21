@@ -1,11 +1,15 @@
-package editor
+package editor_test
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
+	"vague/bonefire/display"
+	"vague/bonefire/editor"
 	"vague/bonefire/text"
+	"vague/bonefire/window"
+	"vague/bonefire/workspace"
 )
 
 func TestEnsureCursorVisibleScrollsDown(t *testing.T) {
@@ -20,13 +24,13 @@ func TestEnsureCursorVisibleScrollsDown(t *testing.T) {
 	}
 
 	tex := text.New([]byte(lines.String()))
-	view := layoutView(tex, 80, 0, false)
+	view := editor.LayoutViewForTest(tex, 80, 0, false)
 
-	win := newWindow(1, 1, 1)
-	frame := &Frame{Height: 10}
+	win := window.NewWindow(1, 1)
+	frame := &display.Frame{Height: 10, Width: 80}
 
 	point := text.Point{Line: 29, Col: 0}
-	ensureCursorVisible(win, frame, view, point)
+	editor.EnsureCursorVisibleForTest(win, frame, view, point)
 
 	if win.TopLine != 20 {
 		t.Fatalf("TopLine = %d, want 20", win.TopLine)
@@ -45,14 +49,14 @@ func TestEnsureCursorVisibleScrollsUp(t *testing.T) {
 	}
 
 	tex := text.New([]byte(lines.String()))
-	view := layoutView(tex, 80, 0, false)
+	view := editor.LayoutViewForTest(tex, 80, 0, false)
 
-	win := newWindow(1, 1, 1)
+	win := window.NewWindow(1, 1)
 	win.TopLine = 20
-	frame := &Frame{Height: 10}
+	frame := &display.Frame{Height: 10, Width: 80}
 
 	point := text.Point{Line: 5, Col: 0}
-	ensureCursorVisible(win, frame, view, point)
+	editor.EnsureCursorVisibleForTest(win, frame, view, point)
 
 	if win.TopLine != 5 {
 		t.Fatalf("TopLine = %d, want 5", win.TopLine)
@@ -62,7 +66,8 @@ func TestEnsureCursorVisibleScrollsUp(t *testing.T) {
 func TestRenderRedrawScrollsToCursor(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 
 	var lines strings.Builder
@@ -74,15 +79,15 @@ func TestRenderRedrawScrollsToCursor(t *testing.T) {
 	}
 	buf.Text.SetBytes([]byte(lines.String()))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	win := ed.Windows[frame.ActiveWindowID]
-	setWindowCursor(buf, win, buf.Text.LineEnd(29))
+	win := ws.Windows[frame.ActiveWindowID]
+	editor.SetWindowCursorForTest(buf, win, buf.Text.LineEnd(29))
 
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -107,7 +112,8 @@ func TestRenderRedrawScrollsToCursor(t *testing.T) {
 func TestHandleInputScrollsViewport(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 
 	var lines strings.Builder
@@ -119,21 +125,21 @@ func TestHandleInputScrollsViewport(t *testing.T) {
 	}
 	buf.Text.SetBytes([]byte(lines.String()))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	win := ed.Windows[frame.ActiveWindowID]
+	win := ws.Windows[frame.ActiveWindowID]
 
 	for range 29 {
-		if err := ed.HandleInput(frame.ID, "j"); err != nil {
+		if err := ws.HandleInput(frame.ID, "j"); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	ed.InvalidateFrame(frame.ID)
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	ws.InvalidateFrame(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -147,13 +153,13 @@ func TestHandleInputScrollsViewport(t *testing.T) {
 	}
 
 	for range 10 {
-		if err := ed.HandleInput(frame.ID, "k"); err != nil {
+		if err := ws.HandleInput(frame.ID, "k"); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	ed.InvalidateFrame(frame.ID)
-	redraw, ok = ed.RenderRedraw(frame.ID)
+	ws.InvalidateFrame(frame.ID)
+	redraw, ok = ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
