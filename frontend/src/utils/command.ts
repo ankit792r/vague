@@ -6,6 +6,8 @@ const ALIASES: Record<string, string> = {
   e: "edit",
   w: "write",
   q: "quit",
+  wq: "wq",
+  x: "x",
 }
 
 export function parseCommandLine(input: string): ParsedExecute | null {

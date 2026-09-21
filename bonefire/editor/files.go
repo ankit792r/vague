@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"errors"
+
 	"vague/bonefire/buffer"
 )
 
@@ -83,6 +85,10 @@ func OpenFileError(path string, err error) error {
 
 // WriteFileError wraps a save failure for the wire.
 func WriteFileError(path string, err error) error {
+	if errors.Is(err, buffer.ErrNoFileName) {
+		return fmt.Errorf("No file name")
+	}
+
 	if path == "" {
 		return fmt.Errorf("write: %w", err)
 	}

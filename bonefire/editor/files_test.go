@@ -263,3 +263,23 @@ func TestWriteRelativePathUsesFrameWorkDir(t *testing.T) {
 		t.Fatalf("expected %q to exist: %v", got, err)
 	}
 }
+
+func TestWriteScratchBufferNoFileName(t *testing.T) {
+	t.Parallel()
+
+	ws := workspace.New()
+	ws.Editor.Scratch("*scratch*")
+
+	frame, err := ws.NewFrame(80, 10, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = ws.WriteFile(frame.ID, "", false)
+	if err == nil {
+		t.Fatal("expected error writing scratch buffer with no path")
+	}
+	if err.Error() != "No file name" {
+		t.Fatalf("got %q, want %q", err.Error(), "No file name")
+	}
+}
