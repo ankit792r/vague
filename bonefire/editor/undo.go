@@ -2,12 +2,12 @@ package editor
 
 import (
 	"vague/bonefire/buffer"
-	"vague/bonefire/display"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/text"
 	"vague/bonefire/window"
 )
 
-func (e *Editor) enterInsert(frame *display.Frame, win *window.Window, buf *buffer.Buffer, at text.Offset) error {
+func (e *Editor) enterInsert(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, at text.Offset) error {
 	if buf.ReadOnly {
 		return buffer.ErrReadOnly
 	}
@@ -43,7 +43,7 @@ func (e *Editor) leaveInsert(win *window.Window, buf *buffer.Buffer) {
 	e.insertGroup = 0
 }
 
-func (e *Editor) undoTo(frame *display.Frame, win *window.Window, buf *buffer.Buffer, redo bool) error {
+func (e *Editor) undoTo(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, redo bool) error {
 	var (
 		at text.Offset
 		ok bool

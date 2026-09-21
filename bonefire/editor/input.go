@@ -2,12 +2,12 @@ package editor
 
 import (
 	"vague/bonefire/buffer"
-	"vague/bonefire/display"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/window"
 )
 
 // HandleInput applies one key in Vim notation for the given frame window.
-func (e *Editor) HandleInput(frame *display.Frame, win *window.Window, buf *buffer.Buffer, keys string) error {
+func (e *Editor) HandleInput(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, keys string) error {
 	switch e.Mode {
 	case InsertMode:
 		return e.insertKey(frame, win, buf, keys)
@@ -16,7 +16,7 @@ func (e *Editor) HandleInput(frame *display.Frame, win *window.Window, buf *buff
 	}
 }
 
-func (e *Editor) normalKey(frame *display.Frame, win *window.Window, buf *buffer.Buffer, keys string) error {
+func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, keys string) error {
 
 	t := buf.Text
 	at := windowCursor(win)
@@ -94,7 +94,7 @@ func (e *Editor) normalKey(frame *display.Frame, win *window.Window, buf *buffer
 	return nil
 }
 
-func (e *Editor) insertKey(frame *display.Frame, win *window.Window, buf *buffer.Buffer, keys string) error {
+func (e *Editor) insertKey(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, keys string) error {
 	if buf.ReadOnly {
 		return buffer.ErrReadOnly
 	}
@@ -144,7 +144,7 @@ func (e *Editor) insertKey(frame *display.Frame, win *window.Window, buf *buffer
 	return e.insertBytes(frame, win, buf, []byte(keys))
 }
 
-func (e *Editor) insertBytes(frame *display.Frame, win *window.Window, buf *buffer.Buffer, data []byte) error {
+func (e *Editor) insertBytes(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, data []byte) error {
 	delta, err := buf.Insert(windowCursor(win), data)
 	if err != nil {
 		return err
@@ -157,7 +157,7 @@ func (e *Editor) insertBytes(frame *display.Frame, win *window.Window, buf *buff
 	return nil
 }
 
-func (e *Editor) deleteBack(frame *display.Frame, win *window.Window, buf *buffer.Buffer) error {
+func (e *Editor) deleteBack(frame *frame.Frame, win *window.Window, buf *buffer.Buffer) error {
 	at := windowCursor(win)
 	if at <= 0 {
 		return nil

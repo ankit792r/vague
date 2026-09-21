@@ -3,12 +3,12 @@ package editor
 import (
 	"vague/backbone/process"
 	"vague/bonefire/buffer"
-	"vague/bonefire/display"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/window"
 )
 
 // RenderRedraw builds the wire payload for a dirty frame.
-func RenderRedraw(frame *display.Frame, win *window.Window, buf *buffer.Buffer, mode Mode) (process.Redraw, bool) {
+func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, mode Mode) (process.Redraw, bool) {
 	if frame == nil || !frame.Dirty {
 		return process.Redraw{}, false
 	}

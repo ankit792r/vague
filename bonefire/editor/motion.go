@@ -4,7 +4,7 @@ import (
 	"unicode/utf8"
 
 	"vague/bonefire/buffer"
-	"vague/bonefire/display"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/text"
 	"vague/bonefire/window"
 )
@@ -219,7 +219,7 @@ func clampInt(v, lo, hi int) int {
 func moveVerticalForWindow(
 	t *text.Text,
 	win *window.Window,
-	frame *display.Frame,
+	frame *frame.Frame,
 	off text.Offset,
 	delta int,
 	past bool,
@@ -232,7 +232,7 @@ func moveVerticalForWindow(
 	return moveVerticalVisual(view, t, off, win.DesiredCol, delta, past)
 }
 
-func layoutViewForWindow(t *text.Text, win *window.Window, frame *display.Frame) *viewLayout {
+func layoutViewForWindow(t *text.Text, win *window.Window, frame *frame.Frame) *viewLayout {
 	if !win.WindowOptions.Wrap {
 		return nil
 	}

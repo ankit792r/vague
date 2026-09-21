@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"vague/backbone/process"
 	"vague/backbone/session"
-	"vague/bonefire/display"
 	"vague/bonefire/editor"
+	frame "vague/bonefire/frame"
 	"vague/bonefire/workspace"
 )
 
@@ -226,7 +226,7 @@ func (s *Server) handleUiAttach(ctx context.Context, sess *session.Session, para
 	}
 
 	result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-		var frame *display.Frame
+		var frame *frame.Frame
 		var err error
 
 		if len(params.Files) > 0 && params.Files[0] != "" {
