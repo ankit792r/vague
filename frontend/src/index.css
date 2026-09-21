@@ -70,6 +70,7 @@ button {
   font-family: var(--font-text);
   font-size: 20px;
   line-height: 1.4;
+  user-select: none;
 }
 
 .editor-line {
@@ -80,6 +81,15 @@ button {
 .cursor-cell {
   background: var(--fg);
   color: var(--bg);
+}
+
+.cursor-bar {
+  display: inline-block;
+  width: 2px;
+  height: 1.4rem;
+  margin: 0 0px;
+  vertical-align: text-bottom;
+  background: var(--fg);
 }
 
 .visual-selection {

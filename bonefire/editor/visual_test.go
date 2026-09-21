@@ -125,6 +125,68 @@ func TestVisualChange(t *testing.T) {
 	}
 }
 
+func TestVisualLineSelectionSingleRow(t *testing.T) {
+	t.Parallel()
+
+	ws := workspace.New()
+	buf := ws.Editor.Scratch("*scratch*")
+	buf.Text.SetBytes([]byte("hello\nworld\n"))
+
+	frame, err := ws.NewFrame(80, 10, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ws.HandleInput(frame.ID, "V"); err != nil {
+		t.Fatal(err)
+	}
+
+	redraw, ok := ws.RenderRedraw(frame.ID)
+	if !ok {
+		t.Fatal("expected redraw")
+	}
+	if redraw.Selection == nil || !redraw.Selection.Linewise {
+		t.Fatal("expected linewise selection")
+	}
+	if redraw.Selection.Start.Row != 0 || redraw.Selection.End.Row != 0 {
+		t.Fatalf("selection rows = %d..%d, want 0..0", redraw.Selection.Start.Row, redraw.Selection.End.Row)
+	}
+}
+
+func TestVisualToEOLDoesNotHighlightNextLine(t *testing.T) {
+	t.Parallel()
+
+	ws := workspace.New()
+	buf := ws.Editor.Scratch("*scratch*")
+	buf.Text.SetBytes([]byte("hello\nworld\n"))
+
+	frame, err := ws.NewFrame(80, 10, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ws.HandleInput(frame.ID, "0"); err != nil {
+		t.Fatal(err)
+	}
+	if err := ws.HandleInput(frame.ID, "v"); err != nil {
+		t.Fatal(err)
+	}
+	if err := ws.HandleInput(frame.ID, "$"); err != nil {
+		t.Fatal(err)
+	}
+
+	redraw, ok := ws.RenderRedraw(frame.ID)
+	if !ok {
+		t.Fatal("expected redraw")
+	}
+	if redraw.Selection == nil {
+		t.Fatal("expected selection")
+	}
+	if redraw.Selection.End.Row != 0 {
+		t.Fatalf("selection end row = %d, want 0", redraw.Selection.End.Row)
+	}
+}
+
 func TestVisualRedrawIncludesSelection(t *testing.T) {
 	t.Parallel()
 
