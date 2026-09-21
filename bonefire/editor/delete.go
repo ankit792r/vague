@@ -42,17 +42,8 @@ func (e *Editor) deleteLine(frame *frame.Frame, win *window.Window, buf *buffer.
 	t := buf.Text
 	at := windowCursor(win)
 	first := t.PointOf(at).Line
-	last := first
 
-	from := t.LineStart(first)
-	to := t.LineEnd(last)
-
-	switch {
-	case last+1 < t.LineCount():
-		to = t.LineStart(last + 1)
-	case first > 0:
-		from = t.LineEnd(first - 1)
-	}
+	from, to := lineChangeRange(t, first)
 
 	if to <= from {
 		return nil
