@@ -111,9 +111,18 @@ func (e *Editor) pasteCharwise(
 		return buffer.ErrReadOnly
 	}
 
+	t := buf.Text
 	at := windowCursor(win)
-	if before && at > 0 {
-		at = back(buf.Text, at)
+	if before {
+		if at > 0 {
+			at = back(t, at)
+		}
+	} else {
+		next := forwardChar(t, at)
+		if next == at {
+			next = t.LineEnd(t.PointOf(at).Line)
+		}
+		at = next
 	}
 
 	buf.BeginEdit(windowCursor(win))

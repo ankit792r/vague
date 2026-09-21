@@ -18,6 +18,7 @@ type Editor struct {
 	currentBuffer  uint64
 	insertGroup   uint64
 	pendingKey    string
+	pendingOp     opKind
 	reg           register
 
 	nextBufferID uint64
@@ -38,6 +39,7 @@ func (e *Editor) SetMode(mode Mode) {
 func (e *Editor) ResetInputState() {
 	e.insertGroup = 0
 	e.pendingKey = ""
+	e.pendingOp = opNone
 }
 
 func (e *Editor) CurrentBuffer() *buffer.Buffer {
