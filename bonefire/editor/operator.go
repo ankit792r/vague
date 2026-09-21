@@ -95,15 +95,16 @@ func landingAfterDelete(t *text.Text, from, to text.Offset, motion motionKind) t
 	}
 }
 
-func (e *Editor) applyOperatorMotion(
+func (e *Editor) applyOperatorRange(
 	frame *frame.Frame,
 	win *window.Window,
 	buf *buffer.Buffer,
 	op opKind,
-	motion motionKind,
+	from, to text.Offset,
+	linewise bool,
+	landing text.Offset,
 ) error {
 	t := buf.Text
-	from, to, linewise := textRangeForMotion(t, win, op, motion)
 	if to <= from {
 		frame.Dirty = true
 		return nil
@@ -129,7 +130,6 @@ func (e *Editor) applyOperatorMotion(
 			return err
 		}
 
-		landing := landingAfterDelete(t, from, to, motion)
 		setWindowCursor(buf, win, landing)
 		buf.EndEdit(windowCursor(win))
 
@@ -144,6 +144,24 @@ func (e *Editor) applyOperatorMotion(
 	default:
 		return nil
 	}
+}
+
+func (e *Editor) applyOperatorMotion(
+	frame *frame.Frame,
+	win *window.Window,
+	buf *buffer.Buffer,
+	op opKind,
+	motion motionKind,
+) error {
+	t := buf.Text
+	from, to, linewise := textRangeForMotion(t, win, op, motion)
+	if to <= from {
+		frame.Dirty = true
+		return nil
+	}
+
+	landing := landingAfterDelete(t, from, to, motion)
+	return e.applyOperatorRange(frame, win, buf, op, from, to, linewise, landing)
 }
 
 func (e *Editor) joinLines(frame *frame.Frame, win *window.Window, buf *buffer.Buffer) error {

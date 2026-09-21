@@ -2,6 +2,7 @@ package editor
 
 import (
 	"vague/bonefire/buffer"
+	"vague/bonefire/text"
 )
 
 type Mode int
@@ -9,6 +10,8 @@ type Mode int
 const (
 	NormalMode Mode = iota
 	InsertMode
+	VisualMode
+	VisualLineMode
 )
 
 type Editor struct {
@@ -19,6 +22,7 @@ type Editor struct {
 	insertGroup   uint64
 	pendingKey    string
 	pendingOp     opKind
+	visualAnchor  text.Offset
 	reg           register
 
 	nextBufferID uint64

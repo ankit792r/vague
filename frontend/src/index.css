@@ -82,6 +82,15 @@ button {
   color: var(--bg);
 }
 
+.visual-selection {
+  background: color-mix(in srgb, var(--fg) 35%, transparent);
+}
+
+.visual-selection.cursor-cell {
+  background: var(--fg);
+  color: var(--bg);
+}
+
 .status-line {
   display: flex;
   align-items: center;

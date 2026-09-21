@@ -27,5 +27,5 @@ func (w *Workspace) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 		return process.Redraw{}, false
 	}
 
-	return editor.RenderRedraw(frame, win, buf, w.Editor.Mode)
+	return editor.RenderRedraw(frame, win, buf, w.Editor)
 }
