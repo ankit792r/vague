@@ -1,6 +1,8 @@
-package editor
+package editor_test
 
 import (
+	"vague/bonefire/editor"
+	"vague/bonefire/workspace"
 	"errors"
 	"testing"
 )
@@ -8,11 +10,12 @@ import (
 func TestQuitFrameRefusesModifiedBuffer(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -21,12 +24,12 @@ func TestQuitFrameRefusesModifiedBuffer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = ed.QuitFrame(frame.ID, false)
-	if !errors.Is(err, ErrNotSaved) {
-		t.Fatalf("got %v, want ErrNotSaved", err)
+	err = ws.QuitFrame(frame.ID, false)
+	if !errors.Is(err, editor.ErrNotSaved) {
+		t.Fatalf("got %v, want editor.ErrNotSaved", err)
 	}
 
-	if _, ok := ed.Frames[frame.ID]; !ok {
+	if _, ok := ws.Frames[frame.ID]; !ok {
 		t.Fatal("frame should still exist after refused quit")
 	}
 }
@@ -34,11 +37,12 @@ func TestQuitFrameRefusesModifiedBuffer(t *testing.T) {
 func TestQuitFrameForceCloses(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,11 +51,11 @@ func TestQuitFrameForceCloses(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := ed.QuitFrame(frame.ID, true); err != nil {
+	if err := ws.QuitFrame(frame.ID, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, ok := ed.Frames[frame.ID]; ok {
+	if _, ok := ws.Frames[frame.ID]; ok {
 		t.Fatal("frame should be gone after :q!")
 	}
 }
@@ -59,19 +63,20 @@ func TestQuitFrameForceCloses(t *testing.T) {
 func TestQuitFrameCleanBuffer(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	ed.Scratch("*scratch*")
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.QuitFrame(frame.ID, false); err != nil {
+	if err := ws.QuitFrame(frame.ID, false); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, ok := ed.Frames[frame.ID]; ok {
+	if _, ok := ws.Frames[frame.ID]; ok {
 		t.Fatal("frame should be gone after :q")
 	}
 }

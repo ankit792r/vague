@@ -1,23 +1,29 @@
-package editor
+package editor_test
 
-import "testing"
+import (
+	"vague/bonefire/editor"
+	"testing"
+
+	"vague/bonefire/workspace"
+)
 
 func TestSetEchoIncludedInRedraw(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	ed.Scratch("*scratch*")
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.SetEcho(frame.ID, `"foo" written`, EchoInfo); err != nil {
+	if err := ws.SetEcho(frame.ID, `"foo" written`, editor.EchoInfo); err != nil {
 		t.Fatal(err)
 	}
 
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -30,18 +36,19 @@ func TestSetEchoIncludedInRedraw(t *testing.T) {
 func TestClearEchoOnRedraw(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	ed.Scratch("*scratch*")
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_ = ed.SetEcho(frame.ID, "wrap on", EchoInfo)
-	ed.ClearEcho(frame.ID)
+	_ = ws.SetEcho(frame.ID, "wrap on", editor.EchoInfo)
+	ws.ClearEcho(frame.ID)
 
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -54,11 +61,11 @@ func TestClearEchoOnRedraw(t *testing.T) {
 func TestWriteEchoMessageUsesPath(t *testing.T) {
 	t.Parallel()
 
-	buf := NewEditor().Scratch("*scratch*")
+	buf := editor.NewEditor().Scratch("*scratch*")
 	buf.Path = "/tmp/example.txt"
 	buf.Name = "example.txt"
 
-	if got := WriteEchoMessage(buf); got != `"/tmp/example.txt" written` {
+	if got := editor.WriteEchoMessage(buf); got != `"/tmp/example.txt" written` {
 		t.Fatalf("got %q", got)
 	}
 }

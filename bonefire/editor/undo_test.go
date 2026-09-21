@@ -1,40 +1,45 @@
-package editor
+package editor_test
 
-import "testing"
+import (
+	"testing"
+
+	"vague/bonefire/workspace"
+)
 
 func TestUndoInsertSession(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("hi"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "l"); err != nil {
+	if err := ws.HandleInput(frame.ID, "l"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "l"); err != nil {
+	if err := ws.HandleInput(frame.ID, "l"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "a"); err != nil {
+	if err := ws.HandleInput(frame.ID, "a"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "!"); err != nil {
+	if err := ws.HandleInput(frame.ID, "!"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "x"); err != nil {
+	if err := ws.HandleInput(frame.ID, "x"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "<Esc>"); err != nil {
+	if err := ws.HandleInput(frame.ID, "<Esc>"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -42,7 +47,7 @@ func TestUndoInsertSession(t *testing.T) {
 		t.Fatalf("before undo got %q", buf.Text.Bytes())
 	}
 
-	if err := ed.HandleInput(frame.ID, "u"); err != nil {
+	if err := ws.HandleInput(frame.ID, "u"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -54,36 +59,37 @@ func TestUndoInsertSession(t *testing.T) {
 func TestUndoRedoRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	ed := NewEditor()
+	ws := workspace.New()
+	ed := ws.Editor
 	buf := ed.Scratch("*scratch*")
 	buf.Text.SetBytes([]byte("ab"))
 
-	frame, err := ed.NewFrame(80, 10, "")
+	frame, err := ws.NewFrame(80, 10, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "l"); err != nil {
+	if err := ws.HandleInput(frame.ID, "l"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "l"); err != nil {
+	if err := ws.HandleInput(frame.ID, "l"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "a"); err != nil {
+	if err := ws.HandleInput(frame.ID, "a"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "X"); err != nil {
+	if err := ws.HandleInput(frame.ID, "X"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "<Esc>"); err != nil {
+	if err := ws.HandleInput(frame.ID, "<Esc>"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "u"); err != nil {
+	if err := ws.HandleInput(frame.ID, "u"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -91,7 +97,7 @@ func TestUndoRedoRoundTrip(t *testing.T) {
 		t.Fatalf("after undo got %q", buf.Text.Bytes())
 	}
 
-	if err := ed.HandleInput(frame.ID, "<C-r>"); err != nil {
+	if err := ws.HandleInput(frame.ID, "<C-r>"); err != nil {
 		t.Fatal(err)
 	}
 

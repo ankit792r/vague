@@ -1,11 +1,12 @@
 package editor
 
 import (
+	"vague/bonefire/display"
 	"vague/bonefire/text"
 	"vague/bonefire/window"
 )
 
-func ensureCursorVisible(win *window.Window, frame *Frame, view viewLayout, point text.Point) {
+func ensureCursorVisible(win *window.Window, frame *display.Frame, view viewLayout, point text.Point) {
 	cursorRow, _, ok := visualRowAt(view.Meta, point)
 	if !ok {
 		return
@@ -13,7 +14,7 @@ func ensureCursorVisible(win *window.Window, frame *Frame, view viewLayout, poin
 
 	height := frame.Height
 	if height < 1 {
-		height = defaultFrameHeight
+		height = display.DefaultHeight
 	}
 
 	total := len(view.Meta)

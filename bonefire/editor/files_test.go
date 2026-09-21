@@ -1,6 +1,7 @@
-package editor
+package editor_test
 
 import (
+	"vague/bonefire/workspace"
 	"os"
 	"path/filepath"
 	"testing"
@@ -17,13 +18,14 @@ func TestNewFrameOpensExistingFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10, dir, path)
+	ws := workspace.New()
+	ed := ws.Editor
+	frame, err := ws.NewFrame(80, 10, dir, path)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	win := ed.Windows[frame.ActiveWindowID]
+	win := ws.Windows[frame.ActiveWindowID]
 	buf := ed.Buffers[win.BufferId]
 
 	if buf.Name != "hello.py" {
@@ -34,7 +36,7 @@ func TestNewFrameOpensExistingFile(t *testing.T) {
 		t.Fatalf("got %q, want %q", buf.Text.Bytes(), content)
 	}
 
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -50,13 +52,14 @@ func TestNewFrameOpensMissingFileAsEmptyBuffer(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "new.py")
 
-	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10, dir, path)
+	ws := workspace.New()
+	ed := ws.Editor
+	frame, err := ws.NewFrame(80, 10, dir, path)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	win := ed.Windows[frame.ActiveWindowID]
+	win := ws.Windows[frame.ActiveWindowID]
 	buf := ed.Buffers[win.BufferId]
 
 	if buf.Name != "new.py" {
@@ -71,7 +74,7 @@ func TestNewFrameOpensMissingFileAsEmptyBuffer(t *testing.T) {
 		t.Fatal("expected unmodified new file buffer")
 	}
 
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -92,13 +95,13 @@ func TestOpenFileLoadsIntoFrame(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10, dir)
+	ws := workspace.New()
+	frame, err := ws.NewFrame(80, 10, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	buf, err := ed.OpenFile(frame.ID, path, false)
+	buf, err := ws.OpenFile(frame.ID, path, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +110,7 @@ func TestOpenFileLoadsIntoFrame(t *testing.T) {
 		t.Fatalf("name = %q, want sample.go", buf.Name)
 	}
 
-	redraw, ok := ed.RenderRedraw(frame.ID)
+	redraw, ok := ws.RenderRedraw(frame.ID)
 	if !ok {
 		t.Fatal("expected redraw")
 	}
@@ -123,29 +126,29 @@ func TestWriteFilePersistsEdits(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "out.txt")
 
-	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10, dir)
+	ws := workspace.New()
+	frame, err := ws.NewFrame(80, 10, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := ed.OpenFile(frame.ID, path, false); err != nil {
+	if _, err := ws.OpenFile(frame.ID, path, false); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "i"); err != nil {
+	if err := ws.HandleInput(frame.ID, "i"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "h"); err != nil {
+	if err := ws.HandleInput(frame.ID, "h"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "i"); err != nil {
+	if err := ws.HandleInput(frame.ID, "i"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.WriteFile(frame.ID, "", false); err != nil {
+	if err := ws.WriteFile(frame.ID, "", false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -169,18 +172,18 @@ func TestOpenFileReusesExistingBuffer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10, dir)
+	ws := workspace.New()
+	frame, err := ws.NewFrame(80, 10, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	first, err := ed.OpenFile(frame.ID, path, false)
+	first, err := ws.OpenFile(frame.ID, path, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	second, err := ed.OpenFile(frame.ID, path, false)
+	second, err := ws.OpenFile(frame.ID, path, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,13 +203,13 @@ func TestOpenFileForceReloads(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10, dir)
+	ws := workspace.New()
+	frame, err := ws.NewFrame(80, 10, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	buf, err := ed.OpenFile(frame.ID, path, false)
+	buf, err := ws.OpenFile(frame.ID, path, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -215,7 +218,7 @@ func TestOpenFileForceReloads(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := ed.OpenFile(frame.ID, path, false); err != nil {
+	if _, err := ws.OpenFile(frame.ID, path, false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -223,7 +226,7 @@ func TestOpenFileForceReloads(t *testing.T) {
 		t.Fatalf("without bang got %q, want v1\\n", buf.Text.Bytes())
 	}
 
-	if _, err := ed.OpenFile(frame.ID, path, true); err != nil {
+	if _, err := ws.OpenFile(frame.ID, path, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -237,21 +240,21 @@ func TestWriteRelativePathUsesFrameWorkDir(t *testing.T) {
 
 	dir := t.TempDir()
 
-	ed := NewEditor()
-	frame, err := ed.NewFrame(80, 10, dir)
+	ws := workspace.New()
+	frame, err := ws.NewFrame(80, 10, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "i"); err != nil {
+	if err := ws.HandleInput(frame.ID, "i"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.HandleInput(frame.ID, "x"); err != nil {
+	if err := ws.HandleInput(frame.ID, "x"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ed.WriteFile(frame.ID, "hello.py", false); err != nil {
+	if err := ws.WriteFile(frame.ID, "hello.py", false); err != nil {
 		t.Fatal(err)
 	}
 

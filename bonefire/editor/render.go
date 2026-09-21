@@ -1,32 +1,21 @@
 package editor
 
-import "vague/backbone/process"
+import (
+	"vague/backbone/process"
+	"vague/bonefire/buffer"
+	"vague/bonefire/display"
+	"vague/bonefire/window"
+)
 
-func (e *Editor) InvalidateFrame(frameID uint64) {
-	if frame, ok := e.Frames[frameID]; ok {
-		frame.dirty = true
-	}
-}
-
-func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
-	frame, ok := e.Frames[frameID]
-	if !ok || !frame.dirty {
+// RenderRedraw builds the wire payload for a dirty frame.
+func RenderRedraw(frame *display.Frame, win *window.Window, buf *buffer.Buffer, mode Mode) (process.Redraw, bool) {
+	if frame == nil || !frame.Dirty {
 		return process.Redraw{}, false
 	}
 
-	win, ok := e.Windows[frame.ActiveWindowID]
-	if !ok {
-		return process.Redraw{}, false
-	}
-
-	buf, ok := e.Buffers[win.BufferId]
-	if !ok {
-		return process.Redraw{}, false
-	}
-
-	mode := "normal"
-	if e.Mode == InsertMode {
-		mode = "insert"
+	modeName := "normal"
+	if mode == InsertMode {
+		modeName = "insert"
 	}
 
 	fullView := layoutView(buf.Text, frame.Width, 0, win.WindowOptions.Wrap)
@@ -35,18 +24,18 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 	view := sliceView(fullView, win.TopLine, frame.Height)
 	row, col, visible := cursorViewportPos(win.TopLine, fullView.Meta, point)
 
-	frame.dirty = false
+	frame.Dirty = false
 
 	var echo *process.StatusEcho
-	if frame.echo.Message != "" {
+	if frame.Echo.Message != "" {
 		echo = &process.StatusEcho{
-			Message: frame.echo.Message,
-			Kind:    frame.echo.Kind,
+			Message: frame.Echo.Message,
+			Kind:    frame.Echo.Kind,
 		}
 	}
 
 	return process.Redraw{
-		FrameID: frameID,
+		FrameID: frame.ID,
 		Full:    true,
 		Columns: frame.Width,
 		Rows:    frame.Height,
@@ -62,7 +51,7 @@ func (e *Editor) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 			Column:  col,
 			Visible: visible,
 		},
-		Mode: mode,
+		Mode: modeName,
 		Echo: echo,
 	}, true
 }

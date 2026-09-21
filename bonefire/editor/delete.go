@@ -4,11 +4,12 @@ import (
 	"unicode/utf8"
 
 	"vague/bonefire/buffer"
+	"vague/bonefire/display"
 	"vague/bonefire/text"
 	"vague/bonefire/window"
 )
 
-func (e *Editor) deleteChar(frame *Frame, win *window.Window, buf *buffer.Buffer) error {
+func (e *Editor) deleteChar(frame *display.Frame, win *window.Window, buf *buffer.Buffer) error {
 	if buf.ReadOnly {
 		return buffer.ErrReadOnly
 	}
@@ -29,11 +30,11 @@ func (e *Editor) deleteChar(frame *Frame, win *window.Window, buf *buffer.Buffer
 
 	view := layoutViewForWindow(t, win, frame)
 	rememberColumn(buf, win, view)
-	frame.dirty = true
+	frame.Dirty = true
 	return nil
 }
 
-func (e *Editor) deleteLine(frame *Frame, win *window.Window, buf *buffer.Buffer) error {
+func (e *Editor) deleteLine(frame *display.Frame, win *window.Window, buf *buffer.Buffer) error {
 	if buf.ReadOnly {
 		return buffer.ErrReadOnly
 	}
@@ -72,7 +73,7 @@ func (e *Editor) deleteLine(frame *Frame, win *window.Window, buf *buffer.Buffer
 
 	view := layoutViewForWindow(t, win, frame)
 	rememberColumn(buf, win, view)
-	frame.dirty = true
+	frame.Dirty = true
 	return nil
 }
 
