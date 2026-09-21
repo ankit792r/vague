@@ -241,16 +241,28 @@ func (w *Workspace) WriteFile(frameID uint64, path string, force bool) error {
 		}
 
 		if force {
-			return buf.SaveAsForce(abs)
+			if err := buf.SaveAsForce(abs); err != nil {
+				return editor.WriteFileError(path, err)
+			}
+			return nil
 		}
-		return buf.SaveAs(abs)
+		if err := buf.SaveAs(abs); err != nil {
+			return editor.WriteFileError(path, err)
+		}
+		return nil
 	}
 
 	if force {
-		return buf.SaveForce()
+		if err := buf.SaveForce(); err != nil {
+			return editor.WriteFileError(path, err)
+		}
+		return nil
 	}
 
-	return buf.Save()
+	if err := buf.Save(); err != nil {
+		return editor.WriteFileError(path, err)
+	}
+	return nil
 }
 
 func (w *Workspace) switchBuffer(frameID uint64, buf *buffer.Buffer) (*buffer.Buffer, error) {

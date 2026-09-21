@@ -35,6 +35,11 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return e.deleteLine(frame, win, buf)
 	}
 
+	if e.pendingKey == "y" && keys == "y" {
+		e.pendingKey = ""
+		return e.yankLine(frame, win, buf)
+	}
+
 	if e.pendingKey != "" {
 		e.pendingKey = ""
 	}
@@ -43,6 +48,13 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 	case "d":
 		e.pendingKey = "d"
 		return nil
+	case "y":
+		e.pendingKey = "y"
+		return nil
+	case "p":
+		return e.pasteAfter(frame, win, buf)
+	case "P":
+		return e.pasteBefore(frame, win, buf)
 	case "x", "<Del>":
 		return e.deleteChar(frame, win, buf)
 	case "i":

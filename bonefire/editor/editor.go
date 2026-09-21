@@ -18,6 +18,7 @@ type Editor struct {
 	currentBuffer  uint64
 	insertGroup   uint64
 	pendingKey    string
+	reg           register
 
 	nextBufferID uint64
 }
