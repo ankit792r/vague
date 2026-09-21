@@ -21,6 +21,7 @@ export function EmacsFrame({
   selection,
   echo,
   commandLine,
+  position,
 }: EmacsFrameProps) {
   const statusMode = commandLine.active
     ? promptStatusMode(commandLine.kind)
@@ -40,6 +41,8 @@ export function EmacsFrame({
         bufferName={bufferName}
         modified={modified}
         mode={statusMode}
+        line={position.line}
+        column={position.column}
       />
       <CommandLine
         active={commandLine.active}

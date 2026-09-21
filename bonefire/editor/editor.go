@@ -25,6 +25,7 @@ type Editor struct {
 	visualAnchor  text.Offset
 	searchPattern string
 	searchForward bool
+	lastChange    lastChange
 	reg           register
 
 	nextBufferID uint64

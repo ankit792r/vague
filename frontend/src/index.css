@@ -158,6 +158,13 @@ button {
   white-space: nowrap;
 }
 
+.command-echo-multiline {
+  white-space: pre;
+  text-overflow: clip;
+  overflow: auto;
+  max-height: 6rem;
+}
+
 .command-echo-error {
   color: #ff6b6b;
 }

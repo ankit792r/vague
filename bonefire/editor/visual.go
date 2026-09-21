@@ -87,6 +87,10 @@ func (e *Editor) applyVisualOperator(
 		return err
 	}
 
+	if (op == opDelete || op == opChange) && to > from {
+		e.recordVisualOperatorChange(op, linewise)
+	}
+
 	e.visualAnchor = 0
 	if e.Mode != InsertMode {
 		e.Mode = NormalMode
