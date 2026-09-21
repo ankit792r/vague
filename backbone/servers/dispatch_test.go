@@ -32,13 +32,13 @@ func TestReadyPushesScratchBufferRedraw(t *testing.T) {
 	}
 	defer c.Close()
 
-	if _, err := c.FrameAttach(ctx, process.AttachParams{}); err != nil {
+	if _, err := c.UiAttach(ctx, process.UiAttachParams{}); err != nil {
 		t.Fatal(err)
 	}
 
 	readyDone := make(chan struct{})
 	go func() {
-		if _, err := c.FrameReady(ctx, process.FrameReadyParams{Height: 24, Widht: 80}); err != nil {
+		if _, err := c.UiReady(ctx, process.UiReadyParams{Height: 24, Width: 80}); err != nil {
 			t.Error(err)
 		}
 		close(readyDone)

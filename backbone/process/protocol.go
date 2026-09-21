@@ -6,27 +6,20 @@ const (
 	MethodExecute = "execute"
 
 	// MethodInput delivers keys. Notification, client to server.
-	//
-	// The server's key handling arrives with the editing model; the
-	// transport is defined here so the client does not have to change
-	// shape later.
 	MethodInput = "input"
 
 	// MethodQuit tells a client its surface is gone and it should exit.
 	// Notification, server to client.
-	//
-	// The editor decides this, not the client, because :q and :wq are
-	// ordinary commands that happen to destroy a frame.
 	MethodQuit = "quit"
 
-	// MethodAttach binds a client surface to a frame. Request.
-	MethodFrameAttach = "attach"
+	// MethodUiAttach binds a client webview to a server display frame. Request.
+	MethodUiAttach = "ui_attach"
 
-	// MethodDetach releases the frame. Request.
-	MethodFrameDetach = "detach"
+	// MethodUiDetach releases the client surface. Request.
+	MethodUiDetach = "ui_detach"
 
-	// MethodFrameReady is sent when the client is ready to receive commands.
-	MethodFrameReady = "ready"
+	// MethodUiReady is sent when the webview knows its viewport size. Request.
+	MethodUiReady = "ui_ready"
 
 	// MethodRedraw carries editor state to the client. Notification, server to client.
 	MethodRedraw = "redraw"
@@ -43,11 +36,6 @@ type QuitParams struct {
 }
 
 // ExecuteParams invokes a registered editor command.
-//
-// This is deliberately the whole RPC surface for editing. Key bindings, the
-// ex command line, macros and remote callers all name a command and pass
-// words, so adding a hardwired method per operation would just create a
-// second way to do the same thing that the other callers cannot reach.
 type ExecuteParams struct {
 	Name  string   `json:"name"`
 	Args  []string `json:"args,omitempty"`
@@ -75,27 +63,26 @@ type CommandInfo struct {
 	MaxArgs int    `json:"max_args"`
 }
 
-// AttachParams carries optional startup files for a new client surface.
-type AttachParams struct {
+// UiAttachParams carries optional startup files for a new client surface.
+type UiAttachParams struct {
 	Files   []string `json:"files,omitempty"`
 	WorkDir string   `json:"work_dir,omitempty"`
 }
 
-// Attach Request params
-type FrameReadyParams struct {
-	Height int `json:"height"`
-	Widht  int `json:"width"`
-}
-
-// Ready Result tells the client about frame and window
-type FrameReadyResult struct {
+// UiAttachResult tells the client which server frame it owns.
+type UiAttachResult struct {
 	SessionID uint64 `json:"session_id"`
 	FrameID   uint64 `json:"frame_id"`
 }
 
-// AttachResult tells the client which frame it owns and how big its grid is.
-// No content comes back here; the first redraw notification carries it.
-type AttachResult struct {
+// UiReadyParams carries the webview viewport size.
+type UiReadyParams struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+// UiReadyResult confirms the surface is sized and active.
+type UiReadyResult struct {
 	SessionID uint64 `json:"session_id"`
 	FrameID   uint64 `json:"frame_id"`
 }

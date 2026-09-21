@@ -1,4 +1,4 @@
-package frame
+package webview
 
 import (
 	"embed"
@@ -11,13 +11,13 @@ import (
 	"path"
 	"strings"
 
+	"vague/backbone/process"
+
 	"github.com/abemedia/go-webview"
 	_ "github.com/abemedia/go-webview/embedded"
-	"vague/backbone/process"
 )
 
-// Create new web view frame
-func (f *Frame) BuildWebView() error {
+func (u *UI) open() error {
 	w := webview.New(true)
 	defer w.Destroy()
 
@@ -38,7 +38,7 @@ func (f *Frame) BuildWebView() error {
 	`)
 
 	go func() {
-		for note := range f.client.Notifications() {
+		for note := range u.client.Notifications() {
 			if note.Method == process.MethodQuit {
 				w.Terminate()
 				return
@@ -50,19 +50,29 @@ func (f *Frame) BuildWebView() error {
 		}
 	}()
 
-	if err := w.Bind("hostRequest", f.HostRequest); err != nil {
-		return fmt.Errorf("Host Request Binding Failed: %w", err)
+	if err := w.Bind("hostRequest", u.HostRequest); err != nil {
+		return fmt.Errorf("host request binding: %w", err)
 	}
 
 	w.SetTitle("Vague")
 	w.SetSize(1200, 800, webview.HintNone)
-	w.Navigate("http://localhost:5173")
+
+	url := "http://localhost:5173"
+	if os.Getenv("VAGUE_DEV") != "1" {
+		addr, err := loadStaticUI()
+		if err != nil {
+			return err
+		}
+		url = "http://" + addr
+	}
+
+	w.Navigate(url)
 	w.Run()
 
 	return nil
 }
 
-//go:embed	output
+//go:embed output
 var uiOutput embed.FS
 
 func loadStaticUI() (string, error) {
@@ -71,7 +81,6 @@ func loadStaticUI() (string, error) {
 		return "", err
 	}
 
-	// Find an available local port.
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		return "", err
@@ -79,7 +88,6 @@ func loadStaticUI() (string, error) {
 
 	addr := listener.Addr().String()
 
-	// Serve embedded files.
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestPath := strings.TrimPrefix(
 			path.Clean(r.URL.Path),
@@ -90,13 +98,11 @@ func loadStaticUI() (string, error) {
 			requestPath = "index.html"
 		}
 
-		// Try requested file.
 		if _, err := fs.Stat(dist, requestPath); err == nil {
 			http.FileServer(http.FS(dist)).ServeHTTP(w, r)
 			return
 		}
 
-		// SPA fallback.
 		index, err := fs.ReadFile(dist, "index.html")
 		if err != nil {
 			http.Error(

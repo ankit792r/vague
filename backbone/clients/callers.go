@@ -29,24 +29,24 @@ func (c *Client) Raw(ctx context.Context, params process.ExecuteParams) (json.Ra
 	return result, nil
 }
 
-func (c *Client) FrameAttach(ctx context.Context, params process.AttachParams) (*process.AttachResult, error) {
-	var result process.AttachResult
+func (c *Client) UiAttach(ctx context.Context, params process.UiAttachParams) (*process.UiAttachResult, error) {
+	var result process.UiAttachResult
 
-	if err := c.call(ctx, process.MethodFrameAttach, params, &result); err != nil {
+	if err := c.call(ctx, process.MethodUiAttach, params, &result); err != nil {
 		return nil, err
 	}
 
 	return &result, nil
 }
 
-func (c *Client) FrameDetach(ctx context.Context) error {
-	return c.call(ctx, process.MethodFrameDetach, nil, nil)
+func (c *Client) UiDetach(ctx context.Context) error {
+	return c.call(ctx, process.MethodUiDetach, nil, nil)
 }
 
-func (c *Client) FrameReady(ctx context.Context, params process.FrameReadyParams) (*process.FrameReadyResult, error) {
-	var result process.FrameReadyResult
+func (c *Client) UiReady(ctx context.Context, params process.UiReadyParams) (*process.UiReadyResult, error) {
+	var result process.UiReadyResult
 
-	if err := c.call(ctx, process.MethodFrameReady, params, &result); err != nil {
+	if err := c.call(ctx, process.MethodUiReady, params, &result); err != nil {
 		return nil, err
 	}
 

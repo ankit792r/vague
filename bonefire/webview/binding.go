@@ -1,4 +1,4 @@
-package frame
+package webview
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ type HostReply struct {
 	Error  string          `json:"error,omitempty"`
 }
 
-func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) HostReply {
+func (u *UI) HostRequest(id uint64, method string, params json.RawMessage) HostReply {
 	reply := HostReply{ID: id}
 
 	switch method {
@@ -22,7 +22,7 @@ func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) Ho
 			reply.Error = err.Error()
 			return reply
 		}
-		if err := f.client.Input(p.Keys); err != nil {
+		if err := u.client.Input(p.Keys); err != nil {
 			reply.Error = err.Error()
 		}
 		return reply
@@ -33,7 +33,7 @@ func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) Ho
 			reply.Error = err.Error()
 			return reply
 		}
-		raw, err := f.client.Raw(f.ctx, p)
+		raw, err := u.client.Raw(u.ctx, p)
 		if err != nil {
 			reply.Error = err.Error()
 			return reply
@@ -41,8 +41,8 @@ func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) Ho
 		reply.Result = raw
 		return reply
 
-	case process.MethodFrameAttach:
-		res, err := f.client.FrameAttach(f.ctx, process.AttachParams{})
+	case process.MethodUiAttach:
+		res, err := u.client.UiAttach(u.ctx, process.UiAttachParams{})
 		if err != nil {
 			reply.Error = err.Error()
 			return reply
@@ -51,14 +51,14 @@ func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) Ho
 		reply.Result = result
 		return reply
 
-	case process.MethodFrameReady:
-		var p process.FrameReadyParams
+	case process.MethodUiReady:
+		var p process.UiReadyParams
 		if err := json.Unmarshal(params, &p); err != nil {
 			reply.Error = err.Error()
 			return reply
 		}
 
-		res, err := f.client.FrameReady(f.ctx, p)
+		res, err := u.client.UiReady(u.ctx, p)
 		if err != nil {
 			reply.Error = err.Error()
 			return reply
@@ -72,10 +72,4 @@ func (f *Frame) HostRequest(id uint64, method string, params json.RawMessage) Ho
 		reply.Error = fmt.Sprintf("unknown method %q", method)
 		return reply
 	}
-}
-
-func (f *Frame) IpcBinding(id uint64, method string, params json.RawMessage) {
-
-	fmt.Println(method)
-
 }

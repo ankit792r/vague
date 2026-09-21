@@ -36,8 +36,8 @@ export function useEditorView(
           }
 
           const { rows, cols } = measureEditor(el)
-          void hostRequest("ready", { height: rows, width: cols }).catch((err) => {
-            console.error("ready failed", err)
+          void hostRequest("ui_ready", { height: rows, width: cols }).catch((err) => {
+            console.error("ui_ready failed", err)
           })
         })
       }, 50)

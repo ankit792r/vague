@@ -36,26 +36,26 @@ func (s *Server) dispatchRequest(ctx context.Context, sess *session.Session, msg
 		result, err := s.handleExecute(ctx, sess, params)
 		sess.Reply(msg.ID, result, err)
 
-	case process.MethodFrameAttach:
-		var params process.AttachParams
+	case process.MethodUiAttach:
+		var params process.UiAttachParams
 		if err := msg.DecodeParams(&params); err != nil {
 			sess.Reply(msg.ID, nil, err)
 			return
 		}
-		result, err := s.handleFrameAttach(ctx, sess, params)
+		result, err := s.handleUiAttach(ctx, sess, params)
 		sess.Reply(msg.ID, result, err)
 
-	case process.MethodFrameDetach:
-		err := s.handleFrameDetach(ctx, sess)
+	case process.MethodUiDetach:
+		err := s.handleUiDetach(ctx, sess)
 		sess.Reply(msg.ID, nil, err)
 
-	case process.MethodFrameReady:
-		var params process.FrameReadyParams
+	case process.MethodUiReady:
+		var params process.UiReadyParams
 		if err := msg.DecodeParams(&params); err != nil {
 			sess.Reply(msg.ID, nil, err)
 			return
 		}
-		result, err := s.handleFrameReady(ctx, sess, params)
+		result, err := s.handleUiReady(ctx, sess, params)
 		sess.Reply(msg.ID, result, err)
 
 	default:
@@ -218,10 +218,10 @@ func (s *Server) handleInput(ctx context.Context, sess *session.Session, params 
 	s.pushRedraw(ctx, sess, frameID)
 }
 
-func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, params process.AttachParams) (process.AttachResult, error) {
+func (s *Server) handleUiAttach(ctx context.Context, sess *session.Session, params process.UiAttachParams) (process.UiAttachResult, error) {
 	select {
 	case <-ctx.Done():
-		return process.AttachResult{}, ctx.Err()
+		return process.UiAttachResult{}, ctx.Err()
 	default:
 	}
 
@@ -240,22 +240,22 @@ func (s *Server) handleFrameAttach(ctx context.Context, sess *session.Session, p
 
 		ws.InvalidateFrame(frame.ID)
 
-		return process.AttachResult{
+		return process.UiAttachResult{
 			SessionID: sess.Id,
 			FrameID:   frame.ID,
 		}, nil
 	})
 	if err != nil {
-		return process.AttachResult{}, err
+		return process.UiAttachResult{}, err
 	}
 
-	attached := result.(process.AttachResult)
+	attached := result.(process.UiAttachResult)
 	sess.SetFrameID(attached.FrameID)
 
 	return attached, nil
 }
 
-func (s *Server) handleFrameDetach(ctx context.Context, sess *session.Session) error {
+func (s *Server) handleUiDetach(ctx context.Context, sess *session.Session) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -266,33 +266,33 @@ func (s *Server) handleFrameDetach(ctx context.Context, sess *session.Session) e
 	return nil
 }
 
-func (s *Server) handleFrameReady(ctx context.Context, sess *session.Session, params process.FrameReadyParams) (process.FrameReadyResult, error) {
+func (s *Server) handleUiReady(ctx context.Context, sess *session.Session, params process.UiReadyParams) (process.UiReadyResult, error) {
 	select {
 	case <-ctx.Done():
-		return process.FrameReadyResult{}, ctx.Err()
+		return process.UiReadyResult{}, ctx.Err()
 	default:
 	}
 
 	frameID := sess.FrameID()
 	if frameID == 0 {
 		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-			frame, err := ws.NewFrame(params.Height, params.Widht, "")
+			frame, err := ws.NewFrame(params.Height, params.Width, "")
 			if err != nil {
 				return nil, err
 			}
 
 			ws.InvalidateFrame(frame.ID)
 
-			return process.FrameReadyResult{
+			return process.UiReadyResult{
 				SessionID: sess.Id,
 				FrameID:   frame.ID,
 			}, nil
 		})
 		if err != nil {
-			return process.FrameReadyResult{}, err
+			return process.UiReadyResult{}, err
 		}
 
-		ready := result.(process.FrameReadyResult)
+		ready := result.(process.UiReadyResult)
 		sess.SetFrameID(ready.FrameID)
 		s.pushRedraw(ctx, sess, ready.FrameID)
 
@@ -300,19 +300,19 @@ func (s *Server) handleFrameReady(ctx context.Context, sess *session.Session, pa
 	}
 
 	_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-		if err := ws.ResizeFrame(frameID, params.Widht, params.Height); err != nil {
+		if err := ws.ResizeFrame(frameID, params.Width, params.Height); err != nil {
 			return nil, err
 		}
 		ws.InvalidateFrame(frameID)
 		return nil, nil
 	})
 	if err != nil {
-		return process.FrameReadyResult{}, err
+		return process.UiReadyResult{}, err
 	}
 
 	s.pushRedraw(ctx, sess, frameID)
 
-	return process.FrameReadyResult{
+	return process.UiReadyResult{
 		SessionID: sess.Id,
 		FrameID:   frameID,
 	}, nil
