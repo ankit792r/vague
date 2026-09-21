@@ -19,6 +19,13 @@ function commandCharFromEvent(e: KeyboardEvent): string | null {
   return null
 }
 
+function executeErrorMessage(err: unknown): string {
+  if (err instanceof Error && err.message) {
+    return err.message
+  }
+  return "Command failed"
+}
+
 export function useEditorInput(editorMode: string) {
   const [commandLine, setCommandLine] = useState<CommandLineState>(
     initialCommandLineState,
@@ -65,8 +72,11 @@ export function useEditorInput(editorMode: string) {
             .then(() => {
               cancelCommand()
             })
-            .catch(() => {
-              cancelCommand()
+            .catch((err: unknown) => {
+              syncCommand({
+                ...cmd,
+                error: executeErrorMessage(err),
+              })
             })
           return
         }

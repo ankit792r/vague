@@ -125,48 +125,55 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
 
-		path := ""
-		if len(params.Args) > 0 {
-			path = params.Args[0]
-		}
-
-		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-			_, _, buf, err := ws.FrameContext(frameID)
-			if err != nil {
-				return nil, err
-			}
-
-			if err := ws.WriteFile(frameID, path, params.Bang); err != nil {
-				return nil, editor.WriteFileError(path, err)
-			}
-
-			if err := ws.SetEcho(frameID, editor.WriteEchoMessage(buf), editor.EchoInfo); err != nil {
-				return nil, err
-			}
-
-			return editor.BufferInfo(buf, true), nil
-		})
+		path := argPath(params.Args)
+		result, err := s.executeWrite(ctx, sess, frameID, path, params.Bang)
 		if err != nil {
 			return fail(err)
 		}
-
-		s.pushRedraw(ctx, sess, frameID)
 		return result, nil
+
+	case "wq":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+
+		path := argPath(params.Args)
+		if _, err := s.executeWrite(ctx, sess, frameID, path, params.Bang); err != nil {
+			return fail(err)
+		}
+		if err := s.executeQuit(ctx, sess, frameID, false); err != nil {
+			return fail(err)
+		}
+		return map[string]any{"quit": true}, nil
+
+	case "x":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+
+		path := argPath(params.Args)
+		modified, err := s.bufferModified(ctx, frameID)
+		if err != nil {
+			return fail(err)
+		}
+		if modified {
+			if _, err := s.executeWrite(ctx, sess, frameID, path, params.Bang); err != nil {
+				return fail(err)
+			}
+		}
+		if err := s.executeQuit(ctx, sess, frameID, false); err != nil {
+			return fail(err)
+		}
+		return map[string]any{"quit": true}, nil
 
 	case "quit", "q":
 		if frameID == 0 {
 			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
 
-		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-			return nil, ws.QuitFrame(frameID, params.Bang)
-		})
-		if err != nil {
+		if err := s.executeQuit(ctx, sess, frameID, params.Bang); err != nil {
 			return fail(err)
 		}
-
-		sess.SetFrameID(0)
-		sess.Notify(process.MethodQuit, process.QuitParams{FrameID: frameID})
 
 		return map[string]any{"quit": true}, nil
 
@@ -332,6 +339,65 @@ func (s *Server) pushRedraw(ctx context.Context, sess *session.Session, frameID 
 	}
 
 	sess.Notify(process.MethodRedraw, result.(process.Redraw))
+}
+
+func argPath(args []string) string {
+	if len(args) > 0 {
+		return args[0]
+	}
+	return ""
+}
+
+func (s *Server) bufferModified(ctx context.Context, frameID uint64) (bool, error) {
+	result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+		_, _, buf, err := ws.FrameContext(frameID)
+		if err != nil {
+			return nil, err
+		}
+		return buf.Modified(), nil
+	})
+	if err != nil {
+		return false, err
+	}
+	return result.(bool), nil
+}
+
+func (s *Server) executeWrite(ctx context.Context, sess *session.Session, frameID uint64, path string, bang bool) (any, error) {
+	result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+		_, _, buf, err := ws.FrameContext(frameID)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := ws.WriteFile(frameID, path, bang); err != nil {
+			return nil, editor.WriteFileError(path, err)
+		}
+
+		if err := ws.SetEcho(frameID, editor.WriteEchoMessage(buf), editor.EchoInfo); err != nil {
+			return nil, err
+		}
+
+		return editor.BufferInfo(buf, true), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	s.pushRedraw(ctx, sess, frameID)
+	return result, nil
+}
+
+func (s *Server) executeQuit(ctx context.Context, sess *session.Session, frameID uint64, bang bool) error {
+	_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+		return nil, ws.QuitFrame(frameID, bang)
+	})
+	if err != nil {
+		return err
+	}
+
+	sess.SetFrameID(0)
+	sess.Notify(process.MethodQuit, process.QuitParams{FrameID: frameID})
+	return nil
 }
 
 func (s *Server) pushEcho(ctx context.Context, sess *session.Session, frameID uint64, message, kind string) {
