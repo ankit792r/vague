@@ -77,7 +77,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `:substitute` `:s` ranges + flags `g` `c` `i` `I`
 - [x] `:%s` whole buffer; `:5,10s` range; `:'<,'>s` visual range
 - [x] `:global` `:g` / `:v`
-- [ ] `:normal` `:norm` execute keys on range
+- [x] `:normal` `:norm` execute keys on range
 - [ ] `:read` `:r` insert file or output
 - [ ] `:write` ranges / `:w >>` append
 - [ ] `:edit` no-arg reload; `:find` `:sf` path search
