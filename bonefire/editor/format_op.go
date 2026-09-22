@@ -13,6 +13,13 @@ import (
 
 const defaultTextWidth = 78
 
+func (e *Editor) formatWidthFor(win *window.Window) int {
+	if win != nil && win.WindowOptions.Display.TextWidth > 0 {
+		return win.WindowOptions.Display.TextWidth
+	}
+	return defaultTextWidth
+}
+
 func (e *Editor) formatRange(
 	frame *frame.Frame,
 	win *window.Window,
@@ -26,7 +33,7 @@ func (e *Editor) formatRange(
 	}
 
 	chunk := buf.Text.Slice(from, to)
-	formatted := formatParagraphBytes(chunk, defaultTextWidth)
+	formatted := formatParagraphBytes(chunk, e.formatWidthFor(win))
 	if bytes.Equal(chunk, formatted) {
 		frame.Dirty = true
 		return nil
