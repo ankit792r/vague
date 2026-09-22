@@ -15,6 +15,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - `/` `?` `n` `N`; current-match highlight on redraw
 - Open / save / quit; `:e` `:e!` `:w` `:q` `:wq` `:x`; buffers `:b` `:bn` `:bp` `:buffers`
 - `:goto` / `:123`; `:wrap` `:number` and `:set` aliases; `:only` placeholder echo
+- Search patterns (`\m` `\M` `\v` `\V` subset); `:set` ignorecase/smartcase/hlsearch/incsearch/wrapscan; hlsearch + `:nohlsearch`; `:sort` / `:uniq`; `:g` / `:s` use pattern engine; search offsets (`/pat+2`, `/pat/e`); `:ta` / `:vimgrep` stubbed
 - Viewport scroll, soft wrap, optional line numbers, status line Ln/Col, echo area
 
 ---
