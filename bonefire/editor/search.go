@@ -24,7 +24,9 @@ func (e *Editor) Search(
 
 	e.endIncsearchCommit()
 	e.clearSearchContext()
-	e.searchPattern = pattern
+	pat, off := splitSearchOffset(pattern)
+	e.searchPattern = pat
+	e.searchOffset = off
 	e.searchForward = forward
 	e.nohlSearch = false
 
@@ -89,7 +91,8 @@ func (e *Editor) runSearch(
 	off := text.Offset(start)
 	endOff := text.Offset(end)
 	e.setSearchMatch(buf, off, endOff)
-	setWindowCursor(buf, win, off)
+	cursor := applySearchOffset(start, end, len(data), e.searchOffset)
+	setWindowCursor(buf, win, text.Offset(cursor))
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)
 	frame.Dirty = true
