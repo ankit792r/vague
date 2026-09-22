@@ -427,6 +427,22 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		}
 		return result, nil
 
+	case "help":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			if err := ws.SetEcho(frameID, editor.HelpReference, editor.EchoInfo); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
 	case "bnext", "bn":
 		if frameID == 0 {
 			return fail(fmt.Errorf("session is not attached to a frame"))

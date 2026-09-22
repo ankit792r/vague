@@ -70,7 +70,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `Ctrl-c` / `<Esc>` clears highlight on cancel search
 - [x] `Ctrl-r` insert register in cmdline
 - [x] Wildmenu / tab completion (`:e` paths, `:b` names, `:set` keys)
-- [ ] `:help` stub or generated key reference
+- [x] `:help` stub or generated key reference
 
 ### Ex commands
 
