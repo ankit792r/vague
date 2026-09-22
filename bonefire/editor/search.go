@@ -1,7 +1,6 @@
 package editor
 
 import (
-	"bytes"
 	"errors"
 
 	"vague/bonefire/buffer"
@@ -27,6 +26,7 @@ func (e *Editor) Search(
 	e.clearSearchContext()
 	e.searchPattern = pattern
 	e.searchForward = forward
+	e.nohlSearch = false
 
 	return e.runSearch(frame, win, buf, forward)
 }
@@ -63,30 +63,32 @@ func (e *Editor) runSearch(
 	buf *buffer.Buffer,
 	forward bool,
 ) error {
-	pat := []byte(e.searchPattern)
-	if len(pat) == 0 {
-		return ErrPatternNotFound
+	pp, err := e.parseSearchPattern(e.searchPattern)
+	if err != nil {
+		return err
 	}
 
 	data := buf.Text.Bytes()
 	at := int(windowCursor(win))
+	wrap := e.searchOpts.WrapScan
 
 	var (
-		match int
-		ok    bool
+		start, end int
+		ok         bool
 	)
 	if forward {
-		match, ok = findForward(data, pat, at)
+		start, end, ok = findPatternForward(data, pp, at, wrap)
 	} else {
-		match, ok = findBackward(data, pat, at)
+		start, end, ok = findPatternBackward(data, pp, at, wrap)
 	}
 
 	if !ok {
 		return ErrPatternNotFound
 	}
 
-	off := text.Offset(match)
-	e.setSearchMatch(buf, off, off+text.Offset(len(pat)))
+	off := text.Offset(start)
+	endOff := text.Offset(end)
+	e.setSearchMatch(buf, off, endOff)
 	setWindowCursor(buf, win, off)
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)
@@ -94,58 +96,14 @@ func (e *Editor) runSearch(
 	return nil
 }
 
-func findForward(data, pat []byte, at int) (int, bool) {
-	if len(pat) == 0 {
-		return 0, false
-	}
-	if at < 0 {
-		at = 0
-	}
-	if at > len(data) {
-		at = len(data)
-	}
-
-	for i := 0; i+len(pat) <= len(data); i++ {
-		if bytes.Equal(data[i:i+len(pat)], pat) && i > at {
-			return i, true
-		}
-	}
-
-	for i := 0; i+len(pat) <= len(data); i++ {
-		if bytes.Equal(data[i:i+len(pat)], pat) {
-			return i, true
-		}
-	}
-
-	return 0, false
+func (e *Editor) ClearNohlSearch(frame *frame.Frame) {
+	e.nohlSearch = true
+	frame.Dirty = true
 }
 
-func findBackward(data, pat []byte, at int) (int, bool) {
-	if len(pat) == 0 {
-		return 0, false
+func (e *Editor) compiledPattern() (parsedPattern, error) {
+	if e.searchPattern == "" {
+		return parsedPattern{}, ErrPatternNotFound
 	}
-	if at < 0 {
-		at = 0
-	}
-	if at > len(data) {
-		at = len(data)
-	}
-
-	best := -1
-	for i := 0; i+len(pat) <= len(data); i++ {
-		if bytes.Equal(data[i:i+len(pat)], pat) && i < at {
-			best = i
-		}
-	}
-	if best >= 0 {
-		return best, true
-	}
-
-	for i := len(data) - len(pat); i >= 0; i-- {
-		if bytes.Equal(data[i:i+len(pat)], pat) {
-			return i, true
-		}
-	}
-
-	return 0, false
+	return e.parseSearchPattern(e.searchPattern)
 }

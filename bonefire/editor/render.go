@@ -36,6 +36,7 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed
 	row, col, visible := cursorViewportPos(win.TopLine, fullView.Meta, point)
 	sel := selectionInViewport(ed, win, win.TopLine, fullView.Meta, view.Lines, buf.Text)
 	searchMatch := searchMatchInViewport(ed, buf, win.TopLine, fullView.Meta, view.Lines, buf.Text)
+	searchHighlights := searchHighlightsInViewport(ed, buf, win.TopLine, fullView.Meta, view.Lines, buf.Text)
 
 	var lineNumbers []int
 	gutterCols := 0
@@ -76,9 +77,10 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed
 			Column:  col,
 			Visible: visible,
 		},
-		Selection:   sel,
-		SearchMatch: searchMatch,
-		Mode:        modeName,
+		Selection:        sel,
+		SearchMatch:      searchMatch,
+		SearchHighlights: searchHighlights,
+		Mode:             modeName,
 		Position: process.BufferPosition{
 			Line:   bufLine,
 			Column: bufCol,

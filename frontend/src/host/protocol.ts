@@ -66,6 +66,12 @@ export type RedrawPayload = {
     start: { row: number; column: number }
     end: { row: number; column: number }
   }
+  search_highlights?: {
+    visible: boolean
+    linewise?: boolean
+    start: { row: number; column: number }
+    end: { row: number; column: number }
+  }[]
   mode: string
   position: {
     line: number
