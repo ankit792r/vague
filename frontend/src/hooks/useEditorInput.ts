@@ -30,7 +30,7 @@ function executeErrorMessage(err: unknown): string {
 }
 
 function openPrompt(kind: PromptKind): CommandLineState {
-  return { active: true, kind, text: "", error: null, historyIndex: null }
+  return { active: true, kind, text: "", error: null, historyIndex: null, pendingRegister: false }
 }
 
 async function previewSearch(kind: PromptKind, text: string) {
@@ -53,6 +53,19 @@ async function beginSearch(kind: PromptKind) {
 
 async function cancelSearchPreview() {
   await hostRequest("execute", { name: "search_cancel" })
+}
+
+async function insertRegister(cmd: CommandLineState): Promise<CommandLineState> {
+  const result = (await hostRequest("execute", { name: "register_get" })) as {
+    text?: string
+  }
+  const insert = result.text ?? ""
+  const text = cmd.text + insert
+  const next = { ...cmd, text, error: null as string | null, pendingRegister: false }
+  if (isSearchPrompt(cmd.kind)) {
+    void previewSearch(cmd.kind, text)
+  }
+  return next
 }
 
 export function useEditorInput(editorMode: string) {
@@ -97,6 +110,21 @@ export function useEditorInput(editorMode: string) {
       if (cmd.active) {
         if (keys === "<Esc>" || keys === "<C-c>" || keys === "<C-g>") {
           cancelCommand()
+          return
+        }
+
+        if (keys === "<C-r>") {
+          syncCommand({ ...cmd, pendingRegister: true })
+          return
+        }
+
+        if (cmd.pendingRegister) {
+          void insertRegister({ ...cmd, pendingRegister: false })
+            .then(syncCommand)
+            .catch((err: unknown) => {
+              console.error("register insert failed", err)
+              syncCommand({ ...cmd, pendingRegister: false })
+            })
           return
         }
 

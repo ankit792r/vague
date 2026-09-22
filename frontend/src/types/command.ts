@@ -6,6 +6,7 @@ export type CommandLineState = {
   text: string
   error: string | null
   historyIndex: number | null
+  pendingRegister: boolean
 }
 
 export function initialCommandLineState(): CommandLineState {
@@ -15,6 +16,7 @@ export function initialCommandLineState(): CommandLineState {
     text: "",
     error: null,
     historyIndex: null,
+    pendingRegister: false,
   }
 }
 

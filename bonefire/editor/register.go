@@ -38,3 +38,11 @@ func (e *Editor) registerText() ([]byte, yankKind, bool) {
 	}
 	return e.reg.text, e.reg.kind, true
 }
+
+func (e *Editor) UnnamedRegisterString() string {
+	data, _, ok := e.registerText()
+	if !ok {
+		return ""
+	}
+	return string(data)
+}
