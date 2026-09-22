@@ -93,12 +93,19 @@ func (e *Editor) RunExLine(
 		return "jump list cleared", nil
 	case "undo", "u":
 		return "", e.undoTo(frame, win, buf, false)
-	case "redo":
-		return "", e.undoTo(frame, win, buf, true)
+	case "redo", "red":
+		if err := e.undoTo(frame, win, buf, true); err != nil {
+			return "", err
+		}
+		return "redo", nil
 	case "undolist":
-		return "undolist not detailed yet", nil
-	case "later", "earlier":
-		return "", fmt.Errorf("%s not implemented", cmd.kind)
+		return e.exUndolist(buf), nil
+	case "changes":
+		return e.exChanges(buf), nil
+	case "later":
+		return "", e.exLater(frame, win, buf, cmd.args)
+	case "earlier":
+		return "", e.exEarlier(frame, win, buf, cmd.args)
 	case "checktime":
 		return "", fmt.Errorf("checktime: use workspace CheckTime")
 	case "diffsplit", "diffoff", "diffget", "diffput":
