@@ -29,6 +29,7 @@ func (e *Editor) Search(
 	e.searchOffset = off
 	e.searchForward = forward
 	e.nohlSearch = false
+	e.SetLastSearch(pat)
 
 	return e.runSearch(frame, win, buf, forward)
 }

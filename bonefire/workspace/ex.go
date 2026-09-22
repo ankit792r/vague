@@ -15,6 +15,7 @@ func (w *Workspace) RunExLine(frameID uint64, line string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	w.Editor.SetLastCommand(line)
 	f.Dirty = true
 	return echo, nil
 }
