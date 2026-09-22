@@ -37,6 +37,13 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return e.searchWord(frame, win, buf, forward, true)
 	}
 
+	if e.pendingKey == "z" && len(keys) == 1 {
+		e.pendingKey = ""
+		scrollCursorLine(win, frame, buf, rune(keys[0]))
+		frame.Dirty = true
+		return nil
+	}
+
 	if keys == "*" || keys == "#" {
 		forward := keys == "*"
 		return e.searchWord(frame, win, buf, forward, false)
@@ -118,6 +125,15 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 			line = clampInt(c-1, 0, t.LineCount()-1)
 		}
 		setWindowCursor(buf, win, moveToBufferLine(t, win, line))
+	case "H":
+		setWindowCursor(buf, win, moveToScreenLine(t, win, frame, 'H'))
+	case "M":
+		setWindowCursor(buf, win, moveToScreenLine(t, win, frame, 'M'))
+	case "L":
+		setWindowCursor(buf, win, moveToScreenLine(t, win, frame, 'L'))
+	case "z":
+		e.pendingKey = "z"
+		return nil
 	case "0":
 		setWindowCursor(buf, win, moveToLineStart(t, at))
 	case "^":
