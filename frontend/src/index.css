@@ -174,12 +174,21 @@ button {
 }
 
 .command-text {
+  position: relative;
   color: var(--fg);
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.command-input {
+  white-space: pre;
+}
+
+.command-cursor {
+  z-index: 1;
 }
 
 .command-echo {

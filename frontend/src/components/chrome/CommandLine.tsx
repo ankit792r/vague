@@ -31,8 +31,17 @@ export function CommandLine({ active, kind, text, error, echo }: CommandLineProp
       {active ? (
         <>
           <span class="command-text">
-            {promptPrefix(kind)}
-            {text}
+            <span class="command-input">
+              {promptPrefix(kind)}
+              {text}
+            </span>
+            <span
+              class="cursor-bar command-cursor"
+              style={{
+                left: `${promptPrefix(kind).length + text.length}ch`,
+              }}
+              aria-hidden="true"
+            />
           </span>
           {error ? (
             <span class="command-echo command-echo-error command-echo-after-input">
