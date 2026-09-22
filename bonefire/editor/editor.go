@@ -32,6 +32,7 @@ type Editor struct {
 	searchMatchBuf  uint64
 	searchOpts      SearchOpts
 	nohlSearch      bool
+	searchOffset    searchOffset
 
 	incsearchActive         bool
 	incsearchForward        bool
