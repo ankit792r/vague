@@ -127,7 +127,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] Local marks `a`–`z`; file marks `A`–`Z` (persist in shada)
 - [x] `` ` `` / `'` jumps to mark; `` ' `` line jump; `` `. `` last change; `` `" `` last jump
 - [x] `:marks`; mark in status when set
-- [ ] Digraphs `Ctrl-k` or `:digraphs`
+- [x] Digraphs `Ctrl-k` or `:digraphs`
 - [ ] Keyboard locale / keycode normalization (fix gaps vs Neovim)
 
 ---
