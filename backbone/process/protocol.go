@@ -144,6 +144,7 @@ type Redraw struct {
 	SearchMatch      *Selection   `json:"search_match,omitempty"`
 	SearchHighlights []Selection  `json:"search_highlights,omitempty"`
 	Mode             string       `json:"mode"`
-	Position      BufferPosition `json:"position"`
-	Echo          *StatusEcho    `json:"echo,omitempty"`
+	Position         BufferPosition `json:"position"`
+	LineMarks        string         `json:"line_marks,omitempty"`
+	Echo             *StatusEcho    `json:"echo,omitempty"`
 }

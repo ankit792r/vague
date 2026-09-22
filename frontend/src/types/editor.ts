@@ -21,6 +21,7 @@ export type EditorViewState = {
   searchMatch: EditorSearchMatch | null
   searchHighlights: EditorSearchHighlight[]
   echo: StatusEcho | null
+  lineMarks: string
 }
 
 export function initialEditorViewState(): EditorViewState {
@@ -38,6 +39,7 @@ export function initialEditorViewState(): EditorViewState {
     searchMatch: null,
     searchHighlights: [],
     echo: null,
+    lineMarks: "",
   }
 }
 
@@ -60,5 +62,6 @@ export function editorViewFromRedraw(
       ? redraw.search_highlights.filter((h) => h.visible)
       : [],
     echo: redraw.echo?.message ? redraw.echo : null,
+    lineMarks: redraw.line_marks ?? "",
   }
 }

@@ -85,6 +85,7 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed
 			Line:   bufLine,
 			Column: bufCol,
 		},
-		Echo: echo,
+		LineMarks: ed.marksOnLineLabel(buf, point.Line),
+		Echo:      echo,
 	}, true
 }
