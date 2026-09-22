@@ -12,7 +12,7 @@
   --modeline-fg: #b0b0b0;
   --minibuffer-bg: #141414;
   --border: #3a3a3b;
-  --cursorline-bg: color-mix(in srgb, var(--fg) 8%, transparent);
+  --cursorline-bg: color-mix(in srgb, #3d5a80 42%, var(--bg));
   --colorcolumn-bg: color-mix(in srgb, #6a9fb5 18%, transparent);
   --signcolumn-fg: color-mix(in srgb, var(--fg) 35%, transparent);
 }
@@ -23,7 +23,7 @@
   --modeline-bg: #3c3836;
   --modeline-fg: #a89984;
   --border: #504945;
-  --cursorline-bg: color-mix(in srgb, var(--fg) 10%, transparent);
+  --cursorline-bg: color-mix(in srgb, #458588 35%, var(--bg));
 }
 
 :root[data-theme="rose-pine"] {
@@ -32,6 +32,7 @@
   --modeline-bg: #1f1d2e;
   --modeline-fg: #908caa;
   --border: #26233a;
+  --cursorline-bg: color-mix(in srgb, #286983 38%, var(--bg));
 }
 
 * {
@@ -138,6 +139,10 @@ button {
 
 .editor-line.cursor-line {
   background: var(--cursorline-bg);
+}
+
+.editor-line.cursor-line .line-number {
+  color: color-mix(in srgb, var(--fg) 72%, var(--bg));
 }
 
 .sign-column {

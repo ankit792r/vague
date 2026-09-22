@@ -36,7 +36,7 @@ export function EditorArea({
   relativeNumber,
   gutterColumns,
   signColumn,
-  cursorLineRow,
+  cursorLineRow: _cursorLineRow,
   cursorColumn,
   cursorColumnOn,
   colorColumns,
@@ -63,10 +63,14 @@ export function EditorArea({
   return (
     <div ref={editorRef} class="editor-area" aria-label="editor">
       {(lines ?? []).map((line, index) => {
-        const lineClass =
-          paneActive && cursorLineRow === index
-            ? "editor-line cursor-line"
-            : "editor-line"
+        const showCursorLine =
+          paneActive &&
+          !hideCursor &&
+          cursor.visible &&
+          cursor.row === index
+        const lineClass = showCursorLine
+          ? "editor-line cursor-line"
+          : "editor-line"
         return (
           <div key={index} class={lineClass}>
             {signColumn ? (
