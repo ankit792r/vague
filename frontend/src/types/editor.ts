@@ -6,6 +6,9 @@ export type EditorSearchMatch = NonNullable<RedrawPayload["search_match"]>
 
 export type EditorViewState = {
   lines: string[]
+  lineNumbers: number[]
+  number: boolean
+  gutterColumns: number
   bufferName: string
   modified: boolean
   mode: string
@@ -19,6 +22,9 @@ export type EditorViewState = {
 export function initialEditorViewState(): EditorViewState {
   return {
     lines: [],
+    lineNumbers: [],
+    number: false,
+    gutterColumns: 0,
     bufferName: "*scratch*",
     modified: false,
     mode: "normal",
@@ -37,6 +43,9 @@ export function editorViewFromRedraw(
     bufferName: redraw.buffer?.name ?? "*scratch*",
     modified: redraw.buffer?.modified ?? false,
     lines: Array.isArray(redraw.lines) ? redraw.lines : [],
+    lineNumbers: Array.isArray(redraw.line_numbers) ? redraw.line_numbers : [],
+    number: redraw.number ?? false,
+    gutterColumns: redraw.gutter_columns ?? 0,
     mode: redraw.mode ?? "normal",
     position: redraw.position ?? { line: 1, column: 1 },
     cursor: redraw.cursor ?? { row: 0, column: 0, visible: false },

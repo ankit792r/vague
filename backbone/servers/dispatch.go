@@ -206,6 +206,33 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		s.pushRedraw(ctx, sess, frameID)
 		return result, nil
 
+	case "number", "nonumber":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+
+		number := params.Name == "number"
+		msg := "number off"
+		if number {
+			msg = "number on"
+		}
+
+		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			if err := ws.SetWindowNumber(frameID, number); err != nil {
+				return nil, err
+			}
+			if err := ws.SetEcho(frameID, msg, editor.EchoInfo); err != nil {
+				return nil, err
+			}
+			return map[string]any{"number": number}, nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return result, nil
+
 	case "search":
 		if frameID == 0 {
 			return fail(fmt.Errorf("session is not attached to a frame"))

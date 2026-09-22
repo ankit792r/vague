@@ -26,3 +26,8 @@ func LayoutViewForTest(t *text.Text, width, maxRows int, wrap bool) viewLayout {
 func EnsureCursorVisibleForTest(win *window.Window, frame *frame.Frame, view viewLayout, point text.Point) {
 	ensureCursorVisible(win, frame, view, point)
 }
+
+// GutterColumnsForTest exposes gutter width calculation for tests.
+func GutterColumnsForTest(lineCount int) int {
+	return gutterColumns(lineCount)
+}

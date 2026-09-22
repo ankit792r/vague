@@ -75,8 +75,25 @@ button {
 
 .editor-line {
   position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
   white-space: pre;
   min-height: 1.4em;
+}
+
+.line-number {
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 0.25ch;
+  color: color-mix(in srgb, var(--fg) 45%, transparent);
+  user-select: none;
+}
+
+.editor-line-content {
+  flex: 1;
+  min-width: 0;
+  position: relative;
 }
 
 .cursor-cell {
