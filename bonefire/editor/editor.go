@@ -30,6 +30,8 @@ type Editor struct {
 	searchMatchFrom text.Offset
 	searchMatchTo   text.Offset
 	searchMatchBuf  uint64
+	searchOpts      SearchOpts
+	nohlSearch      bool
 
 	incsearchActive         bool
 	incsearchForward        bool
@@ -72,6 +74,7 @@ func NewEditor() *Editor {
 		Buffers:      make(map[uint64]*buffer.Buffer),
 		nextBufferID: 1,
 		marks:        make(map[string]text.Offset),
+		searchOpts:   DefaultSearchOpts(),
 	}
 }
 

@@ -69,6 +69,7 @@ func (e *Editor) RunExLine(
 			if strings.HasSuffix(msg, "?") {
 				return msg, nil
 			}
+			frame.Dirty = true
 			return msg, nil
 		}
 	case "map", "nmap", "imap", "vmap":
@@ -102,6 +103,17 @@ func (e *Editor) RunExLine(
 		return "", fmt.Errorf("%s not implemented", cmd.kind)
 	case "terminal", "term":
 		return "", fmt.Errorf("terminal not implemented")
+	case "nohlsearch", "noh":
+		e.exNohlSearch(frame)
+		return "", nil
+	case "vimgrep", "vim", "lvimgrep", "lvim":
+		return e.exVimgrep(cmd.args)
+	case "ta", "tag", "tags":
+		return e.exTag(cmd.args)
+	case "sort":
+		return "", e.exSort(frame, win, buf, cmd.args, rng)
+	case "uniq":
+		return "", e.exUniq(frame, win, buf, rng)
 	default:
 		return "", fmt.Errorf("Unknown Ex command: %s", cmd.kind)
 	}

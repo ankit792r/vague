@@ -23,6 +23,24 @@ const SET_OPTIONS: Record<string, ParsedExecute["name"]> = {
   nonu: "nonumber",
   wrap: "wrap",
   nowrap: "nowrap",
+  ignorecase: "set",
+  ic: "set",
+  noignorecase: "set",
+  noic: "set",
+  smartcase: "set",
+  scs: "set",
+  nosmartcase: "set",
+  noscs: "set",
+  hlsearch: "set",
+  hls: "set",
+  nohlsearch: "set",
+  nohls: "set",
+  incsearch: "set",
+  noincsearch: "set",
+  wrapscan: "set",
+  ws: "set",
+  nowrapscan: "set",
+  nows: "set",
 }
 
 const SIMPLE_COMMANDS = new Set([
@@ -73,7 +91,9 @@ export function parseCommandLine(input: string): ParsedExecute | null {
     return { name: "goto", count: Number(line) }
   }
 
-  if (/^[%0-9.'$+\-,<>\s]*s[/\w]/.test(line) || /^[gv]/.test(line) || /^norm/.test(line)) {
+  if (/^[%0-9.'$+\-,<>\s]*s[/\w]/.test(line) || /^[gv]/.test(line) || /^norm/.test(line) ||
+    /^nohl/.test(line) || /^sort\b/.test(line) || /^uniq\b/.test(line) ||
+    /^vimgrep\b/.test(line) || /^[lt]?vi[m]?\b/.test(line) || /^(ta|tag|tags)\b/.test(line)) {
     return { name: "ex", args: [line] }
   }
 
@@ -90,6 +110,9 @@ export function parseCommandLine(input: string): ParsedExecute | null {
   if (name === "set") {
     const opt = rest.toLowerCase()
     const mapped = SET_OPTIONS[opt]
+    if (mapped === "set") {
+      return { name: "set", args: rest ? [rest] : undefined }
+    }
     if (mapped) {
       return { name: mapped }
     }

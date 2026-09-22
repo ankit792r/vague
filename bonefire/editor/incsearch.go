@@ -50,6 +50,9 @@ func (e *Editor) PreviewIncsearch(
 	if !e.incsearchActive {
 		return nil
 	}
+	if !e.searchOpts.IncSearch {
+		return nil
+	}
 
 	if pattern == "" {
 		setWindowCursor(buf, win, e.incsearchReturnCursor)
@@ -58,16 +61,26 @@ func (e *Editor) PreviewIncsearch(
 		return nil
 	}
 
+	pp, err := e.parseSearchPattern(pattern)
+	if err != nil {
+		e.ClearSearchMatch()
+		setWindowCursor(buf, win, e.incsearchReturnCursor)
+		frame.Dirty = true
+		return nil
+	}
+
 	data := buf.Text.Bytes()
 	at := int(e.incsearchReturnCursor)
+	wrap := e.searchOpts.WrapScan
+
 	var (
-		match int
-		ok    bool
+		start, end int
+		ok         bool
 	)
 	if e.incsearchForward {
-		match, ok = findForward(data, []byte(pattern), at)
+		start, end, ok = findPatternForward(data, pp, at, wrap)
 	} else {
-		match, ok = findBackward(data, []byte(pattern), at)
+		start, end, ok = findPatternBackward(data, pp, at, wrap)
 	}
 
 	if !ok {
@@ -77,8 +90,8 @@ func (e *Editor) PreviewIncsearch(
 		return nil
 	}
 
-	off := text.Offset(match)
-	e.setSearchMatch(buf, off, off+text.Offset(len(pattern)))
+	off := text.Offset(start)
+	e.setSearchMatch(buf, off, text.Offset(end))
 	setWindowCursor(buf, win, off)
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)

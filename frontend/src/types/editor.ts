@@ -3,6 +3,9 @@ import type { RedrawPayload, StatusEcho } from "../host/protocol"
 export type EditorCursor = RedrawPayload["cursor"]
 export type EditorSelection = NonNullable<RedrawPayload["selection"]>
 export type EditorSearchMatch = NonNullable<RedrawPayload["search_match"]>
+export type EditorSearchHighlight = NonNullable<
+  RedrawPayload["search_highlights"]
+>[number]
 
 export type EditorViewState = {
   lines: string[]
@@ -16,6 +19,7 @@ export type EditorViewState = {
   cursor: EditorCursor
   selection: EditorSelection | null
   searchMatch: EditorSearchMatch | null
+  searchHighlights: EditorSearchHighlight[]
   echo: StatusEcho | null
 }
 
@@ -32,6 +36,7 @@ export function initialEditorViewState(): EditorViewState {
     cursor: { row: 0, column: 0, visible: true },
     selection: null,
     searchMatch: null,
+    searchHighlights: [],
     echo: null,
   }
 }
@@ -51,6 +56,9 @@ export function editorViewFromRedraw(
     cursor: redraw.cursor ?? { row: 0, column: 0, visible: false },
     selection: redraw.selection?.visible ? redraw.selection : null,
     searchMatch: redraw.search_match?.visible ? redraw.search_match : null,
+    searchHighlights: Array.isArray(redraw.search_highlights)
+      ? redraw.search_highlights.filter((h) => h.visible)
+      : [],
     echo: redraw.echo?.message ? redraw.echo : null,
   }
 }

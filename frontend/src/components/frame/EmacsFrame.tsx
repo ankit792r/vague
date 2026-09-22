@@ -20,6 +20,7 @@ export function EmacsFrame({
   cursor,
   selection,
   searchMatch,
+  searchHighlights,
   lineNumbers,
   number,
   gutterColumns,
@@ -43,6 +44,7 @@ export function EmacsFrame({
         cursor={cursor}
         selection={selection}
         searchMatch={searchMatch}
+        searchHighlights={searchHighlights}
         hideCursor={commandLine.active}
       />
       <StatusLine

@@ -16,6 +16,11 @@ var exCommandNames = []string{
 
 var setOptionNames = []string{
 	"number", "nu", "nonumber", "nonu", "wrap", "nowrap",
+	"ignorecase", "ic", "noignorecase", "noic",
+	"smartcase", "scs", "nosmartcase", "noscs",
+	"hlsearch", "hls", "nohlsearch", "nohls",
+	"incsearch", "noincsearch",
+	"wrapscan", "ws", "nowrapscan", "nows",
 }
 
 func (w *Workspace) Complete(frameID uint64, kind, prefix string) ([]string, error) {

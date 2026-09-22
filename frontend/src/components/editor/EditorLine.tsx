@@ -1,5 +1,5 @@
 import { Fragment, type JSX } from "preact/jsx-runtime"
-import type { EditorCursor, EditorSelection } from "../../types/editor"
+import type { EditorCursor, EditorSearchHighlight, EditorSelection } from "../../types/editor"
 
 export type CursorShape = "block" | "bar"
 
@@ -10,6 +10,7 @@ type EditorLineProps = {
   cursorShape: CursorShape
   selection: EditorSelection | null
   searchMatch: EditorSelection | null
+  searchHighlights: EditorSearchHighlight[]
 }
 
 function highlightSpanForRow(
@@ -43,16 +44,46 @@ function highlightSpanForRow(
   return { start, end }
 }
 
+function highlightSpansForRow(
+  row: number,
+  lineLen: number,
+  highlights: EditorSearchHighlight[],
+): { start: number; end: number }[] {
+  const spans: { start: number; end: number }[] = []
+  for (const highlight of highlights) {
+    const span = highlightSpanForRow(row, lineLen, highlight)
+    if (span) {
+      spans.push(span)
+    }
+  }
+  return spans
+}
+
+function overlapsSpan(
+  colStart: number,
+  colEnd: number,
+  span: { start: number; end: number },
+): boolean {
+  return colEnd > span.start && colStart < span.end
+}
+
 function cellClassName(
   colStart: number,
   colEnd: number,
   selection: { start: number; end: number } | null,
   searchMatch: { start: number; end: number } | null,
+  searchHighlights: { start: number; end: number }[],
   atCursor: boolean,
 ): string | undefined {
   const parts: string[] = []
 
-  if (searchMatch && colEnd > searchMatch.start && colStart < searchMatch.end) {
+  for (const span of searchHighlights) {
+    if (overlapsSpan(colStart, colEnd, span)) {
+      parts.push("search-hl")
+      break
+    }
+  }
+  if (searchMatch && overlapsSpan(colStart, colEnd, searchMatch)) {
     parts.push("search-match")
   }
   if (selection && colEnd > selection.start && colStart < selection.end) {
@@ -88,6 +119,7 @@ function renderLineText(
   display: string,
   selection: { start: number; end: number } | null,
   searchMatch: { start: number; end: number } | null,
+  searchHighlights: { start: number; end: number }[],
   showBlockCursor: boolean,
   cursorColumn: number,
 ): JSX.Element {
@@ -111,6 +143,7 @@ function renderLineText(
       col + 1,
       selection,
       searchMatch,
+      searchHighlights,
       showBlockCursor && cursorColumn === col,
     )
 
@@ -128,6 +161,7 @@ function renderLineText(
       display.length,
       selection,
       searchMatch,
+      searchHighlights,
       true,
     )
     nodes.push(
@@ -147,10 +181,12 @@ export function EditorLine({
   cursorShape,
   selection,
   searchMatch,
+  searchHighlights,
 }: EditorLineProps) {
   const display = line === "" ? "\u00a0" : line
   const selectionSpan = highlightSpanForRow(row, display.length, selection)
   const searchSpan = highlightSpanForRow(row, display.length, searchMatch)
+  const hlSpans = highlightSpansForRow(row, display.length, searchHighlights)
   const showCursor = cursor?.visible && cursor.row === row
   const cursorCol = showCursor
     ? Math.min(Math.max(0, cursor.column), display.length)
@@ -159,7 +195,7 @@ export function EditorLine({
   const useBarOverlay = cursorShape === "bar" && showCursor
   const useBlockCursor = showCursor && !useBarOverlay
 
-  if (!selectionSpan && !searchSpan && !showCursor) {
+  if (!selectionSpan && !searchSpan && hlSpans.length === 0 && !showCursor) {
     return <>{display}</>
   }
 
@@ -167,6 +203,7 @@ export function EditorLine({
     display,
     selectionSpan,
     searchSpan,
+    hlSpans,
     useBlockCursor,
     cursorCol,
   )

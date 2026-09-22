@@ -266,6 +266,26 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 			params.Name = "wrap"
 		case "nowrap":
 			params.Name = "nowrap"
+		case "ignorecase", "ic", "noignorecase", "noic",
+			"smartcase", "scs", "nosmartcase", "noscs",
+			"hlsearch", "hls", "nohlsearch", "nohls",
+			"incsearch", "noincsearch",
+			"wrapscan", "ws", "nowrapscan", "nows":
+			_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+				msg, err := ws.RunExLine(frameID, "set "+opt)
+				if err != nil {
+					return nil, err
+				}
+				if msg != "" {
+					_ = ws.SetEcho(frameID, msg, editor.EchoInfo)
+				}
+				return nil, nil
+			})
+			if err != nil {
+				return fail(err)
+			}
+			s.pushRedraw(ctx, sess, frameID)
+			return nil, nil
 		default:
 			return fail(fmt.Errorf("Unknown option: %s", opt))
 		}

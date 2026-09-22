@@ -120,6 +120,10 @@ button {
   outline-offset: -1px;
 }
 
+.search-hl {
+  background: color-mix(in srgb, #c9a227 22%, transparent);
+}
+
 .visual-selection.search-match {
   background: color-mix(in srgb, #c9a227 55%, transparent);
 }
