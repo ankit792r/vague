@@ -236,3 +236,32 @@ func lastBufferChar(t *text.Text) text.Offset {
 
 	return t.OffsetOf(text.Point{Line: lastLine, Col: lastColumn(line)})
 }
+
+func moveGe(t *text.Text, off text.Offset, count int) text.Offset {
+	for i := 0; i < count; i++ {
+		next := geOnce(t, off)
+		if next == off {
+			break
+		}
+		off = next
+	}
+	return off
+}
+
+func geOnce(t *text.Text, off text.Offset) text.Offset {
+	if off <= 0 {
+		return 0
+	}
+
+	at := back(t, off)
+	for at > 0 {
+		cls, _, _ := charAt(t, at)
+		if cls != wcWhitespace {
+			break
+		}
+		at = back(t, at)
+	}
+
+	start := wordStartAt(t, at)
+	return moveWordEndOnce(t, start)
+}

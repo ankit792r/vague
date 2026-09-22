@@ -90,3 +90,79 @@ func scrollCursorLine(win *window.Window, fm *frame.Frame, buf *buffer.Buffer, s
 		win.TopLine = maxTop
 	}
 }
+
+func moveG0(t *text.Text, win *window.Window, fm *frame.Frame, off text.Offset) text.Offset {
+	view := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions.Number), 0, win.WindowOptions.Wrap)
+	point := t.PointOf(off)
+	row, _, ok := visualRowAt(view.Meta, point)
+	if !ok {
+		return off
+	}
+	vl := view.Meta[row]
+	return t.OffsetOf(text.Point{Line: vl.BufferLine, Col: vl.StartCol})
+}
+
+func moveGScreenEnd(t *text.Text, win *window.Window, fm *frame.Frame, off text.Offset) text.Offset {
+	view := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions.Number), 0, win.WindowOptions.Wrap)
+	point := t.PointOf(off)
+	row, _, ok := visualRowAt(view.Meta, point)
+	if !ok {
+		return off
+	}
+	vl := view.Meta[row]
+	col := vl.EndCol - 1
+	if col < vl.StartCol {
+		col = vl.StartCol
+	}
+	return t.OffsetOf(text.Point{Line: vl.BufferLine, Col: col})
+}
+
+func moveGm(t *text.Text, win *window.Window, fm *frame.Frame, off text.Offset) text.Offset {
+	view := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions.Number), 0, win.WindowOptions.Wrap)
+	point := t.PointOf(off)
+	row, _, ok := visualRowAt(view.Meta, point)
+	if !ok {
+		return off
+	}
+	vl := view.Meta[row]
+	segLen := vl.EndCol - vl.StartCol
+	col := vl.StartCol
+	if segLen > 0 {
+		col = vl.StartCol + segLen/2
+	}
+	return t.OffsetOf(text.Point{Line: vl.BufferLine, Col: col})
+}
+
+func pageScrollLines(fm *frame.Frame, half bool) int {
+	height := fm.Height
+	if height < 1 {
+		height = frame.DefaultHeight
+	}
+	if half {
+		n := height / 2
+		if n < 1 {
+			return 1
+		}
+		return n
+	}
+	n := height - 2
+	if n < 1 {
+		return 1
+	}
+	return n
+}
+
+func pageScrollVertical(
+	t *text.Text,
+	win *window.Window,
+	fm *frame.Frame,
+	off text.Offset,
+	forward bool,
+	half bool,
+) text.Offset {
+	delta := pageScrollLines(fm, half)
+	if !forward {
+		delta = -delta
+	}
+	return moveVerticalForWindow(t, win, fm, off, delta, false)
+}
