@@ -11,6 +11,8 @@ func (e *Editor) HandleInput(frame *frame.Frame, win *window.Window, buf *buffer
 	switch e.Mode {
 	case InsertMode:
 		return e.insertKey(frame, win, buf, keys)
+	case ReplaceMode:
+		return e.replaceKey(frame, win, buf, keys)
 	case VisualMode, VisualLineMode:
 		return e.visualKey(frame, win, buf, keys)
 	default:

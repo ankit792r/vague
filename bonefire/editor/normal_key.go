@@ -61,6 +61,11 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return nil
 	}
 
+	if e.pendingKey == "r" && len(keys) == 1 && keys[0] != '<' {
+		e.pendingKey = ""
+		return e.replaceChar(frame, win, buf, keys)
+	}
+
 	if e.pendingKey == "z" && len(keys) == 1 {
 		e.pendingKey = ""
 		scrollCursorLine(win, frame, buf, rune(keys[0]))
@@ -91,6 +96,11 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 
 	if e.pendingOp != opNone {
 		op := e.pendingOp
+		if _, _, ok := textObjectRange(t, win, keys); ok {
+			e.clearPendingOp()
+			count := e.takeCount()
+			return e.applyOperatorTextObject(frame, win, buf, op, keys, count)
+		}
 		if motion, ok := motionForKey(keys); ok {
 			e.clearPendingOp()
 			count := e.takeCount()
@@ -116,6 +126,25 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return nil
 	case "D":
 		return e.applyOperatorMotion(frame, win, buf, opDelete, motionToEOL, e.takeCount())
+	case "C":
+		return e.applyOperatorMotion(frame, win, buf, opChange, motionToEOL, e.takeCount())
+	case "S":
+		return e.applyOperatorMotion(frame, win, buf, opChange, motionLine, e.takeCount())
+	case "s":
+		return e.changeChars(frame, win, buf, e.takeCount())
+	case "r":
+		e.pendingKey = "r"
+		return nil
+	case "R":
+		return e.enterReplace(frame, win, buf, at)
+	case "~":
+		return e.toggleCase(frame, win, buf, e.takeCount())
+	case ">":
+		return e.indentLines(frame, win, buf, 1, e.takeCount())
+	case "<":
+		return e.indentLines(frame, win, buf, -1, e.takeCount())
+	case "=":
+		return e.indentLines(frame, win, buf, 1, e.takeCount())
 	case "p":
 		return e.pasteAfter(frame, win, buf)
 	case "P":
