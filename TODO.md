@@ -117,8 +117,8 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `"-` small delete; `":` `.` last command; `"/` last search
 - [x] `"*` `"+` system clipboard (X11/Wayland/macOS/Windows)
 - [x] `"_` black hole; `"=` expression register (later)
-- [ ] `:reg` display; getreg/setreg API for plugins
-- [ ] OSC 52 for SSH/remote clipboard (optional)
+- [x] `:reg` display; getreg/setreg API for plugins
+- [x] OSC 52 for SSH/remote clipboard (optional)
 
 ---
 
