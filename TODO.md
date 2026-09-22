@@ -28,11 +28,11 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `{` `}` `(` `)` paragraph / sentence / block (simple heuristics OK first)
 - [x] `%` matching bracket; `[` `]` prev/next section
 - [x] `*` `#` search word forward/back; `g*` `g#`
-- [ ] `H` `M` `L` screen lines; `zt` `zz` `zb` scroll cursor line
-- [ ] `Ctrl-o` / `Ctrl-i` jump list
-- [ ] `ge` `gE` end of word variants
-- [ ] `Ctrl-f` `Ctrl-b` `Ctrl-d` `Ctrl-u` page scroll
-- [ ] `g0` `g$` `gm` screen line boundaries (when wrapped)
+- [x] `H` `M` `L` screen lines; `zt` `zz` `zb` scroll cursor line
+- [x] `Ctrl-o` / `Ctrl-i` jump list
+- [x] `ge` `gE` end of word variants
+- [x] `Ctrl-f` `Ctrl-b` `Ctrl-d` `Ctrl-u` page scroll
+- [x] `g0` `g$` `gm` screen line boundaries (when wrapped)
 
 ### Operators & changes
 

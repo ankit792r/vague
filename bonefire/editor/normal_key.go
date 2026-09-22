@@ -17,6 +17,7 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 
 	t := buf.Text
 	at := windowCursor(win)
+	motionFrom := at
 
 	if e.pendingKey == "g" && keys == "g" {
 		e.pendingKey = ""
@@ -35,6 +36,29 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		e.pendingKey = ""
 		forward := keys == "*"
 		return e.searchWord(frame, win, buf, forward, true)
+	}
+
+	if e.pendingKey == "g" {
+		e.pendingKey = ""
+		switch keys {
+		case "e":
+			setWindowCursor(buf, win, moveGe(t, at, e.takeCount()))
+		case "E":
+			setWindowCursor(buf, win, moveGe(t, at, e.takeCount()))
+		case "0":
+			setWindowCursor(buf, win, moveG0(t, win, frame, at))
+		case "$":
+			setWindowCursor(buf, win, moveGScreenEnd(t, win, frame, at))
+		case "m":
+			setWindowCursor(buf, win, moveGm(t, win, frame, at))
+		default:
+			return nil
+		}
+		e.finishMotionJump(buf, win, motionFrom)
+		view := layoutViewForWindow(t, win, frame)
+		rememberColumn(buf, win, view)
+		frame.Dirty = true
+		return nil
 	}
 
 	if e.pendingKey == "z" && len(keys) == 1 {
@@ -158,6 +182,18 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return e.undoTo(frame, win, buf, false)
 	case "<C-r>":
 		return e.undoTo(frame, win, buf, true)
+	case "<C-o>":
+		return e.jumpOlder(frame, win, buf)
+	case "<C-i>":
+		return e.jumpNewer(frame, win, buf)
+	case "<C-f>":
+		setWindowCursor(buf, win, pageScrollVertical(t, win, frame, at, true, false))
+	case "<C-b>":
+		setWindowCursor(buf, win, pageScrollVertical(t, win, frame, at, false, false))
+	case "<C-d>":
+		setWindowCursor(buf, win, pageScrollVertical(t, win, frame, at, true, true))
+	case "<C-u>":
+		setWindowCursor(buf, win, pageScrollVertical(t, win, frame, at, false, true))
 	case "h", "<Left>":
 		setWindowCursor(buf, win, moveLeft(t, at, e.takeCount()))
 	case "w":
@@ -213,6 +249,7 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return nil
 	}
 
+	e.finishMotionJump(buf, win, motionFrom)
 	view := layoutViewForWindow(t, win, frame)
 	rememberColumn(buf, win, view)
 	frame.Dirty = true

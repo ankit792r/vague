@@ -36,6 +36,10 @@ type Editor struct {
 	lastCharFindKind charFindKind
 	lastCharFindRune rune
 
+	jumps   []text.Offset
+	jumpPos int
+	jumpNav bool
+
 	nextBufferID uint64
 }
 
