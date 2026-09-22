@@ -25,6 +25,8 @@ type Workspace struct {
 	pendingCtrlW map[uint64]bool
 	ArgList      []string
 	ArgIndex     int
+
+	pendingConfirm *confirmPrompt
 }
 
 func New() *Workspace {
@@ -108,7 +110,12 @@ func (w *Workspace) resolvePath(frameID uint64, path string) (string, error) {
 		return "", errNotFound("frame", frameID)
 	}
 
-	return resolvePathAgainst(frame.WorkDir, path)
+	base := frame.WorkDir
+	if win, ok := w.Windows[frame.ActiveWindowID]; ok && win.LocalWorkDir != "" {
+		base = win.LocalWorkDir
+	}
+
+	return resolvePathAgainst(base, path)
 }
 
 func newWindow(id, frameID, bufferID uint64) *window.Window {
@@ -288,7 +295,7 @@ func (w *Workspace) CancelIncsearch(frameID uint64) error {
 	return nil
 }
 
-func (w *Workspace) SwitchToNextBuffer(frameID uint64) (*buffer.Buffer, error) {
+func (w *Workspace) SwitchToNextBuffer(frameID uint64, force bool) (*buffer.Buffer, error) {
 	_, _, buf, err := w.FrameContext(frameID)
 	if err != nil {
 		return nil, err
@@ -299,10 +306,16 @@ func (w *Workspace) SwitchToNextBuffer(frameID uint64) (*buffer.Buffer, error) {
 		return nil, editor.ErrBufferNotFound
 	}
 
-	return w.switchBuffer(frameID, next)
+	var switched *buffer.Buffer
+	err = w.withBufferLeave(frameID, force, func() error {
+		var err error
+		switched, err = w.switchBuffer(frameID, next)
+		return err
+	})
+	return switched, err
 }
 
-func (w *Workspace) SwitchToPrevBuffer(frameID uint64) (*buffer.Buffer, error) {
+func (w *Workspace) SwitchToPrevBuffer(frameID uint64, force bool) (*buffer.Buffer, error) {
 	_, _, buf, err := w.FrameContext(frameID)
 	if err != nil {
 		return nil, err
@@ -313,16 +326,28 @@ func (w *Workspace) SwitchToPrevBuffer(frameID uint64) (*buffer.Buffer, error) {
 		return nil, editor.ErrBufferNotFound
 	}
 
-	return w.switchBuffer(frameID, prev)
+	var switched *buffer.Buffer
+	err = w.withBufferLeave(frameID, force, func() error {
+		var err error
+		switched, err = w.switchBuffer(frameID, prev)
+		return err
+	})
+	return switched, err
 }
 
-func (w *Workspace) SwitchToBuffer(frameID uint64, spec string) (*buffer.Buffer, error) {
+func (w *Workspace) SwitchToBuffer(frameID uint64, spec string, force bool) (*buffer.Buffer, error) {
 	target, err := w.Editor.ResolveBuffer(spec)
 	if err != nil {
 		return nil, err
 	}
 
-	return w.switchBuffer(frameID, target)
+	var switched *buffer.Buffer
+	err = w.withBufferLeave(frameID, force, func() error {
+		var err error
+		switched, err = w.switchBuffer(frameID, target)
+		return err
+	})
+	return switched, err
 }
 
 func (w *Workspace) BufferListMessage(frameID uint64) (string, error) {
@@ -349,22 +374,27 @@ func (w *Workspace) OpenFile(frameID uint64, path string, force bool) (*buffer.B
 		return nil, err
 	}
 
-	if existing := w.Editor.FindBuffer(abs); existing != nil {
-		if force {
-			if err := existing.Reload(); err != nil {
-				return nil, err
+	var result *buffer.Buffer
+	err = w.withBufferLeave(frameID, force, func() error {
+		if existing := w.Editor.FindBuffer(abs); existing != nil {
+			if force {
+				if err := existing.Reload(); err != nil {
+					return err
+				}
 			}
+			var err error
+			result, err = w.switchBuffer(frameID, existing)
+			return err
 		}
 
-		return w.switchBuffer(frameID, existing)
-	}
-
-	buf, err := w.Editor.LoadBufferPathAt("", abs)
-	if err != nil {
-		return nil, err
-	}
-
-	return w.switchBuffer(frameID, buf)
+		buf, err := w.Editor.LoadBufferPathAt("", abs)
+		if err != nil {
+			return err
+		}
+		result, err = w.switchBuffer(frameID, buf)
+		return err
+	})
+	return result, err
 }
 
 func (w *Workspace) WriteFile(frameID uint64, path string, force bool) error {
@@ -423,6 +453,8 @@ func (w *Workspace) switchBuffer(frameID uint64, buf *buffer.Buffer) (*buffer.Bu
 	w.Editor.SetCurrentBuffer(buf.ID)
 	w.Editor.ClearSearchMatch()
 	w.Editor.SetMode(editor.NormalMode)
+	w.maybeAutoread(frame.ID, buf)
+	applyModeline(win, buf)
 	frame.Dirty = true
 
 	return buf, nil
