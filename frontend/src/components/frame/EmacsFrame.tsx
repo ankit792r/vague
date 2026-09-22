@@ -1,4 +1,5 @@
 import type { RefObject } from "preact"
+import { useEffect } from "preact/hooks"
 import { CommandLine } from "../chrome/CommandLine"
 import { StatusLine } from "../chrome/StatusLine"
 import { TabLine } from "../chrome/TabLine"
@@ -24,7 +25,9 @@ export function EmacsFrame({
   searchHighlights,
   lineNumbers,
   number,
+  relativeNumber,
   gutterColumns,
+  signColumn,
   echo,
   commandLine,
   position,
@@ -33,42 +36,68 @@ export function EmacsFrame({
   tabs,
   columns,
   rows,
+  theme,
+  showCmd,
+  statusLine,
+  showMode,
+  ruler,
 }: EmacsFrameProps) {
   const statusMode = commandLine.active
     ? promptStatusMode(commandLine.kind)
     : mode
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme || "vague"
+  }, [theme])
+
+  const fallbackPane = {
+    windowId: 0,
+    x: 0,
+    y: 0,
+    columns,
+    rows,
+    active: true,
+    lines,
+    lineNumbers,
+    number,
+    relativeNumber,
+    gutterColumns,
+    signColumn,
+    list: false,
+    cursorLineRow: -1,
+    cursorColumn: cursor.column,
+    cursorColumnOn: false,
+    colorColumns: [] as number[],
+    bufferName,
+    modified,
+    mode,
+    position,
+    cursor,
+    selection,
+    searchMatch,
+    searchHighlights,
+    lineMarks,
+    statusLine,
+    showMode,
+    ruler,
+  }
 
   return (
     <div class="emacs-frame">
       <TabLine tabs={tabs} />
       <SplitEditor
         editorRef={editorRef}
-        panes={panes.length > 0 ? panes : [{
-          windowId: 0,
-          x: 0,
-          y: 0,
-          columns,
-          rows,
-          active: true,
-          lines,
-          lineNumbers,
-          number,
-          gutterColumns,
-          bufferName,
-          modified,
-          mode,
-          position,
-          cursor,
-          selection,
-          searchMatch,
-          searchHighlights,
-          lineMarks,
-        }]}
+        panes={panes.length > 0 ? panes : [fallbackPane]}
         columns={columns}
         rows={rows}
         hideCursor={commandLine.active}
         mode={mode}
       />
+      {showCmd ? (
+        <div class="showcmd-line" aria-live="polite">
+          {showCmd}
+        </div>
+      ) : null}
       <StatusLine
         bufferName={bufferName}
         modified={modified}
@@ -76,6 +105,9 @@ export function EmacsFrame({
         line={position.line}
         column={position.column}
         lineMarks={lineMarks}
+        statusLine={statusLine}
+        showMode={showMode}
+        ruler={ruler}
       />
       <CommandLine
         active={commandLine.active}

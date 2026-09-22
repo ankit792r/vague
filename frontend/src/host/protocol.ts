@@ -82,6 +82,8 @@ export type RedrawPayload = {
   panes?: RedrawPanePayload[]
   tabs?: { label: string; active?: boolean }[]
   active_tab?: number
+  theme?: string
+  showcmd?: string
 }
 
 export type RedrawPanePayload = {
@@ -104,6 +106,18 @@ export type RedrawPanePayload = {
   mode: string
   position: RedrawPayload["position"]
   line_marks?: string
+  relative_number?: boolean
+  list?: boolean
+  cursor_line_row?: number
+  cursor_column?: number
+  cursor_column_on?: boolean
+  color_columns?: number[]
+  sign_column?: boolean
+  showcmd?: string
+  showmode?: boolean
+  ruler?: boolean
+  statusline?: string
+  theme?: string
 }
 
 export type HostEventMap = {

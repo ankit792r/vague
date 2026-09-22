@@ -17,7 +17,14 @@ export type EditorPaneState = {
   lines: string[]
   lineNumbers: number[]
   number: boolean
+  relativeNumber: boolean
   gutterColumns: number
+  signColumn: boolean
+  list: boolean
+  cursorLineRow: number
+  cursorColumn: number
+  cursorColumnOn: boolean
+  colorColumns: number[]
   bufferName: string
   modified: boolean
   mode: string
@@ -27,6 +34,9 @@ export type EditorPaneState = {
   searchMatch: EditorSearchMatch | null
   searchHighlights: EditorSearchHighlight[]
   lineMarks: string
+  statusLine: string
+  showMode: boolean
+  ruler: boolean
 }
 
 export type EditorTabState = {
@@ -43,7 +53,9 @@ export type EditorViewState = {
   lines: string[]
   lineNumbers: number[]
   number: boolean
+  relativeNumber: boolean
   gutterColumns: number
+  signColumn: boolean
   bufferName: string
   modified: boolean
   mode: string
@@ -54,6 +66,11 @@ export type EditorViewState = {
   searchHighlights: EditorSearchHighlight[]
   echo: StatusEcho | null
   lineMarks: string
+  theme: string
+  showCmd: string
+  statusLine: string
+  showMode: boolean
+  ruler: boolean
 }
 
 export function initialEditorViewState(): EditorViewState {
@@ -66,7 +83,9 @@ export function initialEditorViewState(): EditorViewState {
     lines: [],
     lineNumbers: [],
     number: false,
+    relativeNumber: false,
     gutterColumns: 0,
+    signColumn: false,
     bufferName: "*scratch*",
     modified: false,
     mode: "normal",
@@ -77,6 +96,11 @@ export function initialEditorViewState(): EditorViewState {
     searchHighlights: [],
     echo: null,
     lineMarks: "",
+    theme: "vague",
+    showCmd: "",
+    statusLine: "",
+    showMode: true,
+    ruler: true,
   }
 }
 
@@ -111,7 +135,9 @@ export function editorViewFromRedraw(
     lines: active.lines,
     lineNumbers: active.lineNumbers,
     number: active.number,
+    relativeNumber: active.relativeNumber,
     gutterColumns: active.gutterColumns,
+    signColumn: active.signColumn,
     mode: active.mode,
     position: active.position,
     cursor: active.cursor,
@@ -120,10 +146,17 @@ export function editorViewFromRedraw(
     searchHighlights: active.searchHighlights,
     echo: redraw.echo?.message ? redraw.echo : null,
     lineMarks: active.lineMarks,
+    theme: redraw.theme ?? "vague",
+    showCmd: redraw.showcmd ?? "",
+    statusLine: active.statusLine,
+    showMode: active.showMode,
+    ruler: active.ruler,
   }
 }
 
-function paneFromPayload(p: NonNullable<RedrawPayload["panes"]>[number]): EditorPaneState {
+function paneFromPayload(
+  p: NonNullable<RedrawPayload["panes"]>[number],
+): EditorPaneState {
   return {
     windowId: p.window_id,
     x: p.x,
@@ -134,7 +167,14 @@ function paneFromPayload(p: NonNullable<RedrawPayload["panes"]>[number]): Editor
     lines: Array.isArray(p.lines) ? p.lines : [],
     lineNumbers: Array.isArray(p.line_numbers) ? p.line_numbers : [],
     number: p.number ?? false,
+    relativeNumber: p.relative_number ?? false,
     gutterColumns: p.gutter_columns ?? 0,
+    signColumn: p.sign_column ?? false,
+    list: p.list ?? false,
+    cursorLineRow: p.cursor_line_row ?? -1,
+    cursorColumn: p.cursor_column ?? 0,
+    cursorColumnOn: p.cursor_column_on ?? false,
+    colorColumns: Array.isArray(p.color_columns) ? p.color_columns : [],
     bufferName: p.buffer?.name ?? "*scratch*",
     modified: p.buffer?.modified ?? false,
     mode: p.mode ?? "normal",
@@ -146,6 +186,9 @@ function paneFromPayload(p: NonNullable<RedrawPayload["panes"]>[number]): Editor
       ? p.search_highlights.filter((h) => h.visible)
       : [],
     lineMarks: p.line_marks ?? "",
+    statusLine: p.statusline ?? "",
+    showMode: p.showmode ?? true,
+    ruler: p.ruler ?? true,
   }
 }
 
@@ -160,7 +203,14 @@ function singlePaneFromRedraw(redraw: Partial<RedrawPayload>): EditorPaneState {
     lines: Array.isArray(redraw.lines) ? redraw.lines : [],
     lineNumbers: Array.isArray(redraw.line_numbers) ? redraw.line_numbers : [],
     number: redraw.number ?? false,
+    relativeNumber: false,
     gutterColumns: redraw.gutter_columns ?? 0,
+    signColumn: false,
+    list: false,
+    cursorLineRow: -1,
+    cursorColumn: redraw.cursor?.column ?? 0,
+    cursorColumnOn: false,
+    colorColumns: [],
     bufferName: redraw.buffer?.name ?? "*scratch*",
     modified: redraw.buffer?.modified ?? false,
     mode: redraw.mode ?? "normal",
@@ -172,5 +222,8 @@ function singlePaneFromRedraw(redraw: Partial<RedrawPayload>): EditorPaneState {
       ? redraw.search_highlights.filter((h) => h.visible)
       : [],
     lineMarks: redraw.line_marks ?? "",
+    statusLine: "",
+    showMode: true,
+    ruler: true,
   }
 }
