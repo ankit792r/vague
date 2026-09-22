@@ -165,6 +165,11 @@ func (e *Editor) visualKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 	t := buf.Text
 	at := windowCursor(win)
 
+	if e.pendingKey == "r" && len(keys) == 1 && keys[0] != '<' {
+		e.pendingKey = ""
+		return e.visualReplaceChar(frame, win, buf, keys)
+	}
+
 	switch keys {
 	case "<Esc>", "v":
 		e.leaveVisual(win)
@@ -182,6 +187,10 @@ func (e *Editor) visualKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return e.applyVisualOperator(frame, win, buf, opYank)
 	case "c":
 		return e.applyVisualOperator(frame, win, buf, opChange)
+	case "r":
+		e.pendingKey = "r"
+		frame.Dirty = true
+		return nil
 	case "h", "<Left>":
 		setWindowCursor(buf, win, moveLeft(t, at, 1))
 	case "l", "<Right>", "<Space>":
