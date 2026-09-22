@@ -376,6 +376,19 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		s.pushRedraw(ctx, sess, frameID)
 		return nil, nil
 
+	case "search_cancel":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			return nil, ws.CancelIncsearch(frameID)
+		})
+		if err != nil {
+			return fail(err)
+		}
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
 	case "bnext", "bn":
 		if frameID == 0 {
 			return fail(fmt.Errorf("session is not attached to a frame"))
