@@ -27,6 +27,7 @@ export function EmacsFrame({
   echo,
   commandLine,
   position,
+  lineMarks,
 }: EmacsFrameProps) {
   const statusMode = commandLine.active
     ? promptStatusMode(commandLine.kind)
@@ -53,6 +54,7 @@ export function EmacsFrame({
         mode={statusMode}
         line={position.line}
         column={position.column}
+        lineMarks={lineMarks}
       />
       <CommandLine
         active={commandLine.active}

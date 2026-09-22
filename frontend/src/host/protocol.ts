@@ -77,6 +77,7 @@ export type RedrawPayload = {
     line: number
     column: number
   }
+  line_marks?: string
   echo?: StatusEcho
 }
 

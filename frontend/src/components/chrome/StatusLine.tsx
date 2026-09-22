@@ -4,6 +4,7 @@ type StatusLineProps = {
   mode: string
   line: number
   column: number
+  lineMarks?: string
 }
 
 export function StatusLine({
@@ -12,14 +13,17 @@ export function StatusLine({
   mode,
   line,
   column,
+  lineMarks,
 }: StatusLineProps) {
   const displayName = modified ? `${bufferName}*` : bufferName
+  const markSuffix = lineMarks ? ` '${lineMarks}'` : ""
 
   return (
     <div class="status-line" aria-label="status line">
       <span class="status-left">--**- {displayName}</span>
       <span class="status-right">
-        Ln {line}, Col {column} ({mode})
+        Ln {line}, Col {column}
+        {markSuffix} ({mode})
       </span>
     </div>
   )
