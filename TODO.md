@@ -139,8 +139,8 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `:only` `:close` `:hide` `:wincmd`
 - [x] `<C-w>` + `h/j/k/l/H/J/K/L` focus; `w/W` cycle
 - [x] `<C-w>` + `+` `-` `<` `>` `=` resize; `_` `|` maximize
-- [ ] Multi-window layout in webview (splits + active border)
-- [ ] Per-window options (`:setlocal` wrap/number/scroll)
+- [x] Multi-window layout in webview (splits + active border)
+- [x] Per-window options (`:setlocal` wrap/number/scroll)
 - [ ] Tab pages `:tabnew` `:tabclose` `:tabnext` tabline UI
 - [ ] `:args` `:argadd` `:argdo` argument list
 
