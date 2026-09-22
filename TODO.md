@@ -113,7 +113,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 ## Phase 4 — Registers & clipboard
 
 - [x] Named registers `a`–`z` and `"A` append
-- [ ] `"0` last yank; `"1`–`"9` delete ring
+- [x] `"0` last yank; `"1`–`"9` delete ring
 - [ ] `"-` small delete; `":` `.` last command; `"/` last search
 - [ ] `"*` `"+` system clipboard (X11/Wayland/macOS/Windows)
 - [ ] `"_` black hole; `"=` expression register (later)
