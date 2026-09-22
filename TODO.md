@@ -36,10 +36,11 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ### Operators & changes
 
-- [ ] `s`/`S`/`cc`/`C` parity (char vs line change)
-- [ ] `r` replace char; `R` replace mode
-- [ ] `~` toggle case; `gu`/`gU`/`g~` operator-pending (minimal)
-- [ ] `>>` `<<` `==` indent lines (spaces/tabs, `:set shiftwidth`)
+- [x] `s`/`S`/`cc`/`C` parity (char vs line change)
+- [x] `r` replace char; `R` replace mode
+- [x] `~` toggle case
+- [ ] `gu`/`gU`/`g~` operator-pending (minimal)
+- [x] `>>` `<<` `==` indent lines (spaces/tabs, `:set shiftwidth`)
 - [ ] `>` `<` visual/operator indent
 - [ ] `!` external filter (later: job runner)
 - [ ] `gq` format text (wrap width)
@@ -52,11 +53,11 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ### Text objects (operator + visual)
 
-- [ ] `iw` `aw` `iW` `aW`
+- [x] `iw` `aw` `iW` `aW`
 - [ ] `i"` `a"` `i'` `a'` backtick-quoted strings
 - [ ] `i(` `a(` `ib` `ab` and `i[` `a[` `i{` `a{` pairs
 - [ ] `it` `at` tag block (when HTML-ish)
-- [ ] `ip` `ap` paragraph; `is` `as` sentence
+- [x] `ip` `ap` paragraph; [ ] `is` `as` sentence
 
 ---
 
