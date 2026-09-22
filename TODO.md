@@ -65,7 +65,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ### Command-line mode
 
-- [ ] **incsearch** — preview match while typing `/` `?`
+- [x] **incsearch** — preview match while typing `/` `?`
 - [ ] Command-line history (`/` `?` `:`)
 - [ ] `Ctrl-c` / `<Esc>` clears highlight on cancel search
 - [ ] `Ctrl-r` insert register in cmdline

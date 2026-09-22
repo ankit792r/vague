@@ -348,6 +348,34 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		s.pushRedraw(ctx, sess, frameID)
 		return nil, nil
 
+	case "search_begin":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		forward := !params.Bang
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			return nil, ws.BeginIncsearch(frameID, forward)
+		})
+		if err != nil {
+			return fail(err)
+		}
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
+	case "search_preview":
+		if frameID == 0 {
+		 return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		pattern := strings.Join(params.Args, " ")
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			return nil, ws.PreviewIncsearch(frameID, pattern)
+		})
+		if err != nil {
+			return fail(err)
+		}
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
 	case "bnext", "bn":
 		if frameID == 0 {
 			return fail(fmt.Errorf("session is not attached to a frame"))

@@ -32,6 +32,24 @@ function openPrompt(kind: PromptKind): CommandLineState {
   return { active: true, kind, text: "", error: null }
 }
 
+async function previewSearch(kind: PromptKind, text: string) {
+  if (!isSearchPrompt(kind)) {
+    return
+  }
+  await hostRequest("execute", {
+    name: "search_preview",
+    args: [text],
+    bang: kind === "search-backward",
+  })
+}
+
+async function beginSearch(kind: PromptKind) {
+  await hostRequest("execute", {
+    name: "search_begin",
+    bang: kind === "search-backward",
+  })
+}
+
 export function useEditorInput(editorMode: string) {
   const [commandLine, setCommandLine] = useState<CommandLineState>(
     initialCommandLineState(),
@@ -48,8 +66,12 @@ export function useEditorInput(editorMode: string) {
       setCommandLine(next)
     }
 
-    const cancelCommand = () => {
+    const closeCommand = () => {
       syncCommand(initialCommandLineState())
+    }
+
+    const cancelCommand = () => {
+      closeCommand()
     }
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -75,7 +97,7 @@ export function useEditorInput(editorMode: string) {
               bang: cmd.kind === "search-backward",
             })
               .then(() => {
-                cancelCommand()
+                closeCommand()
               })
               .catch((err: unknown) => {
                 syncCommand({
@@ -94,7 +116,7 @@ export function useEditorInput(editorMode: string) {
 
           void hostRequest("execute", parsed)
             .then(() => {
-              cancelCommand()
+              closeCommand()
             })
             .catch((err: unknown) => {
               syncCommand({
@@ -106,21 +128,21 @@ export function useEditorInput(editorMode: string) {
         }
 
         if (keys === "<BS>") {
-          syncCommand({
-            ...cmd,
-            text: cmd.text.slice(0, -1),
-            error: null,
-          })
+          const text = cmd.text.slice(0, -1)
+          syncCommand({ ...cmd, text, error: null })
+          if (isSearchPrompt(cmd.kind)) {
+            void previewSearch(cmd.kind, text)
+          }
           return
         }
 
         const ch = commandCharFromEvent(e)
         if (ch !== null) {
-          syncCommand({
-            ...cmd,
-            text: cmd.text + ch,
-            error: null,
-          })
+          const text = cmd.text + ch
+          syncCommand({ ...cmd, text, error: null })
+          if (isSearchPrompt(cmd.kind)) {
+            void previewSearch(cmd.kind, text)
+          }
         }
 
         return
@@ -132,11 +154,19 @@ export function useEditorInput(editorMode: string) {
           return
         }
         if (keys === "/") {
-          syncCommand(openPrompt("search-forward"))
+          const next = openPrompt("search-forward")
+          syncCommand(next)
+          void beginSearch(next.kind).catch((err: unknown) => {
+            console.error("search begin failed", err)
+          })
           return
         }
         if (keys === "?") {
-          syncCommand(openPrompt("search-backward"))
+          const next = openPrompt("search-backward")
+          syncCommand(next)
+          void beginSearch(next.kind).catch((err: unknown) => {
+            console.error("search begin failed", err)
+          })
           return
         }
       }
