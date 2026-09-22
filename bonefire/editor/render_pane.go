@@ -20,7 +20,7 @@ func RenderPane(
 	modeName := modeNameFor(ed)
 
 	lineCount := lineCountForGutter(buf.Text)
-	contentWidth := layoutContentWidth(rect.Width, lineCount, win.WindowOptions.Number)
+	contentWidth := layoutContentWidth(rect.Width, lineCount, win.WindowOptions)
 	fullView := layoutView(buf.Text, contentWidth, 0, win.WindowOptions.Wrap)
 	point := windowPoint(buf, win)
 	ensureCursorVisibleHeight(win, rect.Height, fullView, point)
@@ -31,11 +31,25 @@ func RenderPane(
 	searchHighlights := searchHighlightsInViewport(ed, buf, win.TopLine, fullView.Meta, view.Lines, buf.Text)
 
 	var lineNumbers []int
-	gutterCols := 0
-	if win.WindowOptions.Number {
-		lineNumbers = bufferLineNumbers(view.Meta)
-		gutterCols = gutterColumns(lineCount)
+	gutterCols := gutterWidth(lineCount, win.WindowOptions.Number, win.WindowOptions.Display.RelativeNumber, win.WindowOptions.Display.SignColumn)
+	opts := win.WindowOptions
+	if opts.Number || opts.Display.RelativeNumber {
+		lineNumbers = relativeOrAbsoluteLineNumbers(view.Meta, point.Line, opts.Number, opts.Display.RelativeNumber)
 	}
+	lines := view.Lines
+	if opts.Display.List {
+		lines = applyListDisplay(lines, opts.Display.ListChars)
+	}
+	showCmd := ""
+	if opts.Display.ShowCmd {
+		showCmd = ed.ShowCmdString()
+	}
+	mod := " "
+	if buf.Modified() {
+		mod = "+"
+	}
+	statusText := FormatStatusLine(opts.Display.StatusLine, buf.Name, mod, point.Line+1, point.Col+1, modeName)
+	showMode := opts.Display.ShowMode
 
 	return process.RedrawPane{
 		WindowID:      win.Id,
@@ -47,12 +61,24 @@ func RenderPane(
 		Wrap:          win.WindowOptions.Wrap,
 		Number:        win.WindowOptions.Number,
 		GutterColumns: gutterCols,
+		RelativeNumber: opts.Display.RelativeNumber,
+		List:          opts.Display.List,
+		CursorLineRow: cursorLineRow(row, opts.Display.CursorLine),
+		CursorColumn:  col,
+		CursorColumnOn: opts.Display.CursorColumn && visible && active,
+		ColorColumns:  opts.Display.ColorColumn,
+		SignColumn:    opts.Display.SignColumn,
+		ShowCmd:       showCmd,
+		ShowMode:      showMode,
+		Ruler:         opts.Display.Ruler,
+		StatusLine:    statusText,
+		Theme:         ed.ThemeName(),
 		Buffer: process.RedrawBuffer{
 			ID:       buf.ID,
 			Name:     buf.Name,
 			Modified: buf.Modified(),
 		},
-		Lines:            view.Lines,
+		Lines:            lines,
 		LineNumbers:      lineNumbers,
 		Cursor:           process.CursorPos{Row: row, Column: col, Visible: visible && active},
 		Selection:        sel,
@@ -82,6 +108,13 @@ func modeNameFor(ed *Editor) string {
 	default:
 		return "normal"
 	}
+}
+
+func cursorLineRow(row int, on bool) int {
+	if !on {
+		return -1
+	}
+	return row
 }
 
 func ensureCursorVisibleHeight(win *window.Window, height int, view viewLayout, point text.Point) {
