@@ -83,7 +83,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `:edit` no-arg reload; `:find` `:sf` path search
 - [x] `:buffer` `:bd` `:bdelete` `:bwipeout` with confirm
 - [x] `:cd` `:pwd` working directory per tab/frame
-- [ ] `:set` / `:setlocal` full option parser (`set opt?` `set opt&` `opt+=`)
+- [x] `:set` / `:setlocal` full option parser (`set opt?` `set opt&` `opt+=`)
 - [ ] `:map` `:nmap` `:imap` `:vmap` user key bindings
 - [ ] `:command` user ex commands
 - [ ] `:source` load config script
