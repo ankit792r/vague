@@ -1,0 +1,33 @@
+package workspace
+
+import (
+	"fmt"
+	"path/filepath"
+)
+
+func (w *Workspace) RunExLine(frameID uint64, line string) (string, error) {
+	f, win, buf, err := w.FrameContext(frameID)
+	if err != nil {
+		return "", err
+	}
+
+	echo, err := w.Editor.RunExLine(f, win, buf, line)
+	if err != nil {
+		return "", err
+	}
+	f.Dirty = true
+	return echo, nil
+}
+
+func (w *Workspace) ExFindFile(frameID uint64, pattern string) error {
+	f, ok := w.Frames[frameID]
+	if !ok {
+		return errNotFound("frame", frameID)
+	}
+	matches, _ := filepath.Glob(filepath.Join(f.WorkDir, pattern))
+	if len(matches) == 0 {
+		return fmt.Errorf("find: no matches")
+	}
+	_, err := w.OpenFile(frameID, matches[0], false)
+	return err
+}

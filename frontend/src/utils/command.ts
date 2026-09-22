@@ -25,6 +25,40 @@ const SET_OPTIONS: Record<string, ParsedExecute["name"]> = {
   nowrap: "nowrap",
 }
 
+const SIMPLE_COMMANDS = new Set([
+  "edit",
+  "e",
+  "write",
+  "w",
+  "quit",
+  "q",
+  "wq",
+  "x",
+  "bnext",
+  "bn",
+  "bprev",
+  "bp",
+  "buffer",
+  "b",
+  "buffers",
+  "ls",
+  "goto",
+  "go",
+  "help",
+  "search",
+  "search_begin",
+  "search_preview",
+  "search_cancel",
+  "complete",
+  "register_get",
+  "wrap",
+  "nowrap",
+  "number",
+  "nonumber",
+  "set",
+  "only",
+])
+
 export function parseCommandLine(input: string): ParsedExecute | null {
   let line = input.trim()
   if (line.startsWith(":")) {
@@ -37,6 +71,10 @@ export function parseCommandLine(input: string): ParsedExecute | null {
 
   if (/^\d+$/.test(line)) {
     return { name: "goto", count: Number(line) }
+  }
+
+  if (/^[%0-9.'$+\-,<>\s]*s[/\w]/.test(line) || /^[gv]/.test(line) || /^norm/.test(line)) {
+    return { name: "ex", args: [line] }
   }
 
   const space = line.indexOf(" ")
@@ -61,6 +99,10 @@ export function parseCommandLine(input: string): ParsedExecute | null {
   name = ALIASES[name] ?? name
   if (!name) {
     return null
+  }
+
+  if (!SIMPLE_COMMANDS.has(name)) {
+    return { name: "ex", args: [line] }
   }
 
   const args = rest ? [rest] : undefined
