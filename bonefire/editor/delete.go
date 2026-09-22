@@ -9,6 +9,32 @@ import (
 	"vague/bonefire/window"
 )
 
+func (e *Editor) deleteCharRepeat(
+	frame *frame.Frame,
+	win *window.Window,
+	buf *buffer.Buffer,
+	count int,
+) error {
+	if count < 1 {
+		count = 1
+	}
+
+	for i := 0; i < count; i++ {
+		t := buf.Text
+		at := windowCursor(win)
+		end := forwardChar(t, at)
+		if end == at {
+			break
+		}
+
+		if err := e.deleteChar(frame, win, buf); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (e *Editor) deleteChar(frame *frame.Frame, win *window.Window, buf *buffer.Buffer) error {
 	if buf.ReadOnly {
 		return buffer.ErrReadOnly
