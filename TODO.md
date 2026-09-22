@@ -8,9 +8,9 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ## Shipped
 
-- Normal / insert / visual char / visual line; numeric counts; `.` repeat
+- Normal / insert / visual char / visual line / visual block; numeric counts; `.` repeat (operators, text objects, indent, case, format, numbers)
 - Motions: `h/j/k/l`, `w/b/e`, `0/$`/`^`/`_`/`|`, `gg`/`G`, `f`/`F`/`t`/`T`/`;`/`,`, line `j/k` with wrap, `o`/`O`, `i`/`a`/`A`/`I`
-- Operators: `d`/`c`/`y` + `d`/`y`/`c` linewise, `dw`/`cw`/`yw`, `D`, `x`, `J`
+- Operators: `d`/`c`/`y` + linewise, text objects, `gu`/`gU`/`g~`, `gq`, `>>`/`<<`/`==`, visual `>`/`<`, `s`/`S`/`C`, `r`/`R`, `~`, `Ctrl-a`/`Ctrl-x`
 - Unnamed register; `p`/`P`; `u` / `<C-r>`
 - `/` `?` `n` `N`; current-match highlight on redraw
 - Open / save / quit; `:e` `:e!` `:w` `:q` `:wq` `:x`; buffers `:b` `:bn` `:bp` `:buffers`
