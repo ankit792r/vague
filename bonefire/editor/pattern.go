@@ -388,3 +388,28 @@ func findAllLiteral(data, pat []byte, ignoreCase bool) [][2]int {
 	}
 	return out
 }
+
+// findPatternInSlice returns the first match of pp in hay.
+func findPatternInSlice(hay []byte, pp parsedPattern) (start, end int, ok bool) {
+	if len(hay) == 0 {
+		return 0, 0, false
+	}
+	all := findAllPattern(hay, pp)
+	if len(all) == 0 {
+		return 0, 0, false
+	}
+	m := all[0]
+	return m[0], m[1], true
+}
+
+func (e *Editor) parseExPattern(raw string, flags subFlags) (parsedPattern, error) {
+	prev := e.searchOpts.IgnoreCase
+	if flags.ignoreCase && !flags.noIgnoreCase {
+		e.searchOpts.IgnoreCase = true
+	} else if flags.noIgnoreCase {
+		e.searchOpts.IgnoreCase = false
+	}
+	pp, err := e.parseSearchPattern(raw)
+	e.searchOpts.IgnoreCase = prev
+	return pp, err
+}

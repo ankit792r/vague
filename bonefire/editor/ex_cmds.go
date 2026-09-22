@@ -31,11 +31,10 @@ func (e *Editor) exGlobal(
 
 	t := buf.Text
 	startLine, endLine := e.resolveExRange(rng, t, win)
-	patBytes := []byte(pat)
 
 	for line := startLine; line <= endLine; line++ {
 		lineBytes := t.Line(line)
-		if !bytesContainsMatch(lineBytes, patBytes, subFlags{ignoreCase: true}) {
+		if !e.lineMatchesPattern(lineBytes, pat) {
 			if !invert {
 				continue
 			}

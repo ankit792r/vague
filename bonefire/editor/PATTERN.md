@@ -29,3 +29,7 @@ Additional: `\c` force ignore case, `\C` force match case.
 - `\*` `\?` quantifiers in `\m` ( `*` is literal in `\m` )
 
 Use `:help pattern` in Vim for the full reference; this file tracks Vague behavior.
+
+## Search offsets
+
+Trailing offsets on `/` and `?` patterns are supported: `+N`, `-N`, `e`, `s`, `b`, and forms like `e+1` (see `search_offset.go`).

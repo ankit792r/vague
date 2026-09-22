@@ -69,9 +69,13 @@ func (e *Editor) exSubstitute(
 		return buffer.ErrReadOnly
 	}
 
+	pp, err := e.parseExPattern(sub.pattern, sub.flags)
+	if err != nil {
+		return err
+	}
+
 	t := buf.Text
 	startLine, endLine := e.resolveExRange(rng, t, win)
-	pat := []byte(sub.pattern)
 	repl := []byte(sub.replacement)
 
 	for line := startLine; line <= endLine; line++ {
@@ -84,16 +88,17 @@ func (e *Editor) exSubstitute(
 		searchFrom := 0
 
 		for searchFrom <= len(lineBytes) {
-			idx := findSubMatch(lineBytes[searchFrom:], pat, sub.flags)
-			if idx < 0 {
+			idx, matchEnd, ok := findPatternInSlice(lineBytes[searchFrom:], pp)
+			if !ok {
 				out = append(out, lineBytes[searchFrom:]...)
 				break
 			}
 			idx += searchFrom
+			matchEnd += searchFrom
 			out = append(out, lineBytes[searchFrom:idx]...)
 			out = append(out, repl...)
 			changed = true
-			searchFrom = idx + len(pat)
+			searchFrom = matchEnd
 			if !sub.flags.global {
 				out = append(out, lineBytes[searchFrom:]...)
 				break
@@ -123,4 +128,13 @@ func findSubMatch(hay, needle []byte, flags subFlags) int {
 		return bytes.Index(hayLower, needleLower)
 	}
 	return bytes.Index(hay, needle)
+}
+
+func (e *Editor) lineMatchesPattern(line []byte, pattern string) bool {
+	pp, err := e.parseSearchPattern(pattern)
+	if err != nil {
+		return findSubMatch(line, []byte(pattern), subFlags{ignoreCase: true}) >= 0
+	}
+	_, _, ok := findPatternInSlice(line, pp)
+	return ok
 }
