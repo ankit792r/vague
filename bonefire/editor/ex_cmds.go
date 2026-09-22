@@ -215,6 +215,9 @@ func (e *Editor) exSet(
 		if q := e.FileOptionQuery(keyLower); q != "" {
 			return q + "?", nil
 		}
+		if q := e.displayOptionValue(win, keyLower); q != "" {
+			return q + "?", nil
+		}
 		if q := e.SearchOptionQuery(keyLower); q != "" {
 			return q + "?", nil
 		}
@@ -236,12 +239,24 @@ func (e *Editor) exSet(
 			frame.Dirty = true
 			return msg, nil
 		}
+		if msg, err := e.ApplySetDisplayArgs(frame, win, args, false); err == nil {
+			return msg, nil
+		}
 	}
-	if msg, err := e.ApplySetFileOption(lower, true); err == nil {
+	name, val := splitSetNameValue(lower)
+	if msg, err := e.ApplySetFileOption(name, true); err == nil {
 		frame.Dirty = true
 		return msg, nil
 	}
-	if msg, err := e.ApplySetSearchOption(lower, true); err == nil {
+	if val != "" {
+		if msg, err := e.ApplySetDisplayArgs(frame, win, args, true); err == nil {
+			return msg, nil
+		}
+	}
+	if msg, err := e.ApplySetDisplayArgs(frame, win, args, true); err == nil {
+		return msg, nil
+	}
+	if msg, err := e.ApplySetSearchOption(name, true); err == nil {
 		frame.Dirty = true
 		return msg, nil
 	}
