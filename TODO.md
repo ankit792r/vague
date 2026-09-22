@@ -92,7 +92,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `:jumps` `:clearjumps`
 - [x] `:undo` `:undolist` `:later` `:earlier` time travel (stretch)
 - [x] `:checktime` autoread prompt
-- [ ] `:diffsplit` `:diffoff` `:diffget` `:diffput`
+- [x] `:diffsplit` `:diffoff` `:diffget` `:diffput`
 - [ ] `:terminal` `:term` (see Phase 14)
 
 ---
