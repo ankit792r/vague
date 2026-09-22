@@ -21,6 +21,10 @@ type Workspace struct {
 	CurrentFrameID uint64
 	nextFrameID    uint64
 	nextWindowID   uint64
+
+	pendingCtrlW map[uint64]bool
+	ArgList      []string
+	ArgIndex     int
 }
 
 func New() *Workspace {
@@ -30,6 +34,8 @@ func New() *Workspace {
 		Windows:      make(map[uint64]*window.Window),
 		nextFrameID:  1,
 		nextWindowID: 1,
+		pendingCtrlW: make(map[uint64]bool),
+		ArgIndex:     -1,
 	}
 }
 
@@ -137,7 +143,7 @@ func (w *Workspace) NewFrame(width, height int, workDir string, initialPath ...s
 		buf = w.Editor.Scratch("*scratch*")
 	}
 
-	frame := &frame.Frame{
+	fm := &frame.Frame{
 		ID:      w.nextFrameID,
 		Width:   width,
 		Height:  height,
@@ -146,20 +152,26 @@ func (w *Workspace) NewFrame(width, height int, workDir string, initialPath ...s
 	}
 	w.nextFrameID++
 
-	win := newWindow(w.nextWindowID, frame.ID, buf.ID)
+	win := newWindow(w.nextWindowID, fm.ID, buf.ID)
 	win.Cursor = buf.Text.AddMarker(0, text.GravityRight)
 	w.nextWindowID++
 	w.Windows[win.Id] = win
 
-	frame.Root = win.LeafNode()
-	frame.ActiveWindowID = win.Id
+	fm.Root = win.LeafNode()
+	fm.ActiveWindowID = win.Id
+	fm.Tabs = []frame.TabPage{{
+		Root:           fm.Root,
+		ActiveWindowID: win.Id,
+		Label:          buf.Name,
+	}}
+	fm.ActiveTab = 0
 
-	w.Frames[frame.ID] = frame
+	w.Frames[fm.ID] = fm
 	if w.CurrentFrameID == 0 {
-		w.CurrentFrameID = frame.ID
+		w.CurrentFrameID = fm.ID
 	}
 
-	return frame, nil
+	return fm, nil
 }
 
 func (w *Workspace) ResizeFrame(frameID uint64, width, height int) error {
@@ -213,6 +225,17 @@ func (w *Workspace) SetWindowNumber(frameID uint64, number bool) error {
 
 func (w *Workspace) HandleInput(frameID uint64, keys string) error {
 	w.ClearEcho(frameID)
+	if w.pendingCtrlW[frameID] {
+		w.pendingCtrlW[frameID] = false
+		if err := w.HandleCtrlWKey(frameID, keys); err != nil {
+			return err
+		}
+		return nil
+	}
+	if keys == "<C-w>" {
+		w.pendingCtrlW[frameID] = true
+		return nil
+	}
 	frame, win, buf, err := w.FrameContext(frameID)
 	if err != nil {
 		return err

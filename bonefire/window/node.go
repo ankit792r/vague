@@ -51,7 +51,11 @@ func (n *Node) Leaves() []*Node {
 	return out
 }
 
-// find returns the leaf holding a window.
+// Find returns the leaf holding a window ID.
+func (n *Node) Find(windowID uint64) *Node {
+	return n.find(windowID)
+}
+
 func (n *Node) find(windowID uint64) *Node {
 	if n == nil {
 		return nil
@@ -147,6 +151,16 @@ func indexOf(nodes []*Node, target *Node) int {
 		}
 	}
 	return -1
+}
+
+// RemoveLeafRoot removes a leaf and returns the updated root.
+func RemoveLeafRoot(root *Node, leaf *Node) *Node {
+	return removeLeaf(root, leaf)
+}
+
+// Balance equalizes sibling weights in the tree.
+func Balance(root *Node) {
+	balance(root)
 }
 
 // balance resets every weight, making sibling windows equal size.
