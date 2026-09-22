@@ -14,7 +14,7 @@ func selectionInViewport(
 	lines []string,
 	t *text.Text,
 ) *process.Selection {
-	if ed.Mode != VisualMode && ed.Mode != VisualLineMode {
+	if ed.Mode != VisualMode && ed.Mode != VisualLineMode && ed.Mode != VisualBlockMode {
 		return nil
 	}
 

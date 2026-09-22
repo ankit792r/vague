@@ -7,9 +7,36 @@ import (
 	"vague/bonefire/window"
 )
 
-func (e *Editor) leaveVisual() {
-	e.Mode = NormalMode
+func (e *Editor) leaveVisual(win *window.Window) {
+	if e.Mode == VisualMode || e.Mode == VisualLineMode || e.Mode == VisualBlockMode {
+		e.lastVisualMode = e.Mode
+		e.lastVisualAnchor = e.visualAnchor
+		if win != nil {
+			e.lastVisualHead = windowCursor(win)
+		}
+	}
+	if e.Mode != InsertMode {
+		e.Mode = NormalMode
+	}
 	e.visualAnchor = 0
+}
+
+func (e *Editor) reselectLastVisual(
+	frame *frame.Frame,
+	win *window.Window,
+	buf *buffer.Buffer,
+) error {
+	if e.lastVisualMode == NormalMode {
+		frame.Dirty = true
+		return nil
+	}
+	e.Mode = e.lastVisualMode
+	e.visualAnchor = e.lastVisualAnchor
+	setWindowCursor(buf, win, e.lastVisualHead)
+	e.clearPendingOp()
+	e.pendingKey = ""
+	frame.Dirty = true
+	return nil
 }
 
 func (e *Editor) enterVisualChar(win *window.Window) {
@@ -21,6 +48,13 @@ func (e *Editor) enterVisualChar(win *window.Window) {
 
 func (e *Editor) enterVisualLine(win *window.Window) {
 	e.Mode = VisualLineMode
+	e.visualAnchor = windowCursor(win)
+	e.clearPendingOp()
+	e.pendingKey = ""
+}
+
+func (e *Editor) enterVisualBlock(win *window.Window) {
+	e.Mode = VisualBlockMode
 	e.visualAnchor = windowCursor(win)
 	e.clearPendingOp()
 	e.pendingKey = ""
@@ -39,6 +73,31 @@ func (e *Editor) visualRange(t *text.Text, win *window.Window) (from, to text.Of
 		from = t.LineStart(aLine)
 		_, to = lineChangeRange(t, hLine)
 		return from, to, true
+	}
+
+	if e.Mode == VisualBlockMode {
+		aPt := t.PointOf(anchor)
+		hPt := t.PointOf(head)
+		lineLo, lineHi := aPt.Line, hPt.Line
+		if lineLo > lineHi {
+			lineLo, lineHi = lineHi, lineLo
+		}
+		colLo, colHi := aPt.Col, hPt.Col
+		if colLo > colHi {
+			colLo, colHi = colHi, colLo
+		}
+		from = t.OffsetOf(text.Point{Line: lineLo, Col: colLo})
+		endCol := colHi
+		lineBytes := t.Line(lineHi)
+		if endCol >= len(lineBytes) {
+			to = t.LineEnd(lineHi)
+		} else {
+			to = t.OffsetOf(text.Point{Line: lineHi, Col: endCol + 1})
+		}
+		if to <= from {
+			to = from + 1
+		}
+		return from, to, false
 	}
 
 	start := anchor
@@ -69,10 +128,14 @@ func (e *Editor) applyVisualOperator(
 	buf *buffer.Buffer,
 	op opKind,
 ) error {
+	e.lastVisualMode = e.Mode
+	e.lastVisualAnchor = e.visualAnchor
+	e.lastVisualHead = windowCursor(win)
+
 	t := buf.Text
 	from, to, linewise := e.visualRange(t, win)
 	if to <= from {
-		e.leaveVisual()
+		e.leaveVisual(win)
 		frame.Dirty = true
 		return nil
 	}
@@ -93,7 +156,7 @@ func (e *Editor) applyVisualOperator(
 
 	e.visualAnchor = 0
 	if e.Mode != InsertMode {
-		e.Mode = NormalMode
+		e.leaveVisual(win)
 	}
 	return nil
 }
@@ -104,9 +167,15 @@ func (e *Editor) visualKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 
 	switch keys {
 	case "<Esc>", "v":
-		e.leaveVisual()
+		e.leaveVisual(win)
 		frame.Dirty = true
 		return nil
+	case ">":
+		return e.indentVisualSelection(frame, win, buf, 1)
+	case "<":
+		return e.indentVisualSelection(frame, win, buf, -1)
+	case "=":
+		return e.indentVisualSelection(frame, win, buf, 1)
 	case "d", "x":
 		return e.applyVisualOperator(frame, win, buf, opDelete)
 	case "y":

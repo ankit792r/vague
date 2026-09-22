@@ -51,6 +51,28 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 			setWindowCursor(buf, win, moveGScreenEnd(t, win, frame, at))
 		case "m":
 			setWindowCursor(buf, win, moveGm(t, win, frame, at))
+		case "u":
+			e.pendingCaseChange = caseChangeLower
+			frame.Dirty = true
+			return nil
+		case "U":
+			e.pendingCaseChange = caseChangeUpper
+			frame.Dirty = true
+			return nil
+		case "~":
+			e.pendingCaseChange = caseChangeToggle
+			frame.Dirty = true
+			return nil
+		case "q":
+			e.pendingFormat = true
+			frame.Dirty = true
+			return nil
+		case "v":
+			return e.reselectLastVisual(frame, win, buf)
+		case "Q":
+			setFrameInfoEcho(frame, "ex linewise mode not implemented")
+			frame.Dirty = true
+			return nil
 		default:
 			return nil
 		}
@@ -94,14 +116,69 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return e.applyOperatorMotion(frame, win, buf, opChange, motionLine, count)
 	}
 
+	if e.pendingCaseChange != caseChangeNone {
+		kind := e.pendingCaseChange
+		objKeys, wait := e.resolveTextObjectKeys(keys)
+		if wait {
+			frame.Dirty = true
+			return nil
+		}
+		if _, _, ok := textObjectRange(t, win, objKeys); ok {
+			e.pendingCaseChange = caseChangeNone
+			return e.applyCaseTarget(frame, win, buf, kind, objKeys)
+		}
+		if motion, ok := motionForKey(objKeys); ok {
+			e.pendingCaseChange = caseChangeNone
+			from, to, _ := textRangeForMotion(t, win, opChange, motion)
+			if to > from {
+				return e.applyCaseOnRange(frame, win, buf, from, to, kind, objKeys)
+			}
+		}
+		e.pendingCaseChange = caseChangeNone
+		frame.Dirty = true
+		return nil
+	}
+
+	if e.pendingFormat {
+		objKeys, wait := e.resolveTextObjectKeys(keys)
+		if wait {
+			frame.Dirty = true
+			return nil
+		}
+		e.pendingFormat = false
+		if from, to, ok := textObjectRange(t, win, objKeys); ok {
+			return e.formatRange(frame, win, buf, from, to, objKeys)
+		}
+		if motion, ok := motionForKey(objKeys); ok {
+			from, to, _ := textRangeForMotion(t, win, opChange, motion)
+			if to > from {
+				return e.formatRange(frame, win, buf, from, to, objKeys)
+			}
+		}
+		frame.Dirty = true
+		return nil
+	}
+
+	if e.pendingFilter {
+		e.pendingFilter = false
+		setFrameInfoEcho(frame, "external filter not implemented")
+		frame.Dirty = true
+		return nil
+	}
+
 	if e.pendingOp != opNone {
 		op := e.pendingOp
-		if _, _, ok := textObjectRange(t, win, keys); ok {
+		objKeys, wait := e.resolveTextObjectKeys(keys)
+		if wait {
+			frame.Dirty = true
+			return nil
+		}
+		if _, _, ok := textObjectRange(t, win, objKeys); ok {
 			e.clearPendingOp()
 			count := e.takeCount()
-			return e.applyOperatorTextObject(frame, win, buf, op, keys, count)
+			return e.applyOperatorTextObject(frame, win, buf, op, objKeys, count)
 		}
-		if motion, ok := motionForKey(keys); ok {
+		if motion, ok := motionForKey(objKeys); ok {
 			e.clearPendingOp()
 			count := e.takeCount()
 			return e.applyOperatorMotion(frame, win, buf, op, motion, count)
@@ -159,6 +236,21 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return nil
 	case "V":
 		e.enterVisualLine(win)
+		frame.Dirty = true
+		return nil
+	case "<C-v>":
+		e.enterVisualBlock(win)
+		frame.Dirty = true
+		return nil
+	case "<C-a>":
+		return e.changeNumberAtCursor(frame, win, buf, 1)
+	case "<C-x>":
+		return e.changeNumberAtCursor(frame, win, buf, -1)
+	case "!":
+		e.pendingFilter = true
+		return nil
+	case "Q":
+		setFrameInfoEcho(frame, "ex linewise mode not implemented")
 		frame.Dirty = true
 		return nil
 	case "i":

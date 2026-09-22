@@ -34,6 +34,8 @@ func (e *Editor) changeChars(frame *frame.Frame, win *window.Window, buf *buffer
 		}
 	}
 	setWindowCursor(buf, win, at)
+	frame.Dirty = true
+	e.recordChangeChars()
 	return e.enterInsert(frame, win, buf, at)
 }
 
@@ -144,5 +146,6 @@ func (e *Editor) indentLines(frame *frame.Frame, win *window.Window, buf *buffer
 		}
 	}
 	frame.Dirty = true
+	e.recordIndentChange(delta)
 	return nil
 }

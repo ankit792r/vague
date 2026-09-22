@@ -49,8 +49,8 @@ func (e *Editor) RepeatSearch(
 }
 
 func (e *Editor) clearSearchContext() {
-	if e.Mode == VisualMode || e.Mode == VisualLineMode {
-		e.leaveVisual()
+	if e.Mode == VisualMode || e.Mode == VisualLineMode || e.Mode == VisualBlockMode {
+		e.leaveVisual(nil)
 	}
 	e.clearPendingOp()
 	e.pendingKey = ""

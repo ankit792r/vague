@@ -8,7 +8,7 @@ import (
 )
 
 // ReplaceMode overwrites characters on insert (Vim R).
-const ReplaceMode Mode = 4
+const ReplaceMode Mode = 5
 
 func (e *Editor) enterReplace(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, at text.Offset) error {
 	e.pendingKey = ""
