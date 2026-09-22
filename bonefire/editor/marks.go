@@ -122,6 +122,7 @@ func (e *Editor) noteChangeAt(buf *buffer.Buffer, off text.Offset) {
 		buf.Text.RemoveMarker(old)
 	}
 	e.changeMarks[buf.ID] = buf.Text.AddMarker(off, text.GravityRight)
+	e.recordChangeEntry(buf, off)
 }
 
 func (e *Editor) noteJumpFrom(buf *buffer.Buffer, off text.Offset) {
