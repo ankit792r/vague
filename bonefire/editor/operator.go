@@ -125,6 +125,7 @@ func (e *Editor) applyOperatorRange(
 		at := windowCursor(win)
 		e.stashRegister(data, linewise, true)
 
+		e.noteChangeAt(buf, from)
 		buf.BeginEdit(at)
 		if _, err := buf.Delete(from, to); err != nil {
 			return err
