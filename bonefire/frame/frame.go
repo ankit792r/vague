@@ -21,6 +21,9 @@ type Frame struct {
 	Root   *window.Node
 
 	ActiveWindowID uint64
+	Tabs           []TabPage
+	ActiveTab      int
+
 	WorkDir        string
 	Dirty          bool
 	Echo           StatusEcho
