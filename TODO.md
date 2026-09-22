@@ -104,7 +104,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] Highlight **all** matches (`hlsearch`) + `:nohlsearch`
 - [x] Search offset `:ta` tags (later)
 - [x] `:vimgrep` / quickfix list (see Phase 12)
-- [ ] `:sort` `:uniq` on ranges
+- [x] `:sort` `:uniq` on ranges
 
 ---
 
