@@ -5,6 +5,7 @@ export type CommandLineState = {
   kind: PromptKind
   text: string
   error: string | null
+  historyIndex: number | null
 }
 
 export function initialCommandLineState(): CommandLineState {
@@ -13,6 +14,7 @@ export function initialCommandLineState(): CommandLineState {
     kind: "command",
     text: "",
     error: null,
+    historyIndex: null,
   }
 }
 
