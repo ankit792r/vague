@@ -189,6 +189,18 @@ func (b *Buffer) Modified() bool {
 	return b.History.Seq() != b.savedSeq
 }
 
+// ChangedOnDisk reports whether the file on disk differs from when we last read/saved.
+func (b *Buffer) ChangedOnDisk() bool {
+	if b.Path == "" {
+		return false
+	}
+	info, err := os.Stat(b.Path)
+	if err != nil {
+		return false
+	}
+	return info.Size() != b.diskSize || !info.ModTime().Equal(b.diskModTime)
+}
+
 func (b *Buffer) encodeForDisk() []byte {
 	if b.startedEmpty && b.Text.Len() == 0 {
 		return nil
