@@ -252,3 +252,12 @@ func splitDelimField(s string, delim byte) (string, string, bool) {
 	}
 	return s, "", false
 }
+
+// ExCommandKind parses an ex line and returns the command name and args.
+func ExCommandKind(line string) (kind, args string, err error) {
+	cmd, _, err := parseExLine(line)
+	if err != nil {
+		return "", "", err
+	}
+	return cmd.kind, cmd.args, nil
+}
