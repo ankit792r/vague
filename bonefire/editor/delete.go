@@ -47,6 +47,9 @@ func (e *Editor) deleteChar(frame *frame.Frame, win *window.Window, buf *buffer.
 		return nil
 	}
 
+	data := t.Slice(at, end)
+	e.recordDelete(data, false)
+
 	buf.BeginEdit(at)
 	if _, err := buf.Delete(at, end); err != nil {
 		return err
