@@ -28,7 +28,7 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed
 	}
 
 	lineCount := lineCountForGutter(buf.Text)
-	contentWidth := layoutContentWidth(frame.Width, lineCount, win.WindowOptions.Number)
+	contentWidth := layoutContentWidth(frame.Width, lineCount, win.WindowOptions)
 	fullView := layoutView(buf.Text, contentWidth, 0, win.WindowOptions.Wrap)
 	point := windowPoint(buf, win)
 	ensureCursorVisible(win, frame, fullView, point)

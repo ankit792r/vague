@@ -18,7 +18,7 @@ func moveToScreenLine(
 		height = frame.DefaultHeight
 	}
 
-	fullView := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions.Number), 0, win.WindowOptions.Wrap)
+	fullView := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions), 0, win.WindowOptions.Wrap)
 	total := len(fullView.Meta)
 	if total == 0 {
 		return windowCursor(win)
@@ -61,7 +61,7 @@ func scrollCursorLine(win *window.Window, fm *frame.Frame, buf *buffer.Buffer, s
 	}
 
 	t := buf.Text
-	fullView := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions.Number), 0, win.WindowOptions.Wrap)
+	fullView := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions), 0, win.WindowOptions.Wrap)
 	point := windowPoint(buf, win)
 	cursorRow, _, ok := visualRowAt(fullView.Meta, point)
 	if !ok {
@@ -92,7 +92,7 @@ func scrollCursorLine(win *window.Window, fm *frame.Frame, buf *buffer.Buffer, s
 }
 
 func moveG0(t *text.Text, win *window.Window, fm *frame.Frame, off text.Offset) text.Offset {
-	view := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions.Number), 0, win.WindowOptions.Wrap)
+	view := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions), 0, win.WindowOptions.Wrap)
 	point := t.PointOf(off)
 	row, _, ok := visualRowAt(view.Meta, point)
 	if !ok {
@@ -103,7 +103,7 @@ func moveG0(t *text.Text, win *window.Window, fm *frame.Frame, off text.Offset) 
 }
 
 func moveGScreenEnd(t *text.Text, win *window.Window, fm *frame.Frame, off text.Offset) text.Offset {
-	view := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions.Number), 0, win.WindowOptions.Wrap)
+	view := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions), 0, win.WindowOptions.Wrap)
 	point := t.PointOf(off)
 	row, _, ok := visualRowAt(view.Meta, point)
 	if !ok {
@@ -118,7 +118,7 @@ func moveGScreenEnd(t *text.Text, win *window.Window, fm *frame.Frame, off text.
 }
 
 func moveGm(t *text.Text, win *window.Window, fm *frame.Frame, off text.Offset) text.Offset {
-	view := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions.Number), 0, win.WindowOptions.Wrap)
+	view := layoutView(t, layoutContentWidth(fm.Width, lineCountForGutter(t), win.WindowOptions), 0, win.WindowOptions.Wrap)
 	point := t.PointOf(off)
 	row, _, ok := visualRowAt(view.Meta, point)
 	if !ok {
