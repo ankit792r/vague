@@ -8,10 +8,12 @@ type WindowOptions struct {
 	Number    bool
 	Wrap      bool
 	ScrollOff int
+
+	Display DisplayOpts
 }
 
 func DefaultWindowOptions() WindowOptions {
-	return WindowOptions{Number: false, Wrap: true, ScrollOff: 0}
+	return WindowOptions{Number: false, Wrap: true, ScrollOff: 0, Display: DefaultDisplayOpts()}
 }
 
 type Window struct {
