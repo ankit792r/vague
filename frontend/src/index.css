@@ -156,6 +156,13 @@ button {
   white-space: nowrap;
 }
 
+.command-line-wrap {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+
 .command-line {
   display: flex;
   align-items: center;
@@ -163,9 +170,12 @@ button {
   height: 1.75rem;
   padding: 0 0.25rem;
   background: var(--minibuffer-bg);
-  border-top: 1px solid var(--border);
   font-size: 1rem;
   line-height: 1.75rem;
+}
+
+.command-line-wrap > .command-line {
+  border-top: none;
 }
 
 .command-line-active {
@@ -214,4 +224,32 @@ button {
 .command-echo-after-input {
   flex: 0 1 auto;
   margin-left: 0.75rem;
+}
+
+.command-hint {
+  color: color-mix(in srgb, var(--fg) 60%, transparent);
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.command-wildmenu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  padding: 0.15rem 0.25rem 0.35rem;
+  background: var(--minibuffer-bg);
+  font-size: 0.9rem;
+  line-height: 1.25rem;
+  max-height: 4rem;
+  overflow: auto;
+}
+
+.command-wildmenu-item {
+  color: color-mix(in srgb, var(--fg) 75%, transparent);
+}
+
+.command-wildmenu-selected {
+  color: var(--bg);
+  background: var(--fg);
+  padding: 0 0.15rem;
 }

@@ -364,7 +364,7 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 
 	case "search_preview":
 		if frameID == 0 {
-		 return fail(fmt.Errorf("session is not attached to a frame"))
+			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
 		pattern := strings.Join(params.Args, " ")
 		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
@@ -388,6 +388,27 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		}
 		s.pushRedraw(ctx, sess, frameID)
 		return nil, nil
+
+	case "complete":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		if len(params.Args) < 2 {
+			return fail(fmt.Errorf("complete: kind and prefix required"))
+		}
+		kind := params.Args[0]
+		prefix := strings.Join(params.Args[1:], " ")
+		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			candidates, err := ws.Complete(frameID, kind, prefix)
+			if err != nil {
+				return nil, err
+			}
+			return map[string]any{"candidates": candidates}, nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+		return result, nil
 
 	case "register_get":
 		if frameID == 0 {

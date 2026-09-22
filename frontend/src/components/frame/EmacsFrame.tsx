@@ -56,8 +56,12 @@ export function EmacsFrame({
         active={commandLine.active}
         kind={commandLine.kind}
         text={commandLine.text}
+        cursor={commandLine.cursor}
         error={commandLine.error}
         echo={echo}
+        completions={commandLine.completions}
+        completionIndex={commandLine.completionIndex}
+        pendingRegister={commandLine.pendingRegister}
       />
     </div>
   )

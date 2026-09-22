@@ -3,11 +3,17 @@ import { hostRequest } from "../host/client"
 import {
   initialCommandLineState,
   isSearchPrompt,
+  withText,
   type CommandLineState,
   type PromptKind,
 } from "../types/command"
 import { parseCommandLine } from "../utils/command"
 import { historyEntry, pushHistory } from "../utils/commandHistory"
+import {
+  applyCompletion,
+  completionContext,
+  type CompletionContext,
+} from "../utils/completion"
 import { encodeKey } from "../utils/keys"
 
 function commandCharFromEvent(e: KeyboardEvent): string | null {
@@ -30,7 +36,21 @@ function executeErrorMessage(err: unknown): string {
 }
 
 function openPrompt(kind: PromptKind): CommandLineState {
-  return { active: true, kind, text: "", error: null, historyIndex: null, pendingRegister: false }
+  return {
+    ...initialCommandLineState(),
+    active: true,
+    kind,
+  }
+}
+
+type CompleteResult = { candidates?: string[] }
+
+async function fetchCompletions(ctx: CompletionContext): Promise<string[]> {
+  const result = (await hostRequest("execute", {
+    name: "complete",
+    args: [ctx.kind, ctx.prefix],
+  })) as CompleteResult
+  return result.candidates ?? []
 }
 
 async function previewSearch(kind: PromptKind, text: string) {
@@ -55,15 +75,20 @@ async function cancelSearchPreview() {
   await hostRequest("execute", { name: "search_cancel" })
 }
 
-async function insertRegister(cmd: CommandLineState): Promise<CommandLineState> {
+async function insertRegisterAtCursor(cmd: CommandLineState): Promise<CommandLineState> {
   const result = (await hostRequest("execute", { name: "register_get" })) as {
     text?: string
   }
   const insert = result.text ?? ""
-  const text = cmd.text + insert
-  const next = { ...cmd, text, error: null as string | null, pendingRegister: false }
+  if (!insert) {
+    return { ...cmd, pendingRegister: false }
+  }
+  const before = cmd.text.slice(0, cmd.cursor)
+  const after = cmd.text.slice(cmd.cursor)
+  const text = before + insert + after
+  const next = withText(cmd, text, cmd.cursor + insert.length)
   if (isSearchPrompt(cmd.kind)) {
-    void previewSearch(cmd.kind, text)
+    void previewSearch(cmd.kind, next.text)
   }
   return next
 }
@@ -98,6 +123,34 @@ export function useEditorInput(editorMode: string) {
       closeCommand()
     }
 
+    const runTabCompletion = async (cmd: CommandLineState) => {
+      const ctx = completionContext(cmd.kind, cmd.text, cmd.cursor)
+      if (!ctx) {
+        return
+      }
+
+      let candidates = cmd.completions
+      let index = cmd.completionIndex
+      if (candidates.length === 0) {
+        candidates = await fetchCompletions(ctx)
+        index = 0
+      } else {
+        index = (index + 1) % candidates.length
+      }
+
+      if (candidates.length === 0) {
+        return
+      }
+
+      const pick = candidates[index] ?? candidates[0]!
+      const applied = applyCompletion(cmd.text, ctx, pick)
+      syncCommand({
+        ...withText(cmd, applied.text, applied.cursor),
+        completions: candidates,
+        completionIndex: index,
+      })
+    }
+
     const onKeyDown = (e: KeyboardEvent) => {
       e.preventDefault()
       const keys = encodeKey(e)
@@ -119,12 +172,19 @@ export function useEditorInput(editorMode: string) {
         }
 
         if (cmd.pendingRegister) {
-          void insertRegister({ ...cmd, pendingRegister: false })
+          void insertRegisterAtCursor({ ...cmd, pendingRegister: false })
             .then(syncCommand)
             .catch((err: unknown) => {
               console.error("register insert failed", err)
               syncCommand({ ...cmd, pendingRegister: false })
             })
+          return
+        }
+
+        if (keys === "<Tab>") {
+          void runTabCompletion(cmd).catch((err: unknown) => {
+            console.error("completion failed", err)
+          })
           return
         }
 
@@ -134,12 +194,8 @@ export function useEditorInput(editorMode: string) {
           if (entry === null) {
             return
           }
-          syncCommand({
-            ...cmd,
-            text: entry,
-            error: null,
-            historyIndex: index,
-          })
+          const next = withText(cmd, entry, entry.length)
+          syncCommand({ ...next, historyIndex: index })
           if (isSearchPrompt(cmd.kind)) {
             void previewSearch(cmd.kind, entry)
           }
@@ -148,7 +204,7 @@ export function useEditorInput(editorMode: string) {
 
         if (keys === "<Down>") {
           if (cmd.historyIndex === null || cmd.historyIndex === 0) {
-            syncCommand({ ...cmd, text: "", error: null, historyIndex: null })
+            syncCommand(withText(cmd, "", 0))
             if (isSearchPrompt(cmd.kind)) {
               void previewSearch(cmd.kind, "")
             }
@@ -159,15 +215,39 @@ export function useEditorInput(editorMode: string) {
           if (entry === null) {
             return
           }
-          syncCommand({
-            ...cmd,
-            text: entry,
-            error: null,
-            historyIndex: index,
-          })
+          const next = withText(cmd, entry, entry.length)
+          syncCommand({ ...next, historyIndex: index })
           if (isSearchPrompt(cmd.kind)) {
             void previewSearch(cmd.kind, entry)
           }
+          return
+        }
+
+        if (keys === "<Left>") {
+          syncCommand({
+            ...cmd,
+            cursor: Math.max(0, cmd.cursor - 1),
+            completions: [],
+          })
+          return
+        }
+
+        if (keys === "<Right>") {
+          syncCommand({
+            ...cmd,
+            cursor: Math.min(cmd.text.length, cmd.cursor + 1),
+            completions: [],
+          })
+          return
+        }
+
+        if (keys === "<Home>") {
+          syncCommand({ ...cmd, cursor: 0, completions: [] })
+          return
+        }
+
+        if (keys === "<End>") {
+          syncCommand({ ...cmd, cursor: cmd.text.length, completions: [] })
           return
         }
 
@@ -212,20 +292,27 @@ export function useEditorInput(editorMode: string) {
         }
 
         if (keys === "<BS>") {
-          const text = cmd.text.slice(0, -1)
-          syncCommand({ ...cmd, text, error: null })
+          if (cmd.cursor === 0) {
+            return
+          }
+          const text =
+            cmd.text.slice(0, cmd.cursor - 1) + cmd.text.slice(cmd.cursor)
+          const next = withText(cmd, text, cmd.cursor - 1)
+          syncCommand(next)
           if (isSearchPrompt(cmd.kind)) {
-            void previewSearch(cmd.kind, text)
+            void previewSearch(cmd.kind, next.text)
           }
           return
         }
 
         const ch = commandCharFromEvent(e)
         if (ch !== null) {
-          const text = cmd.text + ch
-          syncCommand({ ...cmd, text, error: null })
+          const text =
+            cmd.text.slice(0, cmd.cursor) + ch + cmd.text.slice(cmd.cursor)
+          const next = withText(cmd, text, cmd.cursor + 1)
+          syncCommand(next)
           if (isSearchPrompt(cmd.kind)) {
-            void previewSearch(cmd.kind, text)
+            void previewSearch(cmd.kind, next.text)
           }
         }
 
