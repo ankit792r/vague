@@ -20,7 +20,7 @@ func TestBufferNextPrev(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	next, err := ws.SwitchToNextBuffer(frame.ID)
+	next, err := ws.SwitchToNextBuffer(frame.ID, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +28,7 @@ func TestBufferNextPrev(t *testing.T) {
 		t.Fatalf("next = %q, want *a*", next.Name)
 	}
 
-	prev, err := ws.SwitchToPrevBuffer(frame.ID)
+	prev, err := ws.SwitchToPrevBuffer(frame.ID, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,7 +49,7 @@ func TestBufferByNumber(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := ws.SwitchToBuffer(frame.ID, "2")
+	got, err := ws.SwitchToBuffer(frame.ID, "2", false)
 	if err != nil {
 		t.Fatal(err)
 	}
