@@ -1,7 +1,8 @@
 import type { RefObject } from "preact"
 import { CommandLine } from "../chrome/CommandLine"
 import { StatusLine } from "../chrome/StatusLine"
-import { EditorArea } from "../editor/EditorArea"
+import { TabLine } from "../chrome/TabLine"
+import { SplitEditor } from "../editor/SplitEditor"
 import type { CommandLineState, PromptKind } from "../../types/command"
 import { isSearchPrompt } from "../../types/command"
 import type { EditorViewState } from "../../types/editor"
@@ -28,6 +29,10 @@ export function EmacsFrame({
   commandLine,
   position,
   lineMarks,
+  panes,
+  tabs,
+  columns,
+  rows,
 }: EmacsFrameProps) {
   const statusMode = commandLine.active
     ? promptStatusMode(commandLine.kind)
@@ -35,18 +40,34 @@ export function EmacsFrame({
 
   return (
     <div class="emacs-frame">
-      <EditorArea
+      <TabLine tabs={tabs} />
+      <SplitEditor
         editorRef={editorRef}
-        lines={lines}
-        lineNumbers={lineNumbers}
-        number={number}
-        gutterColumns={gutterColumns}
-        mode={mode}
-        cursor={cursor}
-        selection={selection}
-        searchMatch={searchMatch}
-        searchHighlights={searchHighlights}
+        panes={panes.length > 0 ? panes : [{
+          windowId: 0,
+          x: 0,
+          y: 0,
+          columns,
+          rows,
+          active: true,
+          lines,
+          lineNumbers,
+          number,
+          gutterColumns,
+          bufferName,
+          modified,
+          mode,
+          position,
+          cursor,
+          selection,
+          searchMatch,
+          searchHighlights,
+          lineMarks,
+        }]}
+        columns={columns}
+        rows={rows}
         hideCursor={commandLine.active}
+        mode={mode}
       />
       <StatusLine
         bufferName={bufferName}

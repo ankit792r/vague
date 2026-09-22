@@ -127,6 +127,35 @@ type BufferPosition struct {
 	Column int `json:"column"`
 }
 
+// RedrawPane is one window in a split layout.
+type RedrawPane struct {
+	WindowID      uint64         `json:"window_id"`
+	X             int            `json:"x"`
+	Y             int            `json:"y"`
+	Columns       int            `json:"columns"`
+	Rows          int            `json:"rows"`
+	Active        bool           `json:"active,omitempty"`
+	Wrap          bool           `json:"wrap"`
+	Number        bool           `json:"number,omitempty"`
+	GutterColumns int            `json:"gutter_columns,omitempty"`
+	Buffer        RedrawBuffer   `json:"buffer"`
+	Lines         []string       `json:"lines"`
+	LineNumbers   []int          `json:"line_numbers,omitempty"`
+	Cursor        CursorPos      `json:"cursor"`
+	Selection     *Selection     `json:"selection,omitempty"`
+	SearchMatch   *Selection     `json:"search_match,omitempty"`
+	SearchHighlights []Selection `json:"search_highlights,omitempty"`
+	Mode          string         `json:"mode"`
+	Position      BufferPosition `json:"position"`
+	LineMarks     string         `json:"line_marks,omitempty"`
+}
+
+// RedrawTab is one entry in the tab line.
+type RedrawTab struct {
+	Label  string `json:"label"`
+	Active bool   `json:"active,omitempty"`
+}
+
 // Redraw brings a client's picture up to date.
 type Redraw struct {
 	FrameID       uint64         `json:"frame_id"`
@@ -147,4 +176,7 @@ type Redraw struct {
 	Position         BufferPosition `json:"position"`
 	LineMarks        string         `json:"line_marks,omitempty"`
 	Echo             *StatusEcho    `json:"echo,omitempty"`
+	Panes            []RedrawPane   `json:"panes,omitempty"`
+	Tabs             []RedrawTab    `json:"tabs,omitempty"`
+	ActiveTab        int            `json:"active_tab,omitempty"`
 }
