@@ -26,7 +26,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `f` `F` `t` `T` on line; `;` `,` repeat
 - [x] `^` `_` first non-blank; `|` column
 - [x] `{` `}` `(` `)` paragraph / sentence / block (simple heuristics OK first)
-- [ ] `%` matching bracket; `[` `]` prev/next section
+- [x] `%` matching bracket; `[` `]` prev/next section
 - [ ] `*` `#` search word forward/back; `g*` `g#`
 - [ ] `H` `M` `L` screen lines; `zt` `zz` `zb` scroll cursor line
 - [ ] `Ctrl-o` / `Ctrl-i` jump list
