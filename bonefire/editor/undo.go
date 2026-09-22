@@ -31,6 +31,8 @@ func (e *Editor) beginInsertGroup(buf *buffer.Buffer, at text.Offset) {
 
 func (e *Editor) leaveInsert(win *window.Window, buf *buffer.Buffer) {
 	e.Mode = NormalMode
+	e.insertNormalOnce = false
+	e.insertCompleteActive = false
 
 	if e.insertGroup == 0 {
 		return
