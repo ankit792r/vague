@@ -17,6 +17,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - `:goto` / `:123`; `:wrap` `:number` and `:set` aliases; `:only` placeholder echo
 - Search patterns (`\m` `\M` `\v` `\V` subset); `:set` ignorecase/smartcase/hlsearch/incsearch/wrapscan; hlsearch + `:nohlsearch`; `:sort` / `:uniq`; `:g` / `:s` use pattern engine; search offsets (`/pat+2`, `/pat/e`); `:ta` / `:vimgrep` stubbed
 - Registers `"a`–`z` / `"A` append; `"0` yank; `"1`–`9` delete ring; `"-` small delete; `":` / `"/` last cmd & search; `"*` / `"+` clipboard (in-memory stub); `"_` black hole; `:reg`; `register_get` / `register_set`; OSC 52 stub
+- Marks `ma`–`mz` / file `mA`–`mZ` (shada); `` ` `` / `'` mark jumps; `` `. `` / `` `" ``; `:marks`; status line mark labels; digraphs; keyboard locale key encoding
 - Viewport scroll, soft wrap, optional line numbers, status line Ln/Col, echo area
 
 ---
@@ -128,7 +129,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `` ` `` / `'` jumps to mark; `` ' `` line jump; `` `. `` last change; `` `" `` last jump
 - [x] `:marks`; mark in status when set
 - [x] Digraphs `Ctrl-k` or `:digraphs`
-- [ ] Keyboard locale / keycode normalization (fix gaps vs Neovim)
+- [x] Keyboard locale / keycode normalization (fix gaps vs Neovim)
 
 ---
 
