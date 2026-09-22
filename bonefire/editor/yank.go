@@ -91,8 +91,13 @@ func (e *Editor) pasteLinewise(
 		return err
 	}
 
-	setWindowCursor(buf, win, delta.Start)
-	buf.EndEdit(windowCursor(win))
+	if !e.fileOpts.Paste {
+		setWindowCursor(buf, win, delta.Start)
+		buf.EndEdit(windowCursor(win))
+	} else {
+		setWindowCursor(buf, win, delta.NewEnd)
+		buf.EndEdit(windowCursor(win))
+	}
 
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)

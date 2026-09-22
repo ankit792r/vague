@@ -21,6 +21,8 @@ var setOptionNames = []string{
 	"hlsearch", "hls", "nohlsearch", "nohls",
 	"incsearch", "noincsearch",
 	"wrapscan", "ws", "nowrapscan", "nows",
+	"swapfile", "swf",
+	"paste", "nopaste",
 }
 
 func (w *Workspace) Complete(frameID uint64, kind, prefix string) ([]string, error) {
