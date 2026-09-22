@@ -429,18 +429,48 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		if frameID == 0 {
 			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
+		regName := `"`
+		if len(params.Args) > 0 {
+			regName = params.Args[0]
+		}
 		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-			_, _, _, err := ws.FrameContext(frameID)
-			if err != nil {
+			if _, _, _, err := ws.FrameContext(frameID); err != nil {
 				return nil, err
 			}
-			text := ws.Editor.UnnamedRegisterString()
+			text, ok := ws.Editor.GetRegister(regName)
+			if !ok {
+				return map[string]any{"text": ""}, nil
+			}
 			return map[string]any{"text": text}, nil
 		})
 		if err != nil {
 			return fail(err)
 		}
 		return result, nil
+
+	case "register_set":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		if len(params.Args) < 2 {
+			return fail(fmt.Errorf("register_set: name and text required"))
+		}
+		name := params.Args[0]
+		text := strings.Join(params.Args[1:], " ")
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			if _, _, _, err := ws.FrameContext(frameID); err != nil {
+				return nil, err
+			}
+			if err := ws.Editor.SetRegister(name, text, false); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+		s.pushRedraw(ctx, sess, frameID)
+		return map[string]any{"ok": true}, nil
 
 	case "clear_echo":
 		if frameID == 0 {

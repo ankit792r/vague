@@ -296,11 +296,7 @@ func (e *Editor) exSource(
 }
 
 func (e *Editor) exReg() string {
-	data, _, ok := e.registerText()
-	if !ok {
-		return "Type Name Content\n\" (empty)"
-	}
-	return fmt.Sprintf("Type Name Content\n\" %q", string(data))
+	return e.FormatRegisters()
 }
 
 func (e *Editor) exMarks() string {

@@ -73,7 +73,11 @@ func (e *Editor) insertKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 
 	if e.pendingInsertReg {
 		e.pendingInsertReg = false
-		if data, _, ok := e.registerText(); ok {
+		id, ok := parseRegisterKeyASCII(keys)
+		if !ok {
+			id = registerID{}
+		}
+		if data, _, ok := e.readRegister(id); ok {
 			return e.insertBytes(frame, win, buf, data)
 		}
 		frame.Dirty = true
