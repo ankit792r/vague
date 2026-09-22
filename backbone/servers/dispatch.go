@@ -330,7 +330,7 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		}
 
 		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-			if err := ws.SetEcho(frameID, "Only one window (splits not implemented yet)", editor.EchoInfo); err != nil {
+			if err := ws.OnlyWindow(frameID); err != nil {
 				return nil, err
 			}
 			return nil, nil
