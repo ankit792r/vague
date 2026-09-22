@@ -12,6 +12,16 @@ const ALIASES: Record<string, string> = {
   bp: "bprev",
   b: "buffer",
   ls: "buffers",
+  go: "goto",
+}
+
+const SET_OPTIONS: Record<string, ParsedExecute["name"]> = {
+  number: "number",
+  nu: "number",
+  nonumber: "nonumber",
+  nonu: "nonumber",
+  wrap: "wrap",
+  nowrap: "nowrap",
 }
 
 export function parseCommandLine(input: string): ParsedExecute | null {
@@ -22,6 +32,10 @@ export function parseCommandLine(input: string): ParsedExecute | null {
 
   if (!line) {
     return null
+  }
+
+  if (/^\d+$/.test(line)) {
+    return { name: "goto", count: Number(line) }
   }
 
   const space = line.indexOf(" ")
@@ -36,18 +50,11 @@ export function parseCommandLine(input: string): ParsedExecute | null {
 
   if (name === "set") {
     const opt = rest.toLowerCase()
-    switch (opt) {
-      case "number":
-        return { name: "number" }
-      case "nonumber":
-        return { name: "nonumber" }
-      case "wrap":
-        return { name: "wrap" }
-      case "nowrap":
-        return { name: "nowrap" }
-      default:
-        return null
+    const mapped = SET_OPTIONS[opt]
+    if (mapped) {
+      return { name: mapped }
     }
+    return { name: "set", args: rest ? [rest] : undefined }
   }
 
   name = ALIASES[name] ?? name
@@ -61,5 +68,7 @@ export function parseCommandLine(input: string): ParsedExecute | null {
     name,
     args,
     bang: bang || undefined,
+    count:
+      name === "goto" && rest && /^\d+$/.test(rest) ? Number(rest) : undefined,
   }
 }
