@@ -26,6 +26,9 @@ type Editor struct {
 	visualAnchor  text.Offset
 	searchPattern string
 	searchForward bool
+	searchMatchFrom text.Offset
+	searchMatchTo   text.Offset
+	searchMatchBuf  uint64
 	lastChange    lastChange
 	reg           register
 

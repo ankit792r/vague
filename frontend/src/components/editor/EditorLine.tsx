@@ -9,32 +9,33 @@ type EditorLineProps = {
   cursor: EditorCursor
   cursorShape: CursorShape
   selection: EditorSelection | null
+  searchMatch: EditorSelection | null
 }
 
-function selectionSpanForRow(
+function highlightSpanForRow(
   row: number,
   lineLen: number,
-  selection: EditorSelection | null,
+  highlight: EditorSelection | null,
 ): { start: number; end: number } | null {
-  if (!selection?.visible) {
+  if (!highlight?.visible) {
     return null
   }
 
-  if (row < selection.start.row || row > selection.end.row) {
+  if (row < highlight.start.row || row > highlight.end.row) {
     return null
   }
 
-  if (selection.linewise) {
+  if (highlight.linewise) {
     return { start: 0, end: lineLen }
   }
 
   let start = 0
   let end = lineLen
-  if (row === selection.start.row) {
-    start = selection.start.column
+  if (row === highlight.start.row) {
+    start = highlight.start.column
   }
-  if (row === selection.end.row) {
-    end = Math.min(lineLen, selection.end.column + 1)
+  if (row === highlight.end.row) {
+    end = Math.min(lineLen, highlight.end.column + 1)
   }
   if (end <= start) {
     return null
@@ -42,18 +43,30 @@ function selectionSpanForRow(
   return { start, end }
 }
 
-function classForSpan(
+function cellClassName(
   colStart: number,
   colEnd: number,
-  span: { start: number; end: number } | null,
+  selection: { start: number; end: number } | null,
+  searchMatch: { start: number; end: number } | null,
+  atCursor: boolean,
 ): string | undefined {
-  if (!span) {
+  const parts: string[] = []
+
+  if (searchMatch && colEnd > searchMatch.start && colStart < searchMatch.end) {
+    parts.push("search-match")
+  }
+  if (selection && colEnd > selection.start && colStart < selection.end) {
+    parts.push("visual-selection")
+  }
+  if (atCursor) {
+    parts.push("cursor-cell")
+  }
+
+  if (parts.length === 0) {
     return undefined
   }
-  if (colEnd <= span.start || colStart >= span.end) {
-    return undefined
-  }
-  return "visual-selection"
+
+  return parts.join(" ")
 }
 
 function renderSegment(
@@ -73,7 +86,8 @@ function renderSegment(
 
 function renderLineText(
   display: string,
-  span: { start: number; end: number } | null,
+  selection: { start: number; end: number } | null,
+  searchMatch: { start: number; end: number } | null,
   showBlockCursor: boolean,
   cursorColumn: number,
 ): JSX.Element {
@@ -92,12 +106,13 @@ function renderLineText(
 
   for (let col = 0; col < display.length; col++) {
     const ch = display[col]
-    let className = classForSpan(col, col + 1, span)
-    const atCursor = showBlockCursor && cursorColumn === col
-
-    if (atCursor) {
-      className = className ? "visual-selection cursor-cell" : "cursor-cell"
-    }
+    const className = cellClassName(
+      col,
+      col + 1,
+      selection,
+      searchMatch,
+      showBlockCursor && cursorColumn === col,
+    )
 
     if (className !== runClass) {
       flush()
@@ -108,12 +123,15 @@ function renderLineText(
   flush()
 
   if (showBlockCursor && cursorColumn >= display.length) {
-    const trailingClass = classForSpan(display.length, display.length, span)
+    const trailingClass = cellClassName(
+      display.length,
+      display.length,
+      selection,
+      searchMatch,
+      true,
+    )
     nodes.push(
-      <span
-        key="cursor-eol"
-        class={trailingClass ? "visual-selection cursor-cell" : "cursor-cell"}
-      >
+      <span key="cursor-eol" class={trailingClass ?? "cursor-cell"}>
         {"\u00a0"}
       </span>,
     )
@@ -128,9 +146,11 @@ export function EditorLine({
   cursor,
   cursorShape,
   selection,
+  searchMatch,
 }: EditorLineProps) {
   const display = line === "" ? "\u00a0" : line
-  const span = selectionSpanForRow(row, display.length, selection)
+  const selectionSpan = highlightSpanForRow(row, display.length, selection)
+  const searchSpan = highlightSpanForRow(row, display.length, searchMatch)
   const showCursor = cursor?.visible && cursor.row === row
   const cursorCol = showCursor
     ? Math.min(Math.max(0, cursor.column), display.length)
@@ -139,11 +159,17 @@ export function EditorLine({
   const useBarOverlay = cursorShape === "bar" && showCursor
   const useBlockCursor = showCursor && !useBarOverlay
 
-  if (!span && !showCursor) {
+  if (!selectionSpan && !searchSpan && !showCursor) {
     return <>{display}</>
   }
 
-  const text = renderLineText(display, span, useBlockCursor, cursorCol)
+  const text = renderLineText(
+    display,
+    selectionSpan,
+    searchSpan,
+    useBlockCursor,
+    cursorCol,
+  )
 
   if (!useBarOverlay) {
     return text

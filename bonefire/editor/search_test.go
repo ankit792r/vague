@@ -114,6 +114,66 @@ func TestRepeatSearchNAndN(t *testing.T) {
 	}
 }
 
+func TestSearchHighlightInRedraw(t *testing.T) {
+	t.Parallel()
+
+	ws := workspace.New()
+	buf := ws.Editor.Scratch("*scratch*")
+	buf.Text.SetBytes([]byte("hello world"))
+
+	frame, err := ws.NewFrame(80, 10, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ws.Search(frame.ID, "world", true); err != nil {
+		t.Fatal(err)
+	}
+
+	redraw, ok := ws.RenderRedraw(frame.ID)
+	if !ok {
+		t.Fatal("expected redraw")
+	}
+	if redraw.SearchMatch == nil || !redraw.SearchMatch.Visible {
+		t.Fatal("expected search_match highlight")
+	}
+	if redraw.SearchMatch.Start.Column != 6 || redraw.SearchMatch.End.Column != 10 {
+		t.Fatalf("search_match cols = %d..%d",
+			redraw.SearchMatch.Start.Column, redraw.SearchMatch.End.Column)
+	}
+}
+
+func TestSearchHighlightMovesWithN(t *testing.T) {
+	t.Parallel()
+
+	ws := workspace.New()
+	buf := ws.Editor.Scratch("*scratch*")
+	buf.Text.SetBytes([]byte("foo foo foo"))
+
+	frame, err := ws.NewFrame(80, 10, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ws.Search(frame.ID, "foo", true); err != nil {
+		t.Fatal(err)
+	}
+	if err := ws.HandleInput(frame.ID, "n"); err != nil {
+		t.Fatal(err)
+	}
+
+	redraw, ok := ws.RenderRedraw(frame.ID)
+	if !ok {
+		t.Fatal("expected redraw")
+	}
+	if redraw.SearchMatch == nil {
+		t.Fatal("expected search_match")
+	}
+	if redraw.SearchMatch.Start.Column != 8 {
+		t.Fatalf("search_match start col = %d, want 8", redraw.SearchMatch.Start.Column)
+	}
+}
+
 func TestSearchNotFound(t *testing.T) {
 	t.Parallel()
 

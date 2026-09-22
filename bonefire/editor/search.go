@@ -85,6 +85,7 @@ func (e *Editor) runSearch(
 	}
 
 	off := text.Offset(match)
+	e.setSearchMatch(buf, off, off+text.Offset(len(pat)))
 	setWindowCursor(buf, win, off)
 	view := layoutViewForWindow(buf.Text, win, frame)
 	rememberColumn(buf, win, view)
