@@ -94,6 +94,7 @@ func (e *Editor) RunExLine(
 	case "undo", "u":
 		return "", e.undoTo(frame, win, buf, false)
 	case "redo", "red":
+		// Ex `:redo` (distinct from insert-mode <C-r> register paste).
 		if err := e.undoTo(frame, win, buf, true); err != nil {
 			return "", err
 		}
