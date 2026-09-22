@@ -102,7 +102,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] Vim regex engine (`\m` `\M` `\v` `\V`) or documented subset
 - [x] `:set ignorecase` `smartcase` `hlsearch` `incsearch` `wrapscan`
 - [x] Highlight **all** matches (`hlsearch`) + `:nohlsearch`
-- [ ] Search offset `:ta` tags (later)
+- [x] Search offset `:ta` tags (later)
 - [ ] `:vimgrep` / quickfix list (see Phase 12)
 - [ ] `:sort` `:uniq` on ranges
 
