@@ -42,6 +42,8 @@ type UndoTree struct {
 	group []Edit
 	depth int
 	before Offset
+
+	initial []byte
 }
 
 func NewUndoTree() *UndoTree {
