@@ -11,6 +11,10 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return nil
 	}
 
+	if handled, err := e.consumePendingCharFind(frame, win, buf, keys); handled {
+		return err
+	}
+
 	t := buf.Text
 	at := windowCursor(win)
 
@@ -105,6 +109,12 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		setWindowCursor(buf, win, moveToBufferLine(t, win, line))
 	case "0":
 		setWindowCursor(buf, win, moveToLineStart(t, at))
+	case "^":
+		setWindowCursor(buf, win, firstNonBlank(t, at))
+	case "_":
+		setWindowCursor(buf, win, moveUnderscore(t, at, e.takeCount()))
+	case "|":
+		setWindowCursor(buf, win, moveToColumn(t, at, e.takeCount()))
 	case "$":
 		setWindowCursor(buf, win, moveToLineEnd(t, at, false))
 	case "o":
@@ -135,6 +145,29 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		setWindowCursor(buf, win, moveVerticalForWindow(t, win, frame, at, e.takeCount(), false))
 	case "k", "<Up>":
 		setWindowCursor(buf, win, moveVerticalForWindow(t, win, frame, at, -e.takeCount(), false))
+	case "f":
+		e.beginPendingCharFind(charFindF)
+		return nil
+	case "F":
+		e.beginPendingCharFind(charFindBigF)
+		return nil
+	case "t":
+		e.beginPendingCharFind(charFindT)
+		return nil
+	case "T":
+		e.beginPendingCharFind(charFindBigT)
+		return nil
+	case ";":
+		if e.lastCharFindKind != charFindNone {
+			return e.executeCharFind(frame, win, buf, e.lastCharFindKind, e.lastCharFindRune, e.takeCount())
+		}
+		return nil
+	case ",":
+		if e.lastCharFindKind != charFindNone {
+			kind := oppositeCharFind(e.lastCharFindKind)
+			return e.executeCharFind(frame, win, buf, kind, e.lastCharFindRune, e.takeCount())
+		}
+		return nil
 	default:
 		return nil
 	}

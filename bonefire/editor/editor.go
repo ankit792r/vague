@@ -32,6 +32,10 @@ type Editor struct {
 	lastChange    lastChange
 	reg           register
 
+	pendingCharFind  charFindKind
+	lastCharFindKind charFindKind
+	lastCharFindRune rune
+
 	nextBufferID uint64
 }
 
@@ -52,6 +56,7 @@ func (e *Editor) ResetInputState() {
 	e.pendingKey = ""
 	e.pendingOp = opNone
 	e.pendingCount = 0
+	e.clearPendingCharFind()
 }
 
 func (e *Editor) CurrentBuffer() *buffer.Buffer {
