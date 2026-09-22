@@ -422,6 +422,20 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		}
 		return result, nil
 
+	case "clear_echo":
+		if frameID == 0 {
+			return nil, nil
+		}
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			ws.ClearEcho(frameID)
+			return nil, nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
 	case "help":
 		if frameID == 0 {
 			return fail(fmt.Errorf("session is not attached to a frame"))
