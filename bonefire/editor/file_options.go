@@ -11,6 +11,7 @@ type FileOpts struct {
 	Backup      bool
 	WriteBackup bool
 	Swapfile    bool
+	Paste       bool
 }
 
 func defaultFileOpts() FileOpts {
@@ -36,6 +37,8 @@ func (e *Editor) FileOptionQuery(name string) string {
 		return boolOpt(e.fileOpts.WriteBackup)
 	case "swapfile", "swf":
 		return boolOpt(e.fileOpts.Swapfile)
+	case "paste":
+		return boolOpt(e.fileOpts.Paste)
 	default:
 		return ""
 	}
@@ -67,6 +70,9 @@ func (e *Editor) ApplySetFileOption(name string, enable bool) (string, error) {
 			return "", fmt.Errorf("swapfile not implemented")
 		}
 		return "swapfile", nil
+	case "paste":
+		e.fileOpts.Paste = enable
+		return "paste", nil
 	default:
 		return "", fmt.Errorf("Unknown option: %s", name)
 	}

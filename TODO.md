@@ -22,6 +22,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - Modified-buffer guards; `:confirm` / `:set confirm`; `:wa` / `:qa` / `:wqall` / `:xall`; autoread / checktime; `:set` autowrite/hidden/backup; `:lcd`; modeline; `:e ++binary`
 - Viewport scroll, soft wrap, optional line numbers, status line Ln/Col, echo area
 - `:set` / `:setlocal` display: relativenumber, scrolloff, list/listchars, cursorline/column, colorcolumn, signcolumn, statusline/tabline, showcmd/ruler, colorschemes; conceallevel stored; foldenable deferred
+- Insert mode: C-w/C-u/C-k, C-a/C-e, C-o, C-r, C-t/C-d, C-x completion; replace mode R; visual replace; `:set paste`
 
 ---
 
@@ -180,14 +181,14 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ## Phase 9 — Insert & replace mode
 
-- [ ] `<C-w>` word back; `<C-u>` to start; `<C-k>` digraph
-- [ ] `<C-a>` / `<C-e>` line start/end
-- [ ] `<C-o>` normal one-shot in insert
-- [ ] `<C-r>` insert register
-- [ ] `<C-t>` / `<C-d>` indent in insert
-- [ ] `<C-x>` completion submodes (`Ctrl-n/p`, omni — ties to LSP)
-- [ ] Replace mode `R` and `gr` visual replace
-- [ ] Insert paste `:set paste` `nopaste`
+- [x] `<C-w>` word back; `<C-u>` to start; `<C-k>` digraph
+- [x] `<C-a>` / `<C-e>` line start/end
+- [x] `<C-o>` normal one-shot in insert
+- [x] `<C-r>` insert register
+- [x] `<C-t>` / `<C-d>` indent in insert
+- [x] `<C-x>` completion submodes (`Ctrl-n/p`, omni — ties to LSP)
+- [x] Replace mode `R` and `gr` visual replace
+- [x] Insert paste `:set paste` `nopaste`
 
 ---
 
