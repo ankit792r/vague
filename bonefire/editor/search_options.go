@@ -57,6 +57,10 @@ func (e *Editor) ApplySetSearchOption(name string, enable bool) (string, error) 
 	}
 }
 
+func (e *Editor) SearchOptsForTest() SearchOpts {
+	return e.searchOpts
+}
+
 func (e *Editor) SearchOptionQuery(name string) string {
 	switch name {
 	case "ignorecase", "ic":
