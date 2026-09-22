@@ -52,7 +52,7 @@ func parseExLine(line string) (exCommand, exRange, error) {
 		return exCommand{}, rng, fmt.Errorf("No command")
 	}
 
-	if strings.HasPrefix(rest, "s") {
+	if isExSubstitute(rest) {
 		sub, err := parseSubstitute(rest)
 		if err != nil {
 			return exCommand{}, exRange{}, err
@@ -80,6 +80,27 @@ func parseExLine(line string) (exCommand, exRange, error) {
 	cmdName = strings.ToLower(cmdName)
 
 	return exCommand{kind: cmdName, args: args, bang: bang}, rng, nil
+}
+
+// isExSubstitute reports whether rest is :substitute (s/pat/repl/), not :set or :sort.
+func isExSubstitute(rest string) bool {
+	if len(rest) < 2 || rest[0] != 's' {
+		return false
+	}
+	lower := strings.ToLower(rest)
+	if strings.HasPrefix(lower, "set") {
+		if len(lower) == 3 {
+			return false
+		}
+		if lower[3] == ' ' || lower[3] == '\t' {
+			return false
+		}
+	}
+	if strings.HasPrefix(lower, "sort") || strings.HasPrefix(lower, "source") {
+		return false
+	}
+	delim := rest[1]
+	return delim != ' ' && delim != '\t'
 }
 
 func splitExNameArgs(rest string) (string, string) {

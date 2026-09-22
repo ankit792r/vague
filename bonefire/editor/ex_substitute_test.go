@@ -24,6 +24,26 @@ func TestParseSubstituteLine(t *testing.T) {
 	}
 }
 
+func TestParseSetLineNotSubstitute(t *testing.T) {
+	cmd, _, err := parseExLine("set hlsearch")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cmd.kind != "set" || cmd.args != "hlsearch" {
+		t.Fatalf("cmd = %+v", cmd)
+	}
+}
+
+func TestParseSetHlsAlias(t *testing.T) {
+	cmd, _, err := parseExLine("set hls")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cmd.kind != "set" || cmd.args != "hls" {
+		t.Fatalf("cmd = %+v", cmd)
+	}
+}
+
 func TestSubstituteOnLine(t *testing.T) {
 	ed := NewEditor()
 	buf := ed.Scratch("ex-sub-test")

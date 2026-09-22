@@ -91,9 +91,19 @@ export function parseCommandLine(input: string): ParsedExecute | null {
     return { name: "goto", count: Number(line) }
   }
 
-  if (/^[%0-9.'$+\-,<>\s]*s[/\w]/.test(line) || /^[gv]/.test(line) || /^norm/.test(line) ||
-    /^nohl/.test(line) || /^sort\b/.test(line) || /^uniq\b/.test(line) ||
-    /^vimgrep\b/.test(line) || /^[lt]?vi[m]?\b/.test(line) || /^(ta|tag|tags)\b/.test(line)) {
+  const looksLikeEx =
+    !/^set(\s|$)/i.test(line) &&
+    (/^[%0-9.'$+\-,<>\s]*s[/\w]/.test(line) ||
+      /^[gv]/.test(line) ||
+      /^norm/.test(line) ||
+      /^nohl/.test(line) ||
+      /^sort\b/.test(line) ||
+      /^uniq\b/.test(line) ||
+      /^vimgrep\b/.test(line) ||
+      /^[lt]?vi[m]?\b/.test(line) ||
+      /^(ta|tag|tags)\b/.test(line))
+
+  if (looksLikeEx) {
     return { name: "ex", args: [line] }
   }
 
