@@ -90,8 +90,11 @@ func (e *Editor) exNohlSearch(frame *frame.Frame) {
 }
 
 func (e *Editor) exVimgrep(args string) (string, error) {
-	_ = args
-	return "", fmt.Errorf("vimgrep: quickfix list not implemented (see Phase 12)")
+	args = strings.TrimSpace(args)
+	if args == "" {
+		return "", fmt.Errorf("vimgrep: pattern required")
+	}
+	return "", fmt.Errorf("vimgrep: quickfix list not implemented (Phase 12); use / and :g for now")
 }
 
 func (e *Editor) exTag(args string) (string, error) {
@@ -138,6 +141,18 @@ func (e *Editor) exSort(
 		return chunks[i].text < chunks[j].text
 	})
 
+	if len(chunks) == 0 {
+		return nil
+	}
+
+	rangeStart := t.LineStart(startLine)
+	rangeEnd := t.LineEnd(endLine)
+	if endLine+1 < t.LineCount() {
+		rangeEnd = t.LineStart(endLine + 1)
+	} else {
+		rangeEnd = t.Len()
+	}
+
 	var assembled []byte
 	for i, c := range chunks {
 		if i > 0 {
@@ -146,8 +161,6 @@ func (e *Editor) exSort(
 		assembled = append(assembled, c.text...)
 	}
 
-	rangeStart := chunks[0].start
-	rangeEnd := chunks[len(chunks)-1].end
 	if _, err := buf.Replace(rangeStart, rangeEnd, assembled); err != nil {
 		return err
 	}
@@ -182,6 +195,11 @@ func (e *Editor) exUniq(
 
 	rangeStart := t.LineStart(startLine)
 	rangeEnd := t.LineEnd(endLine)
+	if endLine+1 < t.LineCount() {
+		rangeEnd = t.LineStart(endLine + 1)
+	} else {
+		rangeEnd = t.Len()
+	}
 	body := strings.Join(kept, "\n")
 	if _, err := buf.Replace(rangeStart, rangeEnd, []byte(body)); err != nil {
 		return err
