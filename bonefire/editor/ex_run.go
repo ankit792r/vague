@@ -84,6 +84,8 @@ func (e *Editor) RunExLine(
 		return e.exMarks(), nil
 	case "delm":
 		return e.exDelMark(cmd.args), nil
+	case "digraphs", "dig":
+		return e.exDigraphs(cmd.args), nil
 	case "jumps":
 		return e.exJumps(), nil
 	case "clearjumps":
