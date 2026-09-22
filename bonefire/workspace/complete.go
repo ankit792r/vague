@@ -11,9 +11,8 @@ var exCommandNames = []string{
 	"edit", "e", "write", "w", "quit", "q", "wq", "x",
 	"buffer", "b", "buffers", "ls", "bnext", "bn", "bprev", "bp",
 	"goto", "go", "search", "set", "wrap", "nowrap", "number", "nonumber",
-	"only", "help",
+	"only", "help", "undolist", "changes", "earlier", "later", "redo", "red",
 }
-
 var setOptionNames = []string{
 	"number", "nu", "nonumber", "nonu", "wrap", "nowrap",
 	"ignorecase", "ic", "noignorecase", "noic",

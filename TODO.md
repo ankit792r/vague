@@ -23,6 +23,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - Viewport scroll, soft wrap, optional line numbers, status line Ln/Col, echo area
 - `:set` / `:setlocal` display: relativenumber, scrolloff, list/listchars, cursorline/column, colorcolumn, signcolumn, statusline/tabline, showcmd/ruler, colorschemes; conceallevel stored; foldenable deferred
 - Insert mode: C-w/C-u/C-k, C-a/C-e, C-o, C-r, C-t/C-d, C-x completion; replace mode R; visual replace; `:set paste`
+- Undo branches `:undolist`; persistent undo cache; `:earlier`/`:later`; `:redo`; `:changes` with `.`/`"` marks
 
 ---
 
@@ -194,11 +195,11 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ## Phase 10 — Undo & change history
 
-- [ ] Undo branches visible `:undolist`
-- [ ] Persistent undo across restarts
-- [ ] `:earlier` `:later` time-based undo
-- [ ] `:redo` ex command (if not same as `<C-r>`)
-- [ ] `:changes` change list `` `. `` `` `" ``
+- [x] Undo branches visible `:undolist`
+- [x] Persistent undo across restarts
+- [x] `:earlier` `:later` time-based undo
+- [x] `:redo` ex command (if not same as `<C-r>`)
+- [x] `:changes` change list `` `. `` `` `" ``
 
 ---
 

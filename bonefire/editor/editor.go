@@ -92,6 +92,8 @@ type Editor struct {
 	fileOpts FileOpts
 
 	globalDisplay GlobalDisplayOpts
+
+	changeLog map[uint64][]changeEntry
 }
 
 func NewEditor() *Editor {
