@@ -35,6 +35,10 @@ func (e *Editor) insertKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		rememberColumn(buf, win, view)
 		frame.Dirty = true
 		return nil
+	case "<C-k>":
+		e.beginDigraph()
+		frame.Dirty = true
+		return nil
 	case "<C-r>":
 		e.pendingInsertReg = true
 		frame.Dirty = true
@@ -84,11 +88,26 @@ func (e *Editor) insertKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return nil
 	}
 
+	if e.pendingDigraph {
+		if e.digraphFirst == "" {
+			if e.setDigraphFirst(keys) {
+				frame.Dirty = true
+			}
+			return nil
+		}
+		if text, ok := e.consumeDigraphInsert(keys); ok {
+			return e.insertBytes(frame, win, buf, []byte(text))
+		}
+		return nil
+	}
+
 	return e.insertBytes(frame, win, buf, []byte(keys))
 }
 
 func (e *Editor) insertBytes(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, data []byte) error {
-	delta, err := buf.Insert(windowCursor(win), data)
+	at := windowCursor(win)
+	e.noteChangeAt(buf, at)
+	delta, err := buf.Insert(at, data)
 	if err != nil {
 		return err
 	}
@@ -107,6 +126,7 @@ func (e *Editor) deleteBack(frame *frame.Frame, win *window.Window, buf *buffer.
 	}
 
 	from := back(buf.Text, at)
+	e.noteChangeAt(buf, from)
 	if _, err := buf.Delete(from, at); err != nil {
 		return err
 	}

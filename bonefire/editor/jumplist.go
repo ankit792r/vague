@@ -67,6 +67,7 @@ func (e *Editor) finishMotionJump(buf *buffer.Buffer, win *window.Window, from t
 		return
 	}
 	if windowCursor(win) != from {
+		e.noteJumpFrom(buf, from)
 		e.pushJump(from)
 	}
 }

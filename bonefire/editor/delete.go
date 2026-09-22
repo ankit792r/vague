@@ -50,6 +50,7 @@ func (e *Editor) deleteChar(frame *frame.Frame, win *window.Window, buf *buffer.
 	data := t.Slice(at, end)
 	e.recordDelete(data, false)
 
+	e.noteChangeAt(buf, at)
 	buf.BeginEdit(at)
 	if _, err := buf.Delete(at, end); err != nil {
 		return err

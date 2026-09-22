@@ -7,15 +7,35 @@ import (
 )
 
 func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, keys string) error {
+	if e.consumeCountDigit(keys) {
+		return nil
+	}
+
+	if e.pendingMarkSet {
+		e.pendingMarkSet = false
+		if isMarkSetKey(keys) {
+			e.setMarkFromNormal(buf, win, rune(keys[0]))
+			frame.Dirty = true
+		}
+		return nil
+	}
+
+	if e.pendingMarkJump != markJumpNone {
+		mode := e.pendingMarkJump
+		e.pendingMarkJump = markJumpNone
+		at := windowCursor(win)
+		motionFrom := at
+		if key, ok := parseMarkJumpKey(keys); ok {
+			return e.jumpToMarkKey(frame, win, buf, key, mode, motionFrom)
+		}
+		return nil
+	}
+
 	if e.consumeRegisterSelect(keys) {
 		return nil
 	}
 	if keys == `"` {
 		e.beginRegisterSelect()
-		return nil
-	}
-
-	if e.consumeCountDigit(keys) {
 		return nil
 	}
 
@@ -373,6 +393,15 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 			kind := oppositeCharFind(e.lastCharFindKind)
 			return e.executeCharFind(frame, win, buf, kind, e.lastCharFindRune, e.takeCount())
 		}
+		return nil
+	case "m":
+		e.pendingMarkSet = true
+		return nil
+	case "`":
+		e.pendingMarkJump = markJumpExact
+		return nil
+	case "'":
+		e.pendingMarkJump = markJumpLine
 		return nil
 	default:
 		return nil
