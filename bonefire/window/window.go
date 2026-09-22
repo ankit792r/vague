@@ -31,6 +31,8 @@ type Window struct {
 	// TopLine is the index of the first visible visual row in the layout.
 	TopLine int
 
+	LocalWorkDir string
+
 	WindowOptions WindowOptions
 }
 

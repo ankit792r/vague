@@ -150,7 +150,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 ## Phase 7 — Buffers & files
 
 - [x] Modified-buffer confirm on `:b` `:bn` `:bp` `:e` `:q` (`:confirm` `:set confirm`)
-- [ ] `:wa` `:wqall` `:qa` `:xall`
+- [x] `:wa` `:wqall` `:qa` `:xall`
 - [ ] Autoread when file changed on disk
 - [ ] `:set autowrite` `autoread` `backup` `writebackup` `swapfile`
 - [ ] Hidden buffers `:set hidden`
