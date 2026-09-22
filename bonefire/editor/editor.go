@@ -61,6 +61,9 @@ type Editor struct {
 	pendingTextObject string
 
 	nextBufferID uint64
+
+	userMaps map[string]string
+	marks    map[string]text.Offset
 }
 
 func NewEditor() *Editor {
@@ -68,6 +71,7 @@ func NewEditor() *Editor {
 		Mode:         NormalMode,
 		Buffers:      make(map[uint64]*buffer.Buffer),
 		nextBufferID: 1,
+		marks:        make(map[string]text.Offset),
 	}
 }
 

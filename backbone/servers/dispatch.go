@@ -102,12 +102,8 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
 		if len(params.Args) == 0 {
-			if !params.Bang {
-				return fail(fmt.Errorf("edit: file name required"))
-			}
-
 			result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-				buf, err := ws.ReloadCurrentBuffer(frameID, true)
+				buf, err := ws.ReloadCurrentBuffer(frameID, params.Bang)
 				if err != nil {
 					return nil, err
 				}
@@ -119,7 +115,6 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 			if err != nil {
 				return fail(err)
 			}
-
 			s.pushRedraw(ctx, sess, frameID)
 			return result, nil
 		}
@@ -538,9 +533,59 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		s.pushRedraw(ctx, sess, frameID)
 		return nil, nil
 
+	case "ex":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		line := strings.Join(params.Args, " ")
+		return s.runExLine(ctx, sess, frameID, line)
+
 	default:
 		return fail(fmt.Errorf("Unknown command: %s", params.Name))
 	}
+}
+
+func (s *Server) runExLine(ctx context.Context, sess *session.Session, frameID uint64, line string) (any, error) {
+	fail := func(err error) (any, error) {
+		if frameID != 0 && err != nil {
+			s.pushEcho(ctx, sess, frameID, err.Error(), editor.EchoError)
+		}
+		return nil, err
+	}
+
+	line = strings.TrimSpace(line)
+	if strings.HasPrefix(strings.ToLower(line), "find ") || strings.HasPrefix(strings.ToLower(line), "sf ") {
+		parts := strings.Fields(line)
+		if len(parts) >= 2 {
+			pattern := parts[1]
+			_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+				return nil, ws.ExFindFile(frameID, pattern)
+			})
+			if err != nil {
+				return fail(err)
+			}
+			s.pushRedraw(ctx, sess, frameID)
+			return nil, nil
+		}
+	}
+
+	echo, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+		msg, runErr := ws.RunExLine(frameID, line)
+		if runErr != nil {
+			return nil, runErr
+		}
+		if msg != "" {
+			if setErr := ws.SetEcho(frameID, msg, editor.EchoInfo); setErr != nil {
+				return nil, setErr
+			}
+		}
+		return msg, nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	s.pushRedraw(ctx, sess, frameID)
+	return echo, nil
 }
 
 func (s *Server) handleInput(ctx context.Context, sess *session.Session, params process.InputParams) {
