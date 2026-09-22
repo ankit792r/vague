@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"vague/bonefire/text"
+	"vague/bonefire/window"
 )
 
 // gutterColumns is the width reserved for line numbers (digits + separator space).
@@ -18,11 +19,9 @@ func gutterColumns(lineCount int) int {
 	return digits + 1
 }
 
-func layoutContentWidth(frameWidth, lineCount int, number bool) int {
+func layoutContentWidth(frameWidth, lineCount int, opts window.WindowOptions) int {
 	width := frameWidth
-	if number {
-		width -= gutterColumns(lineCount)
-	}
+	width -= gutterWidth(lineCount, opts.Number, opts.Display.RelativeNumber, opts.Display.SignColumn)
 	if width < 1 {
 		width = 1
 	}
