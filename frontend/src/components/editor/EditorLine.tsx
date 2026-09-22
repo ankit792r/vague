@@ -2,12 +2,14 @@ import { Fragment, type JSX } from "preact/jsx-runtime"
 import type { EditorCursor, EditorSearchHighlight, EditorSelection } from "../../types/editor"
 
 export type CursorShape = "block" | "bar"
+export type CursorFill = "solid" | "hollow"
 
 type EditorLineProps = {
   line: string
   row: number
   cursor: EditorCursor
   cursorShape: CursorShape
+  cursorFill: CursorFill
   selection: EditorSelection | null
   searchMatch: EditorSelection | null
   searchHighlights: EditorSearchHighlight[]
@@ -74,6 +76,7 @@ function cellClassName(
   searchMatch: { start: number; end: number } | null,
   searchHighlights: { start: number; end: number }[],
   atCursor: boolean,
+  cursorFill: CursorFill,
 ): string | undefined {
   const parts: string[] = []
 
@@ -90,7 +93,7 @@ function cellClassName(
     parts.push("visual-selection")
   }
   if (atCursor) {
-    parts.push("cursor-cell")
+    parts.push(cursorFill === "hollow" ? "cursor-cell-hollow" : "cursor-cell")
   }
 
   if (parts.length === 0) {
@@ -122,6 +125,7 @@ function renderLineText(
   searchHighlights: { start: number; end: number }[],
   showBlockCursor: boolean,
   cursorColumn: number,
+  cursorFill: CursorFill,
 ): JSX.Element {
   const nodes: JSX.Element[] = []
   let run = ""
@@ -145,6 +149,7 @@ function renderLineText(
       searchMatch,
       searchHighlights,
       showBlockCursor && cursorColumn === col,
+      cursorFill,
     )
 
     if (className !== runClass) {
@@ -163,9 +168,16 @@ function renderLineText(
       searchMatch,
       searchHighlights,
       true,
+      cursorFill,
     )
     nodes.push(
-      <span key="cursor-eol" class={trailingClass ?? "cursor-cell"}>
+      <span
+        key="cursor-eol"
+        class={
+          trailingClass ??
+          (cursorFill === "hollow" ? "cursor-cell-hollow" : "cursor-cell")
+        }
+      >
         {"\u00a0"}
       </span>,
     )
@@ -179,6 +191,7 @@ export function EditorLine({
   row,
   cursor,
   cursorShape,
+  cursorFill,
   selection,
   searchMatch,
   searchHighlights,
@@ -206,17 +219,21 @@ export function EditorLine({
     hlSpans,
     useBlockCursor,
     cursorCol,
+    cursorFill,
   )
 
   if (!useBarOverlay) {
     return text
   }
 
+  const barClass =
+    cursorFill === "hollow" ? "cursor-bar-hollow" : "cursor-bar"
+
   return (
     <>
       {text}
       <span
-        class="cursor-bar"
+        class={barClass}
         style={{ left: `${cursorCol}ch` }}
         aria-hidden="true"
       />

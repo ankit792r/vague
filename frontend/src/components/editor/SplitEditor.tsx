@@ -26,7 +26,7 @@ export function SplitEditor({
       {panes.map((pane) => (
         <div
           key={pane.windowId}
-          class={`editor-pane${pane.active ? " editor-pane-active" : ""}`}
+          class="editor-pane"
           style={{
             left: `${pane.x * unitW}%`,
             top: `${pane.y * unitH}%`,
@@ -36,6 +36,7 @@ export function SplitEditor({
         >
           <EditorArea
             editorRef={pane.active ? editorRef : { current: null }}
+            paneActive={pane.active}
             lines={pane.lines}
             lineNumbers={pane.lineNumbers}
             number={pane.number}
@@ -51,7 +52,7 @@ export function SplitEditor({
             selection={pane.selection}
             searchMatch={pane.searchMatch}
             searchHighlights={pane.searchHighlights}
-            hideCursor={hideCursor || !pane.active}
+            hideCursor={hideCursor}
           />
         </div>
       ))}

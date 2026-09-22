@@ -1,6 +1,6 @@
 import type { RefObject } from "preact"
 import type { EditorCursor, EditorSearchHighlight, EditorSearchMatch, EditorSelection } from "../../types/editor"
-import { EditorLine } from "./EditorLine"
+import { EditorLine, type CursorFill } from "./EditorLine"
 
 function cursorShapeForMode(mode: string): "block" | "bar" {
   return mode === "insert" ? "bar" : "block"
@@ -8,6 +8,7 @@ function cursorShapeForMode(mode: string): "block" | "bar" {
 
 type EditorAreaProps = {
   editorRef: RefObject<HTMLDivElement>
+  paneActive: boolean
   lines: string[]
   lineNumbers: number[]
   number: boolean
@@ -28,6 +29,7 @@ type EditorAreaProps = {
 
 export function EditorArea({
   editorRef,
+  paneActive,
   lines,
   lineNumbers,
   number,
@@ -46,17 +48,25 @@ export function EditorArea({
   hideCursor,
 }: EditorAreaProps) {
   const cursorShape = cursorShapeForMode(mode)
+  const cursorFill: CursorFill = paneActive ? "solid" : "hollow"
   const showGutter = number || relativeNumber
   const gutterStyle =
     showGutter && gutterColumns > 0
       ? { width: `${gutterColumns}ch` }
       : undefined
 
+  const displayCursor: EditorCursor =
+    hideCursor || !cursor.visible
+      ? { ...cursor, visible: false }
+      : { ...cursor, visible: true }
+
   return (
     <div ref={editorRef} class="editor-area" aria-label="editor">
       {(lines ?? []).map((line, index) => {
         const lineClass =
-          cursorLineRow === index ? "editor-line cursor-line" : "editor-line"
+          paneActive && cursorLineRow === index
+            ? "editor-line cursor-line"
+            : "editor-line"
         return (
           <div key={index} class={lineClass}>
             {signColumn ? (
@@ -78,7 +88,7 @@ export function EditorArea({
                   aria-hidden="true"
                 />
               ))}
-              {cursorColumnOn ? (
+              {cursorColumnOn && paneActive ? (
                 <span
                   class="cursor-column"
                   style={{ left: `${cursorColumn}ch` }}
@@ -88,8 +98,9 @@ export function EditorArea({
               <EditorLine
                 line={line}
                 row={index}
-                cursor={hideCursor ? { ...cursor, visible: false } : cursor}
+                cursor={displayCursor}
                 cursorShape={cursorShape}
+                cursorFill={cursorFill}
                 selection={selection}
                 searchMatch={searchMatch}
                 searchHighlights={searchHighlights}
