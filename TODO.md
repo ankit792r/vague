@@ -9,7 +9,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 ## Shipped
 
 - Normal / insert / visual char / visual line; numeric counts; `.` repeat
-- Motions: `h/j/k/l`, `w/b/e`, `0/$`, `gg`/`G`, line `j/k` with wrap, `o`/`O`, `i`/`a`/`A`/`I`
+- Motions: `h/j/k/l`, `w/b/e`, `0/$`/`^`/`_`/`|`, `gg`/`G`, `f`/`F`/`t`/`T`/`;`/`,`, line `j/k` with wrap, `o`/`O`, `i`/`a`/`A`/`I`
 - Operators: `d`/`c`/`y` + `d`/`y`/`c` linewise, `dw`/`cw`/`yw`, `D`, `x`, `J`
 - Unnamed register; `p`/`P`; `u` / `<C-r>`
 - `/` `?` `n` `N`; current-match highlight on redraw
@@ -23,8 +23,8 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ### Motions still missing
 
-- [ ] `f` `F` `t` `T` on line; `;` `,` repeat
-- [ ] `^` `_` first non-blank; `|` column
+- [x] `f` `F` `t` `T` on line; `;` `,` repeat
+- [x] `^` `_` first non-blank; `|` column
 - [ ] `{` `}` `(` `)` paragraph / sentence / block (simple heuristics OK first)
 - [ ] `%` matching bracket; `[` `]` prev/next section
 - [ ] `*` `#` search word forward/back; `g*` `g#`

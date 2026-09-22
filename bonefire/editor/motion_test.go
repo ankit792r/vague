@@ -61,6 +61,40 @@ func TestFirstNonBlank(t *testing.T) {
 	}
 }
 
+func TestMoveUnderscore(t *testing.T) {
+	t.Parallel()
+
+	tex := text.New([]byte("  one\n    two\nthree\n"))
+	at := tex.OffsetOf(text.Point{Line: 0, Col: 0})
+
+	if got := tex.PointOf(moveUnderscore(tex, at, 1)); got.Line != 0 || got.Col != 2 {
+		t.Fatalf("_ count 1: got line=%d col=%d, want 0,2", got.Line, got.Col)
+	}
+
+	if got := tex.PointOf(moveUnderscore(tex, at, 2)); got.Line != 1 || got.Col != 4 {
+		t.Fatalf("_ count 2: got line=%d col=%d, want 1,4", got.Line, got.Col)
+	}
+}
+
+func TestMoveToColumn(t *testing.T) {
+	t.Parallel()
+
+	tex := text.New([]byte("hello"))
+	at := tex.LineEnd(0)
+
+	if got := tex.PointOf(moveToColumn(tex, at, 1)); got.Col != 0 {
+		t.Fatalf("|1: got col %d, want 0", got.Col)
+	}
+
+	if got := tex.PointOf(moveToColumn(tex, at, 4)); got.Col != 3 {
+		t.Fatalf("|4: got col %d, want 3", got.Col)
+	}
+
+	if got := tex.PointOf(moveToColumn(tex, at, 99)); got.Col != 5 {
+		t.Fatalf("|99: got col %d, want 5", got.Col)
+	}
+}
+
 func TestMoveLeftRight(t *testing.T) {
 	t.Parallel()
 

@@ -59,18 +59,50 @@ func moveToLineEnd(t *text.Text, off text.Offset, past bool) text.Offset {
 
 func firstNonBlank(t *text.Text, off text.Offset) text.Offset {
 	point := t.PointOf(off)
-	line := t.Line(point.Line)
+	return firstNonBlankOnLine(t, point.Line)
+}
+
+func firstNonBlankOnLine(t *text.Text, line int) text.Offset {
+	line = clampInt(line, 0, t.LineCount()-1)
+	lineBytes := t.Line(line)
 	col := 0
 
-	for col < len(line) {
-		r, size := utf8.DecodeRune(line[col:])
+	for col < len(lineBytes) {
+		r, size := utf8.DecodeRune(lineBytes[col:])
 		if r != ' ' && r != '\t' {
-			return t.OffsetOf(text.Point{Line: point.Line, Col: col})
+			return t.OffsetOf(text.Point{Line: line, Col: col})
 		}
 		col += size
 	}
 
-	return t.LineStart(point.Line)
+	return t.LineStart(line)
+}
+
+// moveUnderscore is [count-1] lines down, first non-blank (Vim _).
+func moveUnderscore(t *text.Text, off text.Offset, count int) text.Offset {
+	if count < 1 {
+		count = 1
+	}
+
+	point := t.PointOf(off)
+	targetLine := point.Line + (count - 1)
+	return firstNonBlankOnLine(t, targetLine)
+}
+
+// moveToColumn moves to 1-based byte column on the current line (Vim |).
+func moveToColumn(t *text.Text, off text.Offset, column1 int) text.Offset {
+	if column1 < 1 {
+		column1 = 1
+	}
+
+	point := t.PointOf(off)
+	line := t.Line(point.Line)
+	col := column1 - 1
+	if col > len(line) {
+		col = len(line)
+	}
+
+	return t.OffsetOf(text.Point{Line: point.Line, Col: col})
 }
 
 func moveToBufferLine(t *text.Text, win *window.Window, line int) text.Offset {
