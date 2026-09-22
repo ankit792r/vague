@@ -39,25 +39,25 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `s`/`S`/`cc`/`C` parity (char vs line change)
 - [x] `r` replace char; `R` replace mode
 - [x] `~` toggle case
-- [ ] `gu`/`gU`/`g~` operator-pending (minimal)
+- [x] `gu`/`gU`/`g~` operator-pending (minimal)
 - [x] `>>` `<<` `==` indent lines (spaces/tabs, `:set shiftwidth`)
-- [ ] `>` `<` visual/operator indent
-- [ ] `!` external filter (later: job runner)
-- [ ] `gq` format text (wrap width)
-- [ ] `Ctrl-a` / `Ctrl-x` number increment/decrement
-- [ ] `Ctrl-v` visual block mode
-- [ ] `gv` reselect last visual
-- [ ] `Ctrl-r` register insert in insert mode (not just redo)
-- [ ] `Q`/`gQ` ex linewise (low priority)
-- [ ] `.` records more motion/operator combos; fix known gaps
+- [x] `>` `<` visual/operator indent
+- [x] `!` external filter stub (echo; job runner later)
+- [x] `gq` format text (wrap width)
+- [x] `Ctrl-a` / `Ctrl-x` number increment/decrement
+- [x] `Ctrl-v` visual block mode
+- [x] `gv` reselect last visual
+- [x] `Ctrl-r` register insert in insert mode (not just redo)
+- [x] `Q`/`gQ` ex linewise (low priority)
+- [x] `.` records more motion/operator combos; fix known gaps
 
 ### Text objects (operator + visual)
 
 - [x] `iw` `aw` `iW` `aW`
-- [ ] `i"` `a"` `i'` `a'` backtick-quoted strings
-- [ ] `i(` `a(` `ib` `ab` and `i[` `a[` `i{` `a{` pairs
-- [ ] `it` `at` tag block (when HTML-ish)
-- [x] `ip` `ap` paragraph; [ ] `is` `as` sentence
+- [x] `i"` `a"` `i'` `a'` backtick-quoted strings
+- [x] `i(` `a(` `ib` `ab` and `i[` `a[` `i{` `a{` pairs
+- [x] `it` `at` tag block (when HTML-ish)
+- [x] `ip` `ap` paragraph; [x] `is` `as` sentence
 
 ---
 

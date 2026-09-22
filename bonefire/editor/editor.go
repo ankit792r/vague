@@ -12,6 +12,7 @@ const (
 	InsertMode
 	VisualMode
 	VisualLineMode
+	VisualBlockMode
 )
 
 type Editor struct {
@@ -32,6 +33,10 @@ type Editor struct {
 	lastChange    lastChange
 	reg           register
 
+	lastVisualMode   Mode
+	lastVisualAnchor text.Offset
+	lastVisualHead   text.Offset
+
 	pendingCharFind  charFindKind
 	lastCharFindKind charFindKind
 	lastCharFindRune rune
@@ -39,6 +44,12 @@ type Editor struct {
 	jumps   []text.Offset
 	jumpPos int
 	jumpNav bool
+
+	pendingCaseChange caseChangeKind
+	pendingFormat     bool
+	pendingInsertReg  bool
+	pendingFilter     bool
+	pendingTextObject string
 
 	nextBufferID uint64
 }

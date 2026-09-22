@@ -21,6 +21,8 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed
 		modeName = "visual"
 	case VisualLineMode:
 		modeName = "visual-line"
+	case VisualBlockMode:
+		modeName = "visual-block"
 	case ReplaceMode:
 		modeName = "replace"
 	}

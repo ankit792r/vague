@@ -38,6 +38,38 @@ func textObjectRange(t *text.Text, win *window.Window, keys string) (from, to te
 		if to < t.Len() {
 			to++
 		}
+	case "is":
+		from, to, ok = sentenceObjectRange(t, at, false)
+	case "as":
+		from, to, ok = sentenceObjectRange(t, at, true)
+	case "it":
+		from, to, ok = tagObjectRange(t, at, true)
+	case "at":
+		from, to, ok = tagObjectRange(t, at, false)
+	case "i\"":
+		from, to, ok = quotedObjectRange(t, at, '"', true)
+	case "a\"":
+		from, to, ok = quotedObjectRange(t, at, '"', false)
+	case "i'":
+		from, to, ok = quotedObjectRange(t, at, '\'', true)
+	case "a'":
+		from, to, ok = quotedObjectRange(t, at, '\'', false)
+	case "i`":
+		from, to, ok = quotedObjectRange(t, at, '`', true)
+	case "a`":
+		from, to, ok = quotedObjectRange(t, at, '`', false)
+	case "i(", "ib":
+		from, to, ok = pairObjectRange(t, at, '(', ')', true)
+	case "a(", "ab":
+		from, to, ok = pairObjectRange(t, at, '(', ')', false)
+	case "i[":
+		from, to, ok = pairObjectRange(t, at, '[', ']', true)
+	case "a[":
+		from, to, ok = pairObjectRange(t, at, '[', ']', false)
+	case "i{":
+		from, to, ok = pairObjectRange(t, at, '{', '}', true)
+	case "a{":
+		from, to, ok = pairObjectRange(t, at, '{', '}', false)
 	default:
 		return 0, 0, false
 	}
@@ -100,6 +132,9 @@ func (e *Editor) applyOperatorTextObject(
 		if op == opChange {
 			break
 		}
+	}
+	if op == opDelete || op == opYank || op == opChange {
+		e.recordTextObjectChange(op, keys)
 	}
 	return nil
 }

@@ -13,7 +13,7 @@ func (e *Editor) HandleInput(frame *frame.Frame, win *window.Window, buf *buffer
 		return e.insertKey(frame, win, buf, keys)
 	case ReplaceMode:
 		return e.replaceKey(frame, win, buf, keys)
-	case VisualMode, VisualLineMode:
+	case VisualMode, VisualLineMode, VisualBlockMode:
 		return e.visualKey(frame, win, buf, keys)
 	default:
 		return e.normalKey(frame, win, buf, keys)
@@ -33,6 +33,10 @@ func (e *Editor) insertKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		setWindowCursor(buf, win, moveLeft(t, windowCursor(win), 1))
 		view := layoutViewForWindow(t, win, frame)
 		rememberColumn(buf, win, view)
+		frame.Dirty = true
+		return nil
+	case "<C-r>":
+		e.pendingInsertReg = true
 		frame.Dirty = true
 		return nil
 	case "<CR>":
@@ -64,6 +68,15 @@ func (e *Editor) insertKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 	}
 
 	if keys == "" || keys[0] == '<' {
+		return nil
+	}
+
+	if e.pendingInsertReg {
+		e.pendingInsertReg = false
+		if data, _, ok := e.registerText(); ok {
+			return e.insertBytes(frame, win, buf, data)
+		}
+		frame.Dirty = true
 		return nil
 	}
 
