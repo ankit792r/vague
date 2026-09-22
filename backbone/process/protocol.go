@@ -129,17 +129,20 @@ type BufferPosition struct {
 
 // Redraw brings a client's picture up to date.
 type Redraw struct {
-	FrameID uint64       `json:"frame_id"`
-	Columns int          `json:"columns"`
-	Rows    int          `json:"rows"`
-	Wrap    bool         `json:"wrap"`
-	Full    bool         `json:"full,omitempty"`
-	Buffer  RedrawBuffer `json:"buffer"`
-	Lines     []string     `json:"lines"`
-	Cursor    CursorPos    `json:"cursor"`
-	Selection *Selection   `json:"selection,omitempty"`
-	SearchMatch *Selection   `json:"search_match,omitempty"`
-	Mode      string       `json:"mode"`
-	Position  BufferPosition `json:"position"`
-	Echo    *StatusEcho  `json:"echo,omitempty"`
+	FrameID       uint64         `json:"frame_id"`
+	Columns       int            `json:"columns"`
+	Rows          int            `json:"rows"`
+	Wrap          bool           `json:"wrap"`
+	Number        bool           `json:"number,omitempty"`
+	GutterColumns int            `json:"gutter_columns,omitempty"`
+	Full          bool           `json:"full,omitempty"`
+	Buffer        RedrawBuffer   `json:"buffer"`
+	Lines         []string       `json:"lines"`
+	LineNumbers   []int          `json:"line_numbers,omitempty"`
+	Cursor        CursorPos      `json:"cursor"`
+	Selection     *Selection     `json:"selection,omitempty"`
+	SearchMatch   *Selection     `json:"search_match,omitempty"`
+	Mode          string         `json:"mode"`
+	Position      BufferPosition `json:"position"`
+	Echo          *StatusEcho    `json:"echo,omitempty"`
 }

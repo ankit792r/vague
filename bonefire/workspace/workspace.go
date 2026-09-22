@@ -195,6 +195,22 @@ func (w *Workspace) SetWindowWrap(frameID uint64, wrap bool) error {
 	return nil
 }
 
+func (w *Workspace) SetWindowNumber(frameID uint64, number bool) error {
+	frame, ok := w.Frames[frameID]
+	if !ok {
+		return errNotFound("frame", frameID)
+	}
+
+	win, ok := w.Windows[frame.ActiveWindowID]
+	if !ok {
+		return errNotFound("window", frame.ActiveWindowID)
+	}
+
+	win.WindowOptions.Number = number
+	frame.Dirty = true
+	return nil
+}
+
 func (w *Workspace) HandleInput(frameID uint64, keys string) error {
 	w.ClearEcho(frameID)
 	frame, win, buf, err := w.FrameContext(frameID)

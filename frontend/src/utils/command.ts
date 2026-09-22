@@ -34,6 +34,22 @@ export function parseCommandLine(input: string): ParsedExecute | null {
     name = name.slice(0, -1)
   }
 
+  if (name === "set") {
+    const opt = rest.toLowerCase()
+    switch (opt) {
+      case "number":
+        return { name: "number" }
+      case "nonumber":
+        return { name: "nonumber" }
+      case "wrap":
+        return { name: "wrap" }
+      case "nowrap":
+        return { name: "nowrap" }
+      default:
+        return null
+    }
+  }
+
   name = ALIASES[name] ?? name
   if (!name) {
     return null

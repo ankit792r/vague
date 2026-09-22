@@ -9,6 +9,9 @@ function cursorShapeForMode(mode: string): "block" | "bar" {
 type EditorAreaProps = {
   editorRef: RefObject<HTMLDivElement>
   lines: string[]
+  lineNumbers: number[]
+  number: boolean
+  gutterColumns: number
   mode: string
   cursor: EditorCursor
   selection: EditorSelection | null
@@ -19,6 +22,9 @@ type EditorAreaProps = {
 export function EditorArea({
   editorRef,
   lines,
+  lineNumbers,
+  number,
+  gutterColumns,
   mode,
   cursor,
   selection,
@@ -26,12 +32,22 @@ export function EditorArea({
   hideCursor,
 }: EditorAreaProps) {
   const cursorShape = cursorShapeForMode(mode)
+  const gutterStyle =
+    number && gutterColumns > 0
+      ? { width: `${gutterColumns}ch` }
+      : undefined
 
   return (
     <div ref={editorRef} class="editor-area" aria-label="editor">
       {(lines ?? []).map((line, index) => (
         <div key={index} class="editor-line">
-          <EditorLine
+          {number ? (
+            <span class="line-number" style={gutterStyle} aria-hidden="true">
+              {lineNumbers[index] ?? ""}
+            </span>
+          ) : null}
+          <div class="editor-line-content">
+            <EditorLine
             line={line}
             row={index}
             cursor={hideCursor ? { ...cursor, visible: false } : cursor}
@@ -39,6 +55,7 @@ export function EditorArea({
             selection={selection}
             searchMatch={searchMatch}
           />
+          </div>
         </div>
       ))}
     </div>

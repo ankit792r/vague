@@ -39,6 +39,8 @@ export type RedrawPayload = {
   columns: number
   rows: number
   wrap: boolean
+  number?: boolean
+  gutter_columns?: number
   full?: boolean
   buffer: {
     id: number
@@ -46,6 +48,7 @@ export type RedrawPayload = {
     modified?: boolean
   }
   lines: string[]
+  line_numbers?: number[]
   cursor: {
     row: number
     column: number

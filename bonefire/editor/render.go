@@ -23,13 +23,22 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed
 		modeName = "visual-line"
 	}
 
-	fullView := layoutView(buf.Text, frame.Width, 0, win.WindowOptions.Wrap)
+	lineCount := lineCountForGutter(buf.Text)
+	contentWidth := layoutContentWidth(frame.Width, lineCount, win.WindowOptions.Number)
+	fullView := layoutView(buf.Text, contentWidth, 0, win.WindowOptions.Wrap)
 	point := windowPoint(buf, win)
 	ensureCursorVisible(win, frame, fullView, point)
 	view := sliceView(fullView, win.TopLine, frame.Height)
 	row, col, visible := cursorViewportPos(win.TopLine, fullView.Meta, point)
 	sel := selectionInViewport(ed, win, win.TopLine, fullView.Meta, view.Lines, buf.Text)
 	searchMatch := searchMatchInViewport(ed, buf, win.TopLine, fullView.Meta, view.Lines, buf.Text)
+
+	var lineNumbers []int
+	gutterCols := 0
+	if win.WindowOptions.Number {
+		lineNumbers = bufferLineNumbers(view.Meta)
+		gutterCols = gutterColumns(lineCount)
+	}
 	bufLine := point.Line + 1
 	bufCol := point.Col + 1
 
@@ -44,25 +53,28 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed
 	}
 
 	return process.Redraw{
-		FrameID: frame.ID,
-		Full:    true,
-		Columns: frame.Width,
-		Rows:    frame.Height,
-		Wrap:    win.WindowOptions.Wrap,
+		FrameID:       frame.ID,
+		Full:          true,
+		Columns:       frame.Width,
+		Rows:          frame.Height,
+		Wrap:          win.WindowOptions.Wrap,
+		Number:        win.WindowOptions.Number,
+		GutterColumns: gutterCols,
 		Buffer: process.RedrawBuffer{
 			ID:       buf.ID,
 			Name:     buf.Name,
 			Modified: buf.Modified(),
 		},
-		Lines: view.Lines,
+		Lines:       view.Lines,
+		LineNumbers: lineNumbers,
 		Cursor: process.CursorPos{
 			Row:     row,
 			Column:  col,
 			Visible: visible,
 		},
-		Selection: sel,
+		Selection:   sel,
 		SearchMatch: searchMatch,
-		Mode:      modeName,
+		Mode:        modeName,
 		Position: process.BufferPosition{
 			Line:   bufLine,
 			Column: bufCol,

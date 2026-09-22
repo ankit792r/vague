@@ -20,6 +20,9 @@ export function EmacsFrame({
   cursor,
   selection,
   searchMatch,
+  lineNumbers,
+  number,
+  gutterColumns,
   echo,
   commandLine,
   position,
@@ -33,6 +36,9 @@ export function EmacsFrame({
       <EditorArea
         editorRef={editorRef}
         lines={lines}
+        lineNumbers={lineNumbers}
+        number={number}
+        gutterColumns={gutterColumns}
         mode={mode}
         cursor={cursor}
         selection={selection}
