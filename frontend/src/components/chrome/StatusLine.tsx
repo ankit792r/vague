@@ -5,6 +5,9 @@ type StatusLineProps = {
   line: number
   column: number
   lineMarks?: string
+  statusLine?: string
+  showMode?: boolean
+  ruler?: boolean
 }
 
 export function StatusLine({
@@ -14,16 +17,32 @@ export function StatusLine({
   line,
   column,
   lineMarks,
+  statusLine,
+  showMode = true,
+  ruler = true,
 }: StatusLineProps) {
-  const displayName = modified ? `${bufferName}*` : bufferName
   const markSuffix = lineMarks ? ` '${lineMarks}'` : ""
+
+  if (statusLine) {
+    return (
+      <div class="status-line" aria-label="status line">
+        <span class="status-left">{statusLine}</span>
+        {showMode ? (
+          <span class="status-right">({mode})</span>
+        ) : null}
+      </div>
+    )
+  }
+
+  const displayName = modified ? `${bufferName}*` : bufferName
+  const rulerText = ruler ? `Ln ${line}, Col ${column}${markSuffix}` : markSuffix
 
   return (
     <div class="status-line" aria-label="status line">
       <span class="status-left">--**- {displayName}</span>
       <span class="status-right">
-        Ln {line}, Col {column}
-        {markSuffix} ({mode})
+        {ruler ? rulerText : null}
+        {showMode ? ` (${mode})` : null}
       </span>
     </div>
   )

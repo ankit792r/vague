@@ -39,7 +39,13 @@ export function SplitEditor({
             lines={pane.lines}
             lineNumbers={pane.lineNumbers}
             number={pane.number}
+            relativeNumber={pane.relativeNumber}
             gutterColumns={pane.gutterColumns}
+            signColumn={pane.signColumn}
+            cursorLineRow={pane.cursorLineRow}
+            cursorColumn={pane.cursorColumn}
+            cursorColumnOn={pane.cursorColumnOn}
+            colorColumns={pane.colorColumns}
             mode={mode}
             cursor={pane.cursor}
             selection={pane.selection}
