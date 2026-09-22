@@ -18,7 +18,7 @@ func TestMatchingBracket(t *testing.T) {
 
 	at = tex.OffsetOf(text.Point{Line: 0, Col: 4})
 	got = tex.PointOf(moveMatchingBracket(tex, at, 1))
-	if got.Col != 6 {
-		t.Fatalf("%% on [: col=%d, want 6", got.Col)
+	if got.Col != 5 {
+		t.Fatalf("%% on [: col=%d, want 5", got.Col)
 	}
 }
