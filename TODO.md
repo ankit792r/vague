@@ -16,6 +16,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - Open / save / quit; `:e` `:e!` `:w` `:q` `:wq` `:x`; buffers `:b` `:bn` `:bp` `:buffers`
 - `:goto` / `:123`; `:wrap` `:number` and `:set` aliases; `:only` placeholder echo
 - Search patterns (`\m` `\M` `\v` `\V` subset); `:set` ignorecase/smartcase/hlsearch/incsearch/wrapscan; hlsearch + `:nohlsearch`; `:sort` / `:uniq`; `:g` / `:s` use pattern engine; search offsets (`/pat+2`, `/pat/e`); `:ta` / `:vimgrep` stubbed
+- Registers `"a`–`z` / `"A` append; `"0` yank; `"1`–`9` delete ring; `"-` small delete; `":` / `"/` last cmd & search; `"*` / `"+` clipboard (in-memory stub); `"_` black hole; `:reg`; `register_get` / `register_set`; OSC 52 stub
 - Viewport scroll, soft wrap, optional line numbers, status line Ln/Col, echo area
 
 ---
@@ -111,7 +112,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ## Phase 4 — Registers & clipboard
 
-- [ ] Named registers `a`–`z` and `"A` append
+- [x] Named registers `a`–`z` and `"A` append
 - [ ] `"0` last yank; `"1`–`"9` delete ring
 - [ ] `"-` small delete; `":` `.` last command; `"/` last search
 - [ ] `"*` `"+` system clipboard (X11/Wayland/macOS/Windows)
