@@ -97,7 +97,22 @@ button {
   background: color-mix(in srgb, var(--fg) 35%, transparent);
 }
 
+.search-match {
+  background: color-mix(in srgb, #c9a227 45%, transparent);
+  outline: 1px solid color-mix(in srgb, #c9a227 70%, transparent);
+  outline-offset: -1px;
+}
+
+.visual-selection.search-match {
+  background: color-mix(in srgb, #c9a227 55%, transparent);
+}
+
 .visual-selection.cursor-cell {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.search-match.cursor-cell {
   background: var(--fg);
   color: var(--bg);
 }

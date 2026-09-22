@@ -342,6 +342,7 @@ func (w *Workspace) switchBuffer(frameID uint64, buf *buffer.Buffer) (*buffer.Bu
 	win.Cursor = buf.Text.AddMarker(0, text.GravityRight)
 
 	w.Editor.SetCurrentBuffer(buf.ID)
+	w.Editor.ClearSearchMatch()
 	w.Editor.SetMode(editor.NormalMode)
 	frame.Dirty = true
 

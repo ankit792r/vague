@@ -29,6 +29,7 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed
 	view := sliceView(fullView, win.TopLine, frame.Height)
 	row, col, visible := cursorViewportPos(win.TopLine, fullView.Meta, point)
 	sel := selectionInViewport(ed, win, win.TopLine, fullView.Meta, view.Lines, buf.Text)
+	searchMatch := searchMatchInViewport(ed, buf, win.TopLine, fullView.Meta, view.Lines, buf.Text)
 	bufLine := point.Line + 1
 	bufCol := point.Col + 1
 
@@ -60,6 +61,7 @@ func RenderRedraw(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, ed
 			Visible: visible,
 		},
 		Selection: sel,
+		SearchMatch: searchMatch,
 		Mode:      modeName,
 		Position: process.BufferPosition{
 			Line:   bufLine,

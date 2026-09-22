@@ -1,5 +1,5 @@
 import type { RefObject } from "preact"
-import type { EditorCursor, EditorSelection } from "../../types/editor"
+import type { EditorCursor, EditorSearchMatch, EditorSelection } from "../../types/editor"
 import { EditorLine } from "./EditorLine"
 
 function cursorShapeForMode(mode: string): "block" | "bar" {
@@ -12,6 +12,7 @@ type EditorAreaProps = {
   mode: string
   cursor: EditorCursor
   selection: EditorSelection | null
+  searchMatch: EditorSearchMatch | null
   hideCursor?: boolean
 }
 
@@ -21,6 +22,7 @@ export function EditorArea({
   mode,
   cursor,
   selection,
+  searchMatch,
   hideCursor,
 }: EditorAreaProps) {
   const cursorShape = cursorShapeForMode(mode)
@@ -35,6 +37,7 @@ export function EditorArea({
             cursor={hideCursor ? { ...cursor, visible: false } : cursor}
             cursorShape={cursorShape}
             selection={selection}
+            searchMatch={searchMatch}
           />
         </div>
       ))}

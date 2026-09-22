@@ -19,6 +19,7 @@ export function EmacsFrame({
   mode,
   cursor,
   selection,
+  searchMatch,
   echo,
   commandLine,
   position,
@@ -35,6 +36,7 @@ export function EmacsFrame({
         mode={mode}
         cursor={cursor}
         selection={selection}
+        searchMatch={searchMatch}
         hideCursor={commandLine.active}
       />
       <StatusLine

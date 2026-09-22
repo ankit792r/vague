@@ -138,6 +138,7 @@ type Redraw struct {
 	Lines     []string     `json:"lines"`
 	Cursor    CursorPos    `json:"cursor"`
 	Selection *Selection   `json:"selection,omitempty"`
+	SearchMatch *Selection   `json:"search_match,omitempty"`
 	Mode      string       `json:"mode"`
 	Position  BufferPosition `json:"position"`
 	Echo    *StatusEcho  `json:"echo,omitempty"`
