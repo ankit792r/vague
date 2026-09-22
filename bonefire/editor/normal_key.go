@@ -31,6 +31,17 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return nil
 	}
 
+	if e.pendingKey == "g" && (keys == "*" || keys == "#") {
+		e.pendingKey = ""
+		forward := keys == "*"
+		return e.searchWord(frame, win, buf, forward, true)
+	}
+
+	if keys == "*" || keys == "#" {
+		forward := keys == "*"
+		return e.searchWord(frame, win, buf, forward, false)
+	}
+
 	if e.pendingOp == opDelete && keys == "d" {
 		e.clearPendingOp()
 		count := e.takeCount()
