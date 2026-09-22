@@ -6,6 +6,16 @@ import (
 )
 
 func (w *Workspace) RunExLine(frameID uint64, line string) (string, error) {
+	if msg, handled, err := w.tryExWindowCommand(frameID, line); handled {
+		if err != nil {
+			return "", err
+		}
+		w.Editor.SetLastCommand(line)
+		if f, ok := w.Frames[frameID]; ok {
+			f.Dirty = true
+		}
+		return msg, nil
+	}
 	f, win, buf, err := w.FrameContext(frameID)
 	if err != nil {
 		return "", err

@@ -135,7 +135,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ## Phase 6 — Windows & tab pages
 
-- [ ] `:split` `:vsplit` + `:new` `:vnew`
+- [x] `:split` `:vsplit` + `:new` `:vnew`
 - [ ] `:only` `:close` `:hide` `:wincmd`
 - [ ] `<C-w>` + `h/j/k/l/H/J/K/L` focus; `w/W` cycle
 - [ ] `<C-w>` + `+` `-` `<` `>` `=` resize; `_` `|` maximize
