@@ -300,14 +300,7 @@ func (e *Editor) exReg() string {
 }
 
 func (e *Editor) exMarks() string {
-	if len(e.marks) == 0 {
-		return "No marks set"
-	}
-	var b strings.Builder
-	for name, off := range e.marks {
-		fmt.Fprintf(&b, "%s %d\n", name, off)
-	}
-	return strings.TrimSpace(b.String())
+	return e.formatMarksListing()
 }
 
 func (e *Editor) exDelMark(args string) string {
@@ -315,7 +308,9 @@ func (e *Editor) exDelMark(args string) string {
 	if args == "" {
 		return "delm: mark required"
 	}
-	delete(e.marks, args)
+	if !e.deleteMarkName(args) {
+		return "mark not found"
+	}
 	return "mark deleted"
 }
 

@@ -124,7 +124,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ## Phase 5 — Marks & digraphs
 
-- [ ] Local marks `a`–`z`; file marks `A`–`Z` (persist in shada)
+- [x] Local marks `a`–`z`; file marks `A`–`Z` (persist in shada)
 - [ ] `` ` `` / `'` jumps to mark; `` ' `` line jump; `` `. `` last change; `` `" `` last jump
 - [ ] `:marks`; mark in status when set
 - [ ] Digraphs `Ctrl-k` or `:digraphs`
