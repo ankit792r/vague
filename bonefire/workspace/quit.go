@@ -4,16 +4,9 @@ import "vague/bonefire/editor"
 
 // QuitFrame closes a frame after checking whether its buffer may be discarded.
 func (w *Workspace) QuitFrame(frameID uint64, force bool) error {
-	_, _, buf, err := w.FrameContext(frameID)
-	if err != nil {
-		return err
-	}
-
-	if buf.Modified() && !force {
-		return editor.ErrNotSaved
-	}
-
-	return w.CloseFrame(frameID)
+	return w.withBufferLeave(frameID, force, func() error {
+		return w.CloseFrame(frameID)
+	})
 }
 
 // CloseFrame removes a frame and its windows.

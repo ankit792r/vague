@@ -119,9 +119,9 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 			return result, nil
 		}
 
-		path := params.Args[0]
+		path := strings.Join(params.Args, " ")
 		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-			buf, err := ws.OpenFile(frameID, path, params.Bang)
+			buf, err := ws.EditFile(frameID, path)
 			if err != nil {
 				return nil, editor.OpenFileError(path, err)
 			}
@@ -508,7 +508,7 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		}
 
 		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-			buf, err := ws.SwitchToNextBuffer(frameID)
+			buf, err := ws.SwitchToNextBuffer(frameID, params.Bang)
 			if err != nil {
 				return nil, err
 			}
@@ -530,7 +530,7 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		}
 
 		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-			buf, err := ws.SwitchToPrevBuffer(frameID)
+			buf, err := ws.SwitchToPrevBuffer(frameID, params.Bang)
 			if err != nil {
 				return nil, err
 			}
@@ -556,7 +556,7 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 
 		spec := strings.Join(params.Args, " ")
 		result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
-			buf, err := ws.SwitchToBuffer(frameID, spec)
+			buf, err := ws.SwitchToBuffer(frameID, spec, params.Bang)
 			if err != nil {
 				return nil, err
 			}
@@ -604,6 +604,71 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 		line := strings.Join(params.Args, " ")
 		return s.runExLine(ctx, sess, frameID, line)
 
+	case "confirm_answer":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		if len(params.Args) == 0 {
+			return fail(fmt.Errorf("confirm_answer: y/n/a/q/l required"))
+		}
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			return nil, ws.AnswerConfirm(frameID, params.Args[0], false)
+		})
+		if err != nil {
+			return fail(err)
+		}
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
+	case "wa", "wall":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			return nil, ws.WriteAll(frameID, params.Bang)
+		})
+		if err != nil {
+			return fail(err)
+		}
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
+	case "qa", "qall":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			return nil, ws.QuitAll(params.Bang)
+		})
+		if err != nil {
+			return fail(err)
+		}
+		return map[string]any{"quit": true}, nil
+
+	case "wqa", "wqall":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			return nil, ws.WQAll(frameID, params.Bang)
+		})
+		if err != nil {
+			return fail(err)
+		}
+		return map[string]any{"quit": true}, nil
+
+	case "xa", "xall":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			return nil, ws.XAll(frameID, params.Bang)
+		})
+		if err != nil {
+			return fail(err)
+		}
+		return map[string]any{"quit": true}, nil
+
 	default:
 		return fail(fmt.Errorf("Unknown command: %s", params.Name))
 	}
@@ -636,6 +701,9 @@ func (s *Server) runExLine(ctx context.Context, sess *session.Session, frameID u
 	echo, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
 		msg, runErr := ws.RunExLine(frameID, line)
 		if runErr != nil {
+			if errors.Is(runErr, editor.ErrConfirmPending) {
+				return msg, nil
+			}
 			return nil, runErr
 		}
 		if msg != "" {

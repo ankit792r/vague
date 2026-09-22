@@ -18,6 +18,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - Search patterns (`\m` `\M` `\v` `\V` subset); `:set` ignorecase/smartcase/hlsearch/incsearch/wrapscan; hlsearch + `:nohlsearch`; `:sort` / `:uniq`; `:g` / `:s` use pattern engine; search offsets (`/pat+2`, `/pat/e`); `:ta` / `:vimgrep` stubbed
 - Registers `"a`–`z` / `"A` append; `"0` yank; `"1`–`9` delete ring; `"-` small delete; `":` / `"/` last cmd & search; `"*` / `"+` clipboard (in-memory stub); `"_` black hole; `:reg`; `register_get` / `register_set`; OSC 52 stub
 - Marks `ma`–`mz` / file `mA`–`mZ` (shada); `` ` `` / `'` mark jumps; `` `. `` / `` `" ``; `:marks`; status line mark labels; digraphs; keyboard locale key encoding
+- Splits `:split` / `:vsplit` / `:new` / `:vnew`; `:only` / `:close` / `:hide` / `:wincmd`; `<C-w>` focus and resize; multi-pane webview; `:setlocal`; tab pages and tabline; `:args` / `:argadd` / `:argdo`
 - Viewport scroll, soft wrap, optional line numbers, status line Ln/Col, echo area
 
 ---
@@ -141,14 +142,14 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `<C-w>` + `+` `-` `<` `>` `=` resize; `_` `|` maximize
 - [x] Multi-window layout in webview (splits + active border)
 - [x] Per-window options (`:setlocal` wrap/number/scroll)
-- [ ] Tab pages `:tabnew` `:tabclose` `:tabnext` tabline UI
-- [ ] `:args` `:argadd` `:argdo` argument list
+- [x] Tab pages `:tabnew` `:tabclose` `:tabnext` tabline UI
+- [x] `:args` `:argadd` `:argdo` argument list
 
 ---
 
 ## Phase 7 — Buffers & files
 
-- [ ] Modified-buffer confirm on `:b` `:bn` `:bp` `:e` `:q` (`:confirm` `:set confirm`)
+- [x] Modified-buffer confirm on `:b` `:bn` `:bp` `:e` `:q` (`:confirm` `:set confirm`)
 - [ ] `:wa` `:wqall` `:qa` `:xall`
 - [ ] Autoread when file changed on disk
 - [ ] `:set autowrite` `autoread` `backup` `writebackup` `swapfile`
