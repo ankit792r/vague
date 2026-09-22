@@ -280,6 +280,15 @@ func (w *Workspace) BufferListMessage(frameID uint64) (string, error) {
 	return w.Editor.FormatBufferList(buf.ID), nil
 }
 
+func (w *Workspace) GoToLine(frameID uint64, line1 int) error {
+	w.ClearEcho(frameID)
+	frame, win, buf, err := w.FrameContext(frameID)
+	if err != nil {
+		return err
+	}
+	return w.Editor.GoToLine(frame, win, buf, line1)
+}
+
 func (w *Workspace) OpenFile(frameID uint64, path string, force bool) (*buffer.Buffer, error) {
 	abs, err := w.resolvePath(frameID, path)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"vague/backbone/process"
 	"vague/backbone/session"
@@ -101,7 +102,26 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 			return fail(fmt.Errorf("session is not attached to a frame"))
 		}
 		if len(params.Args) == 0 {
-			return fail(fmt.Errorf("edit: file name required"))
+			if !params.Bang {
+				return fail(fmt.Errorf("edit: file name required"))
+			}
+
+			result, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+				buf, err := ws.ReloadCurrentBuffer(frameID, true)
+				if err != nil {
+					return nil, err
+				}
+				if err := ws.SetEcho(frameID, fmt.Sprintf(`"%s"`, buf.Name), editor.EchoInfo); err != nil {
+					return nil, err
+				}
+				return editor.BufferInfo(buf, true), nil
+			})
+			if err != nil {
+				return fail(err)
+			}
+
+			s.pushRedraw(ctx, sess, frameID)
+			return result, nil
 		}
 
 		path := params.Args[0]
@@ -232,6 +252,80 @@ func (s *Server) handleExecute(ctx context.Context, sess *session.Session, param
 
 		s.pushRedraw(ctx, sess, frameID)
 		return result, nil
+
+	case "set":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+		if len(params.Args) == 0 {
+			return fail(fmt.Errorf("set: option required"))
+		}
+
+		opt := strings.ToLower(strings.Join(params.Args, " "))
+		switch opt {
+		case "number", "nu":
+			params.Name = "number"
+		case "nonumber", "nonu":
+			params.Name = "nonumber"
+		case "wrap":
+			params.Name = "wrap"
+		case "nowrap":
+			params.Name = "nowrap"
+		default:
+			return fail(fmt.Errorf("Unknown option: %s", opt))
+		}
+		return s.handleExecute(ctx, sess, params)
+
+	case "goto", "go":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+
+		line := params.Count
+		if line <= 0 && len(params.Args) > 0 {
+			var err error
+			line, err = parsePositiveInt(params.Args[0])
+			if err != nil {
+				return fail(editor.ErrInvalidLine)
+			}
+		}
+		if line <= 0 {
+			return fail(editor.ErrInvalidLine)
+		}
+
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			if err := ws.GoToLine(frameID, line); err != nil {
+				return nil, err
+			}
+			if err := ws.SetEcho(frameID, fmt.Sprintf("line %d", line), editor.EchoInfo); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
+
+	case "only":
+		if frameID == 0 {
+			return fail(fmt.Errorf("session is not attached to a frame"))
+		}
+
+		_, err := s.runtime.Do(ctx, func(ws *workspace.Workspace) (any, error) {
+			if err := ws.SetEcho(frameID, "Only one window (splits not implemented yet)", editor.EchoInfo); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		})
+		if err != nil {
+			return fail(err)
+		}
+
+		s.pushRedraw(ctx, sess, frameID)
+		return nil, nil
 
 	case "search":
 		if frameID == 0 {
@@ -555,4 +649,12 @@ func (s *Server) pushEcho(ctx context.Context, sess *session.Session, frameID ui
 	}
 
 	s.pushRedraw(ctx, sess, frameID)
+}
+
+func parsePositiveInt(s string) (int, error) {
+	n, err := strconv.Atoi(strings.TrimSpace(s))
+	if err != nil || n <= 0 {
+		return 0, fmt.Errorf("invalid number")
+	}
+	return n, nil
 }
