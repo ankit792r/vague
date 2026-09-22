@@ -82,6 +82,8 @@ type Editor struct {
 	digraphFirst    string
 
 	fileOpts FileOpts
+
+	globalDisplay GlobalDisplayOpts
 }
 
 func NewEditor() *Editor {
@@ -92,6 +94,7 @@ func NewEditor() *Editor {
 		searchOpts:   DefaultSearchOpts(),
 		regs:         newRegisters(),
 		fileOpts:     defaultFileOpts(),
+		globalDisplay: defaultGlobalDisplayOpts(),
 	}
 }
 

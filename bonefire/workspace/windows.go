@@ -307,6 +307,13 @@ func (w *Workspace) SetLocalOption(frameID uint64, name string, enable bool) (st
 	if err != nil {
 		return "", err
 	}
+	token := name
+	if !enable {
+		token = "no" + name
+	}
+	if msg, err := w.Editor.ApplySetDisplayArgs(f, win, token, enable); err == nil {
+		return msg, nil
+	}
 	switch name {
 	case "wrap", "linebreak":
 		win.WindowOptions.Wrap = enable
@@ -316,11 +323,6 @@ func (w *Workspace) SetLocalOption(frameID uint64, name string, enable bool) (st
 		win.WindowOptions.Number = enable
 	case "nonumber", "nonu":
 		win.WindowOptions.Number = false
-	case "scrolloff", "so":
-		win.WindowOptions.ScrollOff = 0
-		if enable {
-			win.WindowOptions.ScrollOff = 2
-		}
 	default:
 		return "", fmt.Errorf("setlocal: unknown option %s", name)
 	}

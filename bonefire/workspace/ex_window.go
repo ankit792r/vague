@@ -1,8 +1,6 @@
 package workspace
 
 import (
-	"fmt"
-	"strconv"
 	"strings"
 
 	"vague/bonefire/editor"
@@ -72,30 +70,17 @@ func (w *Workspace) exSetLocal(frameID uint64, args string) (string, error) {
 	if args == "" {
 		return "", nil
 	}
+	f, win, _, err := w.FrameContext(frameID)
+	if err != nil {
+		return "", err
+	}
 	parts := strings.Fields(args)
 	for _, p := range parts {
+		if _, err := w.Editor.ApplySetDisplayArgs(f, win, p, true); err == nil {
+			continue
+		}
 		enable := true
 		name := p
-		if strings.Contains(p, "=") {
-			kv := strings.SplitN(p, "=", 2)
-			name = kv[0]
-			if n, err := strconv.Atoi(strings.TrimSpace(kv[1])); err == nil {
-				f, _, _, ferr := w.FrameContext(frameID)
-				if ferr != nil {
-					return "", ferr
-				}
-				win, ok := w.Windows[f.ActiveWindowID]
-				if !ok {
-					return "", fmt.Errorf("window not found")
-				}
-				switch name {
-				case "scrolloff", "so":
-					win.WindowOptions.ScrollOff = n
-					f.Dirty = true
-					continue
-				}
-			}
-		}
 		if strings.HasPrefix(p, "no") && len(p) > 2 {
 			enable = false
 			name = p[2:]
