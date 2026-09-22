@@ -148,6 +148,18 @@ type RedrawPane struct {
 	Mode          string         `json:"mode"`
 	Position      BufferPosition `json:"position"`
 	LineMarks     string         `json:"line_marks,omitempty"`
+	RelativeNumber bool          `json:"relative_number,omitempty"`
+	List          bool           `json:"list,omitempty"`
+	CursorLineRow int            `json:"cursor_line_row,omitempty"`
+	CursorColumn  int            `json:"cursor_column,omitempty"`
+	CursorColumnOn bool          `json:"cursor_column_on,omitempty"`
+	ColorColumns  []int          `json:"color_columns,omitempty"`
+	SignColumn    bool           `json:"sign_column,omitempty"`
+	ShowCmd       string         `json:"showcmd,omitempty"`
+	ShowMode      bool           `json:"showmode,omitempty"`
+	Ruler         bool           `json:"ruler,omitempty"`
+	StatusLine    string         `json:"statusline,omitempty"`
+	Theme         string         `json:"theme,omitempty"`
 }
 
 // RedrawTab is one entry in the tab line.
@@ -179,4 +191,6 @@ type Redraw struct {
 	Panes            []RedrawPane   `json:"panes,omitempty"`
 	Tabs             []RedrawTab    `json:"tabs,omitempty"`
 	ActiveTab        int            `json:"active_tab,omitempty"`
+	Theme             string         `json:"theme,omitempty"`
+	ShowCmd           string         `json:"showcmd,omitempty"`
 }
