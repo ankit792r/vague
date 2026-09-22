@@ -7,6 +7,14 @@ import (
 )
 
 func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.Buffer, keys string) error {
+	if e.consumeRegisterSelect(keys) {
+		return nil
+	}
+	if keys == `"` {
+		e.beginRegisterSelect()
+		return nil
+	}
+
 	if e.consumeCountDigit(keys) {
 		return nil
 	}

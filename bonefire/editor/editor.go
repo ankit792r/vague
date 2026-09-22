@@ -43,7 +43,9 @@ type Editor struct {
 	incsearchSavedMatchBuf  uint64
 
 	lastChange    lastChange
-	reg           register
+	regs          registers
+	activeReg     registerID
+	pendingRegQuote bool
 
 	lastVisualMode   Mode
 	lastVisualAnchor text.Offset
@@ -76,6 +78,7 @@ func NewEditor() *Editor {
 		nextBufferID: 1,
 		marks:        make(map[string]text.Offset),
 		searchOpts:   DefaultSearchOpts(),
+		regs:         newRegisters(),
 	}
 }
 

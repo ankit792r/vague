@@ -114,7 +114,7 @@ func (e *Editor) applyOperatorRange(
 
 	switch op {
 	case opYank:
-		e.stashRegister(data, linewise)
+		e.stashRegister(data, linewise, false)
 		frame.Dirty = true
 		return nil
 	case opDelete, opChange:
@@ -123,7 +123,7 @@ func (e *Editor) applyOperatorRange(
 		}
 
 		at := windowCursor(win)
-		e.stashRegister(data, linewise)
+		e.stashRegister(data, linewise, true)
 
 		buf.BeginEdit(at)
 		if _, err := buf.Delete(from, to); err != nil {
