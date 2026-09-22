@@ -71,39 +71,12 @@ function renderSegment(
   )
 }
 
-export function EditorLine({
-  line,
-  row,
-  cursor,
-  cursorShape,
-  selection,
-}: EditorLineProps) {
-  const display = line === "" ? "\u00a0" : line
-  const span = selectionSpanForRow(row, display.length, selection)
-  const showCursor = cursor?.visible && cursor.row === row
-  const cursorCol = showCursor
-    ? Math.min(Math.max(0, cursor.column), display.length)
-    : -1
-
-  if (!span && !showCursor) {
-    return <>{display}</>
-  }
-
-  if (cursorShape === "bar" && showCursor) {
-    const before = display.slice(0, cursorCol)
-    const after = display.slice(cursorCol)
-    const beforeClass = classForSpan(0, before.length, span)
-    const afterClass = classForSpan(cursorCol, display.length, span)
-
-    return (
-      <>
-        {renderSegment(before, beforeClass, 0)}
-        <span class="cursor-bar" aria-hidden="true" />
-        {renderSegment(after, afterClass, 1)}
-      </>
-    )
-  }
-
+function renderLineText(
+  display: string,
+  span: { start: number; end: number } | null,
+  showBlockCursor: boolean,
+  cursorColumn: number,
+): JSX.Element {
   const nodes: JSX.Element[] = []
   let run = ""
   let runClass: string | undefined
@@ -120,7 +93,7 @@ export function EditorLine({
   for (let col = 0; col < display.length; col++) {
     const ch = display[col]
     let className = classForSpan(col, col + 1, span)
-    const atCursor = showCursor && cursor.column === col
+    const atCursor = showBlockCursor && cursorColumn === col
 
     if (atCursor) {
       className = className ? "visual-selection cursor-cell" : "cursor-cell"
@@ -134,12 +107,8 @@ export function EditorLine({
   }
   flush()
 
-  if (showCursor && cursor.column >= display.length) {
-    const trailingClass = classForSpan(
-      display.length,
-      display.length,
-      span,
-    )
+  if (showBlockCursor && cursorColumn >= display.length) {
+    const trailingClass = classForSpan(display.length, display.length, span)
     nodes.push(
       <span
         key="cursor-eol"
@@ -151,4 +120,43 @@ export function EditorLine({
   }
 
   return <>{nodes}</>
+}
+
+export function EditorLine({
+  line,
+  row,
+  cursor,
+  cursorShape,
+  selection,
+}: EditorLineProps) {
+  const display = line === "" ? "\u00a0" : line
+  const span = selectionSpanForRow(row, display.length, selection)
+  const showCursor = cursor?.visible && cursor.row === row
+  const cursorCol = showCursor
+    ? Math.min(Math.max(0, cursor.column), display.length)
+    : -1
+
+  const useBarOverlay = cursorShape === "bar" && showCursor
+  const useBlockCursor = showCursor && !useBarOverlay
+
+  if (!span && !showCursor) {
+    return <>{display}</>
+  }
+
+  const text = renderLineText(display, span, useBlockCursor, cursorCol)
+
+  if (!useBarOverlay) {
+    return text
+  }
+
+  return (
+    <>
+      {text}
+      <span
+        class="cursor-bar"
+        style={{ left: `${cursorCol}ch` }}
+        aria-hidden="true"
+      />
+    </>
+  )
 }
