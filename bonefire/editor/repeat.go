@@ -58,13 +58,13 @@ func (e *Editor) repeatLastChange(
 	case repeatJoin:
 		return e.joinLines(frame, win, buf)
 	case repeatOperator:
-		return e.applyOperatorMotion(frame, win, buf, e.lastChange.op, e.lastChange.motion)
+		return e.applyOperatorMotion(frame, win, buf, e.lastChange.op, e.lastChange.motion, 1)
 	case repeatVisualOperator:
 		motion := motionWord
 		if e.lastChange.linewise {
 			motion = motionLine
 		}
-		return e.applyOperatorMotion(frame, win, buf, e.lastChange.op, motion)
+		return e.applyOperatorMotion(frame, win, buf, e.lastChange.op, motion, 1)
 	default:
 		return nil
 	}

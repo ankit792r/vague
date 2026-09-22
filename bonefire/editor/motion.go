@@ -143,7 +143,13 @@ func moveVerticalVisual(view viewLayout, t *text.Text, off text.Offset, desiredC
 	}
 
 	targetRow := currentRow + delta
-	if targetRow < 0 || targetRow >= len(view.Meta) {
+	if targetRow < 0 {
+		targetRow = 0
+	}
+	if targetRow >= len(view.Meta) {
+		targetRow = len(view.Meta) - 1
+	}
+	if targetRow == currentRow {
 		return off
 	}
 

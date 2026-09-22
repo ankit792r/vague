@@ -22,6 +22,7 @@ type Editor struct {
 	insertGroup   uint64
 	pendingKey    string
 	pendingOp     opKind
+	pendingCount  int
 	visualAnchor  text.Offset
 	searchPattern string
 	searchForward bool
@@ -47,6 +48,7 @@ func (e *Editor) ResetInputState() {
 	e.insertGroup = 0
 	e.pendingKey = ""
 	e.pendingOp = opNone
+	e.pendingCount = 0
 }
 
 func (e *Editor) CurrentBuffer() *buffer.Buffer {

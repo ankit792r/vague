@@ -152,23 +152,37 @@ func (e *Editor) applyOperatorMotion(
 	buf *buffer.Buffer,
 	op opKind,
 	motion motionKind,
+	count int,
 ) error {
-	t := buf.Text
-	from, to, linewise := textRangeForMotion(t, win, op, motion)
-	if to <= from {
-		frame.Dirty = true
-		return nil
+	if count < 1 {
+		count = 1
 	}
 
-	landing := landingAfterDelete(t, from, to, motion)
-	err := e.applyOperatorRange(frame, win, buf, op, from, to, linewise, landing)
-	if err != nil {
-		return err
+	var lastErr error
+	for i := 0; i < count; i++ {
+		t := buf.Text
+		from, to, linewise := textRangeForMotion(t, win, op, motion)
+		if to <= from {
+			frame.Dirty = true
+			break
+		}
+
+		landing := landingAfterDelete(t, from, to, motion)
+		err := e.applyOperatorRange(frame, win, buf, op, from, to, linewise, landing)
+		if err != nil {
+			return err
+		}
+		if (op == opDelete || op == opChange) && to > from {
+			e.recordOperatorChange(op, motion)
+		}
+		lastErr = nil
+
+		if op == opChange {
+			break
+		}
 	}
-	if (op == opDelete || op == opChange) && to > from {
-		e.recordOperatorChange(op, motion)
-	}
-	return nil
+
+	return lastErr
 }
 
 func (e *Editor) joinLines(frame *frame.Frame, win *window.Window, buf *buffer.Buffer) error {
