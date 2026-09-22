@@ -13,6 +13,7 @@ const ALIASES: Record<string, string> = {
   b: "buffer",
   ls: "buffers",
   go: "goto",
+  help: "help",
 }
 
 const SET_OPTIONS: Record<string, ParsedExecute["name"]> = {
