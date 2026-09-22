@@ -88,7 +88,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `:command` user ex commands
 - [x] `:source` load config script
 - [x] `:reg` show registers
-- [ ] `:marks` `:delm` marks
+- [x] `:marks` `:delm` marks
 - [ ] `:jumps` `:clearjumps`
 - [ ] `:undo` `:undolist` `:later` `:earlier` time travel (stretch)
 - [ ] `:checktime` autoread prompt
