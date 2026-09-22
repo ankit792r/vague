@@ -7,6 +7,7 @@ import {
   type PromptKind,
 } from "../types/command"
 import { parseCommandLine } from "../utils/command"
+import { historyEntry, pushHistory } from "../utils/commandHistory"
 import { encodeKey } from "../utils/keys"
 
 function commandCharFromEvent(e: KeyboardEvent): string | null {
@@ -29,7 +30,7 @@ function executeErrorMessage(err: unknown): string {
 }
 
 function openPrompt(kind: PromptKind): CommandLineState {
-  return { active: true, kind, text: "", error: null }
+  return { active: true, kind, text: "", error: null, historyIndex: null }
 }
 
 async function previewSearch(kind: PromptKind, text: string) {
@@ -89,6 +90,49 @@ export function useEditorInput(editorMode: string) {
           return
         }
 
+        if (keys === "<Up>") {
+          const index = cmd.historyIndex === null ? 0 : cmd.historyIndex + 1
+          const entry = historyEntry(cmd.kind, index)
+          if (entry === null) {
+            return
+          }
+          syncCommand({
+            ...cmd,
+            text: entry,
+            error: null,
+            historyIndex: index,
+          })
+          if (isSearchPrompt(cmd.kind)) {
+            void previewSearch(cmd.kind, entry)
+          }
+          return
+        }
+
+        if (keys === "<Down>") {
+          if (cmd.historyIndex === null || cmd.historyIndex === 0) {
+            syncCommand({ ...cmd, text: "", error: null, historyIndex: null })
+            if (isSearchPrompt(cmd.kind)) {
+              void previewSearch(cmd.kind, "")
+            }
+            return
+          }
+          const index = cmd.historyIndex - 1
+          const entry = historyEntry(cmd.kind, index)
+          if (entry === null) {
+            return
+          }
+          syncCommand({
+            ...cmd,
+            text: entry,
+            error: null,
+            historyIndex: index,
+          })
+          if (isSearchPrompt(cmd.kind)) {
+            void previewSearch(cmd.kind, entry)
+          }
+          return
+        }
+
         if (keys === "<CR>") {
           if (isSearchPrompt(cmd.kind)) {
             void hostRequest("execute", {
@@ -97,6 +141,7 @@ export function useEditorInput(editorMode: string) {
               bang: cmd.kind === "search-backward",
             })
               .then(() => {
+                pushHistory(cmd.kind, cmd.text)
                 closeCommand()
               })
               .catch((err: unknown) => {
