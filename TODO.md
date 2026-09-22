@@ -19,7 +19,9 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - Registers `"a`–`z` / `"A` append; `"0` yank; `"1`–`9` delete ring; `"-` small delete; `":` / `"/` last cmd & search; `"*` / `"+` clipboard (in-memory stub); `"_` black hole; `:reg`; `register_get` / `register_set`; OSC 52 stub
 - Marks `ma`–`mz` / file `mA`–`mZ` (shada); `` ` `` / `'` mark jumps; `` `. `` / `` `" ``; `:marks`; status line mark labels; digraphs; keyboard locale key encoding
 - Splits `:split` / `:vsplit` / `:new` / `:vnew`; `:only` / `:close` / `:hide` / `:wincmd`; `<C-w>` focus and resize; multi-pane webview; `:setlocal`; tab pages and tabline; `:args` / `:argadd` / `:argdo`
+- Modified-buffer guards; `:confirm` / `:set confirm`; `:wa` / `:qa` / `:wqall` / `:xall`; autoread / checktime; `:set` autowrite/hidden/backup; `:lcd`; modeline; `:e ++binary`
 - Viewport scroll, soft wrap, optional line numbers, status line Ln/Col, echo area
+- `:set` / `:setlocal` display: relativenumber, scrolloff, list/listchars, cursorline/column, colorcolumn, signcolumn, statusline/tabline, showcmd/ruler, colorschemes; conceallevel stored; foldenable deferred
 
 ---
 
@@ -162,17 +164,17 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 ## Phase 8 — `:set` & display
 
-- [ ] `relativenumber` / `n relativenumber`
-- [ ] `scrolloff` `sidescrolloff` `smoothscroll` (wire existing ScrollOff)
-- [ ] `list` `listchars` tabs/trail/eol
-- [ ] `cursorline` `cursorcolumn`
-- [ ] `colorcolumn` `textwidth` `wrapmargin`
-- [ ] `signcolumn` yes/auto
-- [ ] `statusline` `tabline` customizable (Lua-style or config DSL)
-- [ ] `showmode` `showcmd` `ruler` (showcmd for pending operator)
-- [ ] `termguicolors` / theme hooks; multiple built-in colorschemes
-- [ ] `conceallevel` (syntax-dependent, later)
-- [ ] `foldenable` folds (Phase 11)
+- [x] `relativenumber` / `n relativenumber`
+- [x] `scrolloff` `sidescrolloff` `smoothscroll` (wire existing ScrollOff)
+- [x] `list` `listchars` tabs/trail/eol
+- [x] `cursorline` `cursorcolumn`
+- [x] `colorcolumn` `textwidth` `wrapmargin`
+- [x] `signcolumn` yes/auto
+- [x] `statusline` `tabline` customizable (Lua-style or config DSL)
+- [x] `showmode` `showcmd` `ruler` (showcmd for pending operator)
+- [x] `termguicolors` / theme hooks; multiple built-in colorschemes
+- [x] `conceallevel` (syntax-dependent, later)
+- [x] `foldenable` folds (Phase 11)
 
 ---
 
