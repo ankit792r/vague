@@ -200,6 +200,7 @@ func (e *Editor) ApplySetDisplayOption(
 		}
 		e.globalDisplay.ColorScheme = rawValue
 	case "conceallevel", "cole":
+		// Rendering depends on syntax/conceal (later); value is stored for :set.
 		if rawValue != "" {
 			n, err := strconv.Atoi(rawValue)
 			if err != nil {
@@ -212,6 +213,7 @@ func (e *Editor) ApplySetDisplayOption(
 			return "", fmt.Errorf("conceallevel needs syntax support (stub)")
 		}
 	case "foldenable", "fen":
+		// Full folding is Phase 11; :set foldenable returns an error until then.
 		if enable {
 			return "", fmt.Errorf("foldenable: see Phase 11")
 		}
