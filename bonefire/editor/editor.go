@@ -63,6 +63,14 @@ type Editor struct {
 	pendingCaseChange caseChangeKind
 	pendingFormat     bool
 	pendingInsertReg  bool
+	insertNormalOnce  bool
+
+	insertCompleteActive  bool
+	insertCompleteStart   text.Offset
+	insertCompletePrefix  string
+	insertCompleteMatches []string
+	insertCompleteIndex   int
+
 	pendingFilter     bool
 	pendingTextObject string
 

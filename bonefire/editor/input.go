@@ -16,7 +16,13 @@ func (e *Editor) HandleInput(frame *frame.Frame, win *window.Window, buf *buffer
 	case VisualMode, VisualLineMode, VisualBlockMode:
 		return e.visualKey(frame, win, buf, keys)
 	default:
-		return e.normalKey(frame, win, buf, keys)
+		err := e.normalKey(frame, win, buf, keys)
+		if e.insertNormalOnce {
+			e.insertNormalOnce = false
+			e.Mode = InsertMode
+			frame.Dirty = true
+		}
+		return err
 	}
 }
 
@@ -29,19 +35,51 @@ func (e *Editor) insertKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 
 	switch keys {
 	case "<Esc>":
+		e.insertCompleteActive = false
 		e.leaveInsert(win, buf)
 		setWindowCursor(buf, win, moveLeft(t, windowCursor(win), 1))
 		view := layoutViewForWindow(t, win, frame)
 		rememberColumn(buf, win, view)
 		frame.Dirty = true
 		return nil
+	case "<C-w>":
+		return e.insertDeleteWordBack(frame, win, buf)
+	case "<C-u>":
+		return e.insertDeleteToLineStart(frame, win, buf)
 	case "<C-k>":
 		e.beginDigraph()
+		frame.Dirty = true
+		return nil
+	case "<C-a>":
+		return e.insertMoveLineStart(frame, win, buf)
+	case "<C-e>":
+		return e.insertMoveLineEnd(frame, win, buf)
+	case "<C-o>":
+		e.insertNormalOnce = true
+		e.Mode = NormalMode
 		frame.Dirty = true
 		return nil
 	case "<C-r>":
 		e.pendingInsertReg = true
 		frame.Dirty = true
+		return nil
+	case "<C-t>":
+		return e.insertAdjustIndent(frame, win, buf, 1)
+	case "<C-d>":
+		return e.insertAdjustIndent(frame, win, buf, -1)
+	case "<C-x>":
+		e.beginInsertCompletion(win, buf)
+		frame.Dirty = true
+		return nil
+	case "<C-n>":
+		if e.insertCompleteActive {
+			return e.insertCompletionCycle(frame, win, buf, 1)
+		}
+		return nil
+	case "<C-p>":
+		if e.insertCompleteActive {
+			return e.insertCompletionCycle(frame, win, buf, -1)
+		}
 		return nil
 	case "<CR>":
 		return e.insertBytes(frame, win, buf, []byte("\n"))
@@ -82,7 +120,7 @@ func (e *Editor) insertKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 			id = registerID{}
 		}
 		if data, _, ok := e.readRegister(id); ok {
-			return e.insertBytes(frame, win, buf, data)
+			return e.insertRegisterPaste(frame, win, buf, data)
 		}
 		frame.Dirty = true
 		return nil
@@ -101,6 +139,7 @@ func (e *Editor) insertKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		return nil
 	}
 
+	e.insertCompleteActive = false
 	return e.insertBytes(frame, win, buf, []byte(keys))
 }
 

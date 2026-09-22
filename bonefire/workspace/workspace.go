@@ -240,8 +240,18 @@ func (w *Workspace) HandleInput(frameID uint64, keys string) error {
 		return nil
 	}
 	if keys == "<C-w>" {
-		w.pendingCtrlW[frameID] = true
-		return nil
+		frame, win, buf, err := w.FrameContext(frameID)
+		if err != nil {
+			return err
+		}
+		if w.Editor.Mode == editor.NormalMode ||
+			w.Editor.Mode == editor.VisualMode ||
+			w.Editor.Mode == editor.VisualLineMode ||
+			w.Editor.Mode == editor.VisualBlockMode {
+			w.pendingCtrlW[frameID] = true
+			return nil
+		}
+		return w.Editor.HandleInput(frame, win, buf, keys)
 	}
 	frame, win, buf, err := w.FrameContext(frameID)
 	if err != nil {
