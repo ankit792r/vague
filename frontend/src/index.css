@@ -74,6 +74,7 @@ button {
 }
 
 .editor-line {
+  position: relative;
   white-space: pre;
   min-height: 1.4em;
 }
@@ -84,12 +85,12 @@ button {
 }
 
 .cursor-bar {
-  display: inline-block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
   width: 2px;
-  height: 1.4rem;
-  margin: 0 0px;
-  vertical-align: text-bottom;
   background: var(--fg);
+  pointer-events: none;
 }
 
 .visual-selection {
