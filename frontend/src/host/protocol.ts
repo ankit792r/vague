@@ -79,6 +79,31 @@ export type RedrawPayload = {
   }
   line_marks?: string
   echo?: StatusEcho
+  panes?: RedrawPanePayload[]
+  tabs?: { label: string; active?: boolean }[]
+  active_tab?: number
+}
+
+export type RedrawPanePayload = {
+  window_id: number
+  x: number
+  y: number
+  columns: number
+  rows: number
+  active?: boolean
+  wrap: boolean
+  number?: boolean
+  gutter_columns?: number
+  buffer: RedrawPayload["buffer"]
+  lines: string[]
+  line_numbers?: number[]
+  cursor: RedrawPayload["cursor"]
+  selection?: RedrawPayload["selection"]
+  search_match?: RedrawPayload["search_match"]
+  search_highlights?: RedrawPayload["search_highlights"]
+  mode: string
+  position: RedrawPayload["position"]
+  line_marks?: string
 }
 
 export type HostEventMap = {
