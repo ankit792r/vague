@@ -43,9 +43,14 @@ func (w *Workspace) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 	}
 
 	var tabs []process.RedrawTab
+	tabFmt := w.Editor.TabLineFormat()
 	for i, tab := range frame.Tabs {
+		label := tab.Label
+		if tabFmt != "" && tabFmt != "%N" {
+			label = editor.FormatTabLine(tabFmt, tab.Label, i+1, i == frame.ActiveTab)
+		}
 		tabs = append(tabs, process.RedrawTab{
-			Label:  tab.Label,
+			Label:  label,
 			Active: i == frame.ActiveTab,
 		})
 	}
@@ -82,5 +87,7 @@ func (w *Workspace) RenderRedraw(frameID uint64) (process.Redraw, bool) {
 		Panes:            panes,
 		Tabs:             tabs,
 		ActiveTab:        frame.ActiveTab,
+		Theme:            w.Editor.ThemeName(),
+		ShowCmd:          activePane.ShowCmd,
 	}, true
 }
