@@ -17,12 +17,19 @@ sudo pacman -S go bun webkit2gtk-4.1 gtk3
 ## Build
 
 ```bash
+make
+# or
 ./scripts/build.sh
 ./bin/vague
 ./bin/vague hello.py
 ```
 
-The build script installs missing Arch packages (when `pacman` is available),
+```bash
+make test
+make clean
+```
+
+The build installs missing Arch packages when `pacman` is available (see `scripts/build.sh`),
 builds the frontend, and writes a standalone Go binary to `bin/vague`.
 
 Without the systemd service, the server starts automatically on first `vague`
@@ -31,7 +38,21 @@ launch. After install, manage it with `systemctl --user`.
 ## Install
 
 ```bash
+make install
+# or
 ./scripts/install.sh install
+```
+
+User install (default `PREFIX=~/.local`):
+
+```bash
+make install
+```
+
+System-wide (requires write access to `PREFIX`):
+
+```bash
+sudo make install PREFIX=/usr/local
 ```
 
 Installs to `~/.local`:
@@ -83,6 +104,8 @@ Search uses the command line (`/` and `?`); other editing keys are Vim-style in 
 ## Uninstall
 
 ```bash
+make uninstall
+# or
 ./scripts/install.sh uninstall
 ```
 
