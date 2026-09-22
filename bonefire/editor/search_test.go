@@ -191,3 +191,31 @@ func TestSearchNotFound(t *testing.T) {
 		t.Fatalf("err = %v, want ErrPatternNotFound", err)
 	}
 }
+
+func TestHlsearchHighlightsInRedraw(t *testing.T) {
+	t.Parallel()
+
+	ws := workspace.New()
+	buf := ws.Editor.Scratch("*scratch*")
+	buf.Text.SetBytes([]byte("aa bb aa"))
+
+	frame, err := ws.NewFrame(80, 10, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := ws.RunExLine(frame.ID, "set hlsearch"); err != nil {
+		t.Fatal(err)
+	}
+	if err := ws.Search(frame.ID, "aa", true); err != nil {
+		t.Fatal(err)
+	}
+
+	redraw, ok := ws.RenderRedraw(frame.ID)
+	if !ok {
+		t.Fatal("expected redraw")
+	}
+	if len(redraw.SearchHighlights) == 0 {
+		t.Fatal("expected search_highlights with hlsearch on")
+	}
+}
