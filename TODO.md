@@ -100,7 +100,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 ## Phase 3 — Search & pattern
 
 - [x] Vim regex engine (`\m` `\M` `\v` `\V`) or documented subset
-- [ ] `:set ignorecase` `smartcase` `hlsearch` `incsearch` `wrapscan`
+- [x] `:set ignorecase` `smartcase` `hlsearch` `incsearch` `wrapscan`
 - [ ] Highlight **all** matches (`hlsearch`) + `:nohlsearch`
 - [ ] Search offset `:ta` tags (later)
 - [ ] `:vimgrep` / quickfix list (see Phase 12)
