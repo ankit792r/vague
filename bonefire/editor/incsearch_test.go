@@ -8,6 +8,28 @@ import (
 	"vague/bonefire/window"
 )
 
+func TestIncsearchCancelRestoresCursor(t *testing.T) {
+	ed := NewEditor()
+	buf := ed.Scratch("x")
+	_, _ = buf.Insert(0, []byte("hello world"))
+	win := &window.Window{Cursor: buf.Text.AddMarker(5, text.GravityRight)}
+
+	fm := &frame.Frame{Width: 80, Height: 24, Dirty: true}
+
+	ed.BeginIncsearch(win, buf, true)
+	if err := ed.PreviewIncsearch(fm, win, buf, "world"); err != nil {
+		t.Fatal(err)
+	}
+	if windowCursor(win) == 5 {
+		t.Fatal("expected preview to move cursor")
+	}
+
+	ed.CancelIncsearch(fm, win, buf)
+	if windowCursor(win) != 5 {
+		t.Fatalf("cursor = %d, want 5 restored", windowCursor(win))
+	}
+}
+
 func TestIncsearchConfirmSetsPattern(t *testing.T) {
 	ed := NewEditor()
 	buf := ed.Scratch("x")

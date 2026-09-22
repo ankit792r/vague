@@ -51,6 +51,10 @@ async function beginSearch(kind: PromptKind) {
   })
 }
 
+async function cancelSearchPreview() {
+  await hostRequest("execute", { name: "search_cancel" })
+}
+
 export function useEditorInput(editorMode: string) {
   const [commandLine, setCommandLine] = useState<CommandLineState>(
     initialCommandLineState(),
@@ -72,6 +76,12 @@ export function useEditorInput(editorMode: string) {
     }
 
     const cancelCommand = () => {
+      const cmd = commandRef.current
+      if (isSearchPrompt(cmd.kind)) {
+        void cancelSearchPreview().catch((err: unknown) => {
+          console.error("search cancel failed", err)
+        })
+      }
       closeCommand()
     }
 
@@ -161,6 +171,7 @@ export function useEditorInput(editorMode: string) {
 
           void hostRequest("execute", parsed)
             .then(() => {
+              pushHistory(cmd.kind, cmd.text)
               closeCommand()
             })
             .catch((err: unknown) => {

@@ -67,7 +67,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 
 - [x] **incsearch** — preview match while typing `/` `?`
 - [x] Command-line history (`/` `?` `:`)
-- [ ] `Ctrl-c` / `<Esc>` clears highlight on cancel search
+- [x] `Ctrl-c` / `<Esc>` clears highlight on cancel search
 - [ ] `Ctrl-r` insert register in cmdline
 - [ ] Wildmenu / tab completion (`:e` paths, `:b` names, `:set` keys)
 - [ ] `:help` stub or generated key reference
