@@ -30,6 +30,15 @@ type Editor struct {
 	searchMatchFrom text.Offset
 	searchMatchTo   text.Offset
 	searchMatchBuf  uint64
+
+	incsearchActive         bool
+	incsearchForward        bool
+	incsearchReturnCursor   text.Offset
+	incsearchSavedPattern   string
+	incsearchSavedMatchFrom text.Offset
+	incsearchSavedMatchTo   text.Offset
+	incsearchSavedMatchBuf  uint64
+
 	lastChange    lastChange
 	reg           register
 

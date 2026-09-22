@@ -234,6 +234,37 @@ func (w *Workspace) Search(frameID uint64, pattern string, forward bool) error {
 	return nil
 }
 
+func (w *Workspace) BeginIncsearch(frameID uint64, forward bool) error {
+	frame, win, buf, err := w.FrameContext(frameID)
+	if err != nil {
+		return err
+	}
+	w.Editor.BeginIncsearch(win, buf, forward)
+	frame.Dirty = true
+	return nil
+}
+
+func (w *Workspace) PreviewIncsearch(frameID uint64, pattern string) error {
+	frame, win, buf, err := w.FrameContext(frameID)
+	if err != nil {
+		return err
+	}
+	if err := w.Editor.PreviewIncsearch(frame, win, buf, pattern); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (w *Workspace) CancelIncsearch(frameID uint64) error {
+	frame, win, buf, err := w.FrameContext(frameID)
+	if err != nil {
+		return err
+	}
+	w.Editor.CancelIncsearch(frame, win, buf)
+	w.ClearEcho(frameID)
+	return nil
+}
+
 func (w *Workspace) SwitchToNextBuffer(frameID uint64) (*buffer.Buffer, error) {
 	_, _, buf, err := w.FrameContext(frameID)
 	if err != nil {

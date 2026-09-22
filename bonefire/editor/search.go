@@ -23,6 +23,7 @@ func (e *Editor) Search(
 		return ErrPatternNotFound
 	}
 
+	e.endIncsearchCommit()
 	e.clearSearchContext()
 	e.searchPattern = pattern
 	e.searchForward = forward
