@@ -145,6 +145,14 @@ func (e *Editor) normalKey(frame *frame.Frame, win *window.Window, buf *buffer.B
 		setWindowCursor(buf, win, moveVerticalForWindow(t, win, frame, at, e.takeCount(), false))
 	case "k", "<Up>":
 		setWindowCursor(buf, win, moveVerticalForWindow(t, win, frame, at, -e.takeCount(), false))
+	case "{":
+		setWindowCursor(buf, win, moveParagraphBackward(t, at, e.takeCount()))
+	case "}":
+		setWindowCursor(buf, win, moveParagraphForward(t, at, e.takeCount()))
+	case "(":
+		setWindowCursor(buf, win, moveSentenceBackward(t, at, e.takeCount()))
+	case ")":
+		setWindowCursor(buf, win, moveSentenceForward(t, at, e.takeCount()))
 	case "f":
 		e.beginPendingCharFind(charFindF)
 		return nil
