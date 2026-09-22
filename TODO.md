@@ -80,7 +80,7 @@ Legend: **done** items live under [Shipped](#shipped). Everything else is open.
 - [x] `:normal` `:norm` execute keys on range
 - [x] `:read` `:r` insert file or output
 - [x] `:write` ranges / `:w >>` append
-- [ ] `:edit` no-arg reload; `:find` `:sf` path search
+- [x] `:edit` no-arg reload; `:find` `:sf` path search
 - [ ] `:buffer` `:bd` `:bdelete` `:bwipeout` with confirm
 - [ ] `:cd` `:pwd` working directory per tab/frame
 - [ ] `:set` / `:setlocal` full option parser (`set opt?` `set opt&` `opt+=`)
