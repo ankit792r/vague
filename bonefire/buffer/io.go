@@ -33,11 +33,13 @@ func Load(path string) (*Buffer, error) {
 	lineEnding := detectLineEnding(data)
 	noEOL := len(data) > 0 && data[len(data)-1] != '\n'
 
+	history := LoadUndoHistory(abs, normalized)
+
 	buf := &Buffer{
 		Name:         filepath.Base(abs),
 		Path:         abs,
 		Text:         text.New(normalized),
-		History:      text.NewUndoTree(),
+		History:      history,
 		NoEOL:        noEOL,
 		LineEnding:   lineEnding,
 		Binary:       bytes.IndexByte(data, 0) >= 0,
@@ -181,6 +183,7 @@ func (b *Buffer) saveTo(path string, force bool) error {
 	b.diskSize = info.Size()
 	b.diskModTime = info.ModTime()
 	b.savedSeq = b.History.Seq()
+	_ = SaveUndoHistory(b)
 	return nil
 }
 
@@ -251,7 +254,7 @@ func newEmptyFile(abs string) *Buffer {
 		Name:         filepath.Base(abs),
 		Path:         abs,
 		Text:         text.New(nil),
-		History:      text.NewUndoTree(),
+		History:      LoadUndoHistory(abs, nil),
 		startedEmpty: true,
 	}
 }

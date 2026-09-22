@@ -38,10 +38,12 @@ type Buffer struct {
 // NewScratch creates a buffer with no backing file.
 func NewScratch(id uint64, name string) *Buffer {
 	initial := []byte("This is scratch buffer\nModified contents are not saved.")
-	return &Buffer{
+	buf := &Buffer{
 		ID:      id,
 		Name:    name,
 		Text:    text.New(initial),
 		History: text.NewUndoTree(),
 	}
+	buf.History.SetInitial(initial)
+	return buf
 }
