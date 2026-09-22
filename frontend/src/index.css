@@ -210,14 +210,34 @@ button {
   white-space: nowrap;
 }
 
-.command-echo-multiline {
-  white-space: pre;
-  text-overflow: clip;
-  overflow: auto;
-  max-height: 6rem;
+.command-echo-error {
+  color: #ff6b6b;
 }
 
-.command-echo-error {
+.command-minibuffer {
+  flex-shrink: 0;
+  background: var(--minibuffer-bg);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.command-minibuffer-expanded {
+  min-height: 6rem;
+  max-height: min(40vh, 14rem);
+  overflow: auto;
+}
+
+.command-minibuffer-body {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre;
+  color: var(--fg);
+}
+
+.command-minibuffer-error .command-minibuffer-body {
   color: #ff6b6b;
 }
 
@@ -234,22 +254,31 @@ button {
 
 .command-wildmenu {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.75rem;
-  padding: 0.15rem 0.25rem 0.35rem;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.65rem;
+  height: 1.65rem;
+  padding: 0.2rem 0.35rem 0.3rem;
   background: var(--minibuffer-bg);
   font-size: 0.9rem;
   line-height: 1.25rem;
-  max-height: 4rem;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.command-wildmenu::-webkit-scrollbar {
+  display: none;
 }
 
 .command-wildmenu-item {
+  flex-shrink: 0;
+  padding: 0 0.1rem;
   color: color-mix(in srgb, var(--fg) 75%, transparent);
 }
 
 .command-wildmenu-selected {
   color: var(--bg);
   background: var(--fg);
-  padding: 0 0.15rem;
+  box-decoration-break: clone;
 }

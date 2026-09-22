@@ -1,8 +1,10 @@
+import { useLayoutEffect, useRef } from "preact/hooks"
 import type { StatusEcho } from "../../host/protocol"
 import {
   type CommandLineState,
   type PromptKind,
 } from "../../types/command"
+import { syncWildmenuScroll } from "../../utils/wildmenuScroll"
 
 type CommandLineProps = Pick<
   CommandLineState,
@@ -40,6 +42,37 @@ export function CommandLine({
   completionIndex,
   pendingRegister,
 }: CommandLineProps) {
+  const wildmenuRef = useRef<HTMLDivElement>(null)
+  const wildmenuItemRefs = useRef<(HTMLSpanElement | null)[]>([])
+
+  useLayoutEffect(() => {
+    if (!active || completions.length === 0) {
+      wildmenuItemRefs.current = []
+      if (wildmenuRef.current) {
+        wildmenuRef.current.scrollLeft = 0
+      }
+      return
+    }
+    const menu = wildmenuRef.current
+    if (!menu) {
+      return
+    }
+    syncWildmenuScroll(menu, wildmenuItemRefs.current, completionIndex)
+  }, [active, completions, completionIndex])
+
+  useLayoutEffect(() => {
+    const menu = wildmenuRef.current
+    if (!menu || !active || completions.length === 0) {
+      return
+    }
+
+    const ro = new ResizeObserver(() => {
+      syncWildmenuScroll(menu, wildmenuItemRefs.current, completionIndex)
+    })
+    ro.observe(menu)
+    return () => ro.disconnect()
+  }, [active, completions, completionIndex])
+
   const echoMessage = !active && echo?.message ? echo.message : null
   const echoIsError = echo?.kind === "error"
   const prefix = promptPrefix(kind)
@@ -73,11 +106,21 @@ export function CommandLine({
           ) : null}
         </div>
         {completions.length > 0 ? (
-          <div class="command-wildmenu" role="listbox">
+          <div
+            ref={wildmenuRef}
+            class="command-wildmenu"
+            role="listbox"
+            aria-label="command completion"
+          >
             {completions.map((item, i) => (
               <span
+                ref={(el) => {
+                  wildmenuItemRefs.current[i] = el
+                }}
                 key={`${item}-${i}`}
                 class={`command-wildmenu-item${i === completionIndex ? " command-wildmenu-selected" : ""}`}
+                role="option"
+                aria-selected={i === completionIndex}
               >
                 {item}
               </span>
@@ -92,11 +135,26 @@ export function CommandLine({
     return <div class="command-line-wrap" />
   }
 
+  const multiline = echoMessage.includes("\n")
+
+  if (multiline) {
+    return (
+      <div class="command-line-wrap">
+        <div
+          class={`command-minibuffer command-minibuffer-expanded${echoIsError ? " command-minibuffer-error" : ""}`}
+          aria-live="polite"
+        >
+          <pre class="command-minibuffer-body">{echoMessage}</pre>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div class="command-line-wrap">
       <div class="command-line">
         <span
-          class={`command-echo${echoIsError ? " command-echo-error" : ""}${echoMessage.includes("\n") ? " command-echo-multiline" : ""}`}
+          class={`command-echo${echoIsError ? " command-echo-error" : ""}`}
           aria-live="polite"
         >
           {echoMessage}

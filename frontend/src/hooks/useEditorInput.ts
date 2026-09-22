@@ -93,14 +93,20 @@ async function insertRegisterAtCursor(cmd: CommandLineState): Promise<CommandLin
   return next
 }
 
-export function useEditorInput(editorMode: string) {
+async function clearEchoMessage() {
+  await hostRequest("execute", { name: "clear_echo" })
+}
+
+export function useEditorInput(editorMode: string, echoMessage: string | null) {
   const [commandLine, setCommandLine] = useState<CommandLineState>(
     initialCommandLineState(),
   )
   const modeRef = useRef(editorMode)
+  const echoRef = useRef(echoMessage)
   const commandRef = useRef(commandLine)
 
   modeRef.current = editorMode
+  echoRef.current = echoMessage
   commandRef.current = commandLine
 
   useEffect(() => {
@@ -159,6 +165,15 @@ export function useEditorInput(editorMode: string) {
       }
 
       const cmd = commandRef.current
+
+      if (!cmd.active && echoRef.current) {
+        if (keys === "<Esc>" || keys === "<C-c>" || keys === "<C-g>") {
+          void clearEchoMessage().catch((err: unknown) => {
+            console.error("clear echo failed", err)
+          })
+          return
+        }
+      }
 
       if (cmd.active) {
         if (keys === "<Esc>" || keys === "<C-c>" || keys === "<C-g>") {
