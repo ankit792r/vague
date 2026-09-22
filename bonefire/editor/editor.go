@@ -2,6 +2,7 @@ package editor
 
 import (
 	"vague/bonefire/buffer"
+	"vague/bonefire/shada"
 	"vague/bonefire/text"
 )
 
@@ -68,7 +69,17 @@ type Editor struct {
 	nextBufferID uint64
 
 	userMaps map[string]string
-	marks    map[string]text.Offset
+
+	localMarks  map[uint64]map[string]*text.Marker
+	changeMarks map[uint64]*text.Marker
+	jumpMarks   map[uint64]*text.Marker
+	fileMarks   map[string]shada.FileMark
+	shada       *shada.Store
+
+	pendingMarkSet  bool
+	pendingMarkJump markJumpMode
+	pendingDigraph  bool
+	digraphFirst    string
 }
 
 func NewEditor() *Editor {
@@ -76,7 +87,6 @@ func NewEditor() *Editor {
 		Mode:         NormalMode,
 		Buffers:      make(map[uint64]*buffer.Buffer),
 		nextBufferID: 1,
-		marks:        make(map[string]text.Offset),
 		searchOpts:   DefaultSearchOpts(),
 		regs:         newRegisters(),
 	}
