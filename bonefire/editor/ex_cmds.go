@@ -212,6 +212,9 @@ func (e *Editor) exSet(
 	if strings.HasSuffix(lower, "?") {
 		key := strings.TrimSpace(args[:len(args)-1])
 		keyLower := strings.ToLower(key)
+		if q := e.FileOptionQuery(keyLower); q != "" {
+			return q + "?", nil
+		}
 		if q := e.SearchOptionQuery(keyLower); q != "" {
 			return q + "?", nil
 		}
@@ -225,10 +228,18 @@ func (e *Editor) exSet(
 	}
 	if strings.HasPrefix(lower, "no") && len(lower) > 2 {
 		base := lower[2:]
+		if msg, err := e.ApplySetFileOption(base, false); err == nil {
+			frame.Dirty = true
+			return msg, nil
+		}
 		if msg, err := e.ApplySetSearchOption(base, false); err == nil {
 			frame.Dirty = true
 			return msg, nil
 		}
+	}
+	if msg, err := e.ApplySetFileOption(lower, true); err == nil {
+		frame.Dirty = true
+		return msg, nil
 	}
 	if msg, err := e.ApplySetSearchOption(lower, true); err == nil {
 		frame.Dirty = true

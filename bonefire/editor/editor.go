@@ -80,6 +80,8 @@ type Editor struct {
 	pendingMarkJump markJumpMode
 	pendingDigraph  bool
 	digraphFirst    string
+
+	fileOpts FileOpts
 }
 
 func NewEditor() *Editor {
@@ -89,6 +91,7 @@ func NewEditor() *Editor {
 		nextBufferID: 1,
 		searchOpts:   DefaultSearchOpts(),
 		regs:         newRegisters(),
+		fileOpts:     defaultFileOpts(),
 	}
 }
 

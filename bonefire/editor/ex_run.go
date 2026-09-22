@@ -100,7 +100,7 @@ func (e *Editor) RunExLine(
 	case "later", "earlier":
 		return "", fmt.Errorf("%s not implemented", cmd.kind)
 	case "checktime":
-		return "checktime: no autoread prompt yet", nil
+		return "", fmt.Errorf("checktime: use workspace CheckTime")
 	case "diffsplit", "diffoff", "diffget", "diffput":
 		return "", fmt.Errorf("%s not implemented", cmd.kind)
 	case "terminal", "term":
