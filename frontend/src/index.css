@@ -228,15 +228,6 @@ button {
   height: 100%;
 }
 
-.cursor-cell,
-.cursor-cell-hollow {
-  display: inline-block;
-  vertical-align: top;
-  min-height: var(--editor-line-height);
-  line-height: var(--editor-line-height);
-  box-sizing: border-box;
-}
-
 .cursor-cell {
   background: var(--fg);
   color: var(--bg);
@@ -248,22 +239,36 @@ button {
   box-shadow: inset 0 0 0 1px var(--fg);
 }
 
+.cursor-bar,
 .cursor-bar-hollow {
   position: absolute;
   top: 0;
-  height: var(--editor-line-height);
+  bottom: 0;
   width: 2px;
-  box-shadow: inset 1px 0 0 0 var(--fg);
   pointer-events: none;
 }
 
 .cursor-bar {
-  position: absolute;
-  top: 0;
-  height: var(--editor-line-height);
-  width: 2px;
   background: var(--fg);
-  pointer-events: none;
+}
+
+.cursor-bar-hollow {
+  box-shadow: inset 1px 0 0 0 var(--fg);
+}
+
+.editor-area .cursor-cell,
+.editor-area .cursor-cell-hollow {
+  display: inline-block;
+  vertical-align: top;
+  min-height: var(--editor-line-height);
+  line-height: var(--editor-line-height);
+  box-sizing: border-box;
+}
+
+.editor-line-content > .cursor-bar,
+.editor-line-content > .cursor-bar-hollow {
+  bottom: auto;
+  height: var(--editor-line-height);
 }
 
 .visual-selection {
