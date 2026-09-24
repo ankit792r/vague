@@ -85,13 +85,14 @@ button {
 }
 
 .editor-area {
+  --editor-line-height: 1.4em;
   flex: 1;
   min-height: 0;
   overflow: auto;
   padding: 0;
   font-family: var(--font-text);
   font-size: 20px;
-  line-height: 1.4em;
+  line-height: var(--editor-line-height);
   user-select: none;
 }
 
@@ -204,8 +205,8 @@ button {
   flex-direction: row;
   align-items: stretch;
   white-space: pre;
-  height: 1.4em;
-  line-height: 1.4em;
+  height: var(--editor-line-height);
+  line-height: var(--editor-line-height);
   margin: 0;
   padding: 0;
 }
@@ -227,6 +228,15 @@ button {
   height: 100%;
 }
 
+.cursor-cell,
+.cursor-cell-hollow {
+  display: inline-block;
+  vertical-align: top;
+  min-height: var(--editor-line-height);
+  line-height: var(--editor-line-height);
+  box-sizing: border-box;
+}
+
 .cursor-cell {
   background: var(--fg);
   color: var(--bg);
@@ -241,7 +251,7 @@ button {
 .cursor-bar-hollow {
   position: absolute;
   top: 0;
-  bottom: 0;
+  height: var(--editor-line-height);
   width: 2px;
   box-shadow: inset 1px 0 0 0 var(--fg);
   pointer-events: none;
@@ -250,7 +260,7 @@ button {
 .cursor-bar {
   position: absolute;
   top: 0;
-  bottom: 0;
+  height: var(--editor-line-height);
   width: 2px;
   background: var(--fg);
   pointer-events: none;
@@ -259,8 +269,8 @@ button {
 .visual-selection {
   background: var(--visual-selection-bg);
   display: inline-block;
-  min-height: 1.4em;
-  line-height: 1.4em;
+  min-height: var(--editor-line-height);
+  line-height: var(--editor-line-height);
   vertical-align: top;
 }
 
