@@ -13,6 +13,7 @@
   --minibuffer-bg: #141414;
   --border: #3a3a3b;
   --cursorline-bg: color-mix(in srgb, #3d5a80 42%, var(--bg));
+  --visual-selection-bg: color-mix(in srgb, var(--fg) 35%, transparent);
   --colorcolumn-bg: color-mix(in srgb, #6a9fb5 18%, transparent);
   --signcolumn-fg: color-mix(in srgb, var(--fg) 35%, transparent);
 }
@@ -90,7 +91,7 @@ button {
   padding: 0;
   font-family: var(--font-text);
   font-size: 20px;
-  line-height: 1.4;
+  line-height: 1.4em;
   user-select: none;
 }
 
@@ -145,6 +146,19 @@ button {
   color: color-mix(in srgb, var(--fg) 72%, var(--bg));
 }
 
+.editor-line.visual-line-row {
+  background: var(--visual-selection-bg);
+}
+
+.editor-line.visual-line-row .line-number,
+.editor-line.visual-line-row .sign-column {
+  background: transparent;
+}
+
+.editor-line.cursor-line.visual-line-row {
+  background: var(--cursorline-bg);
+}
+
 .sign-column {
   flex-shrink: 0;
   width: 2ch;
@@ -190,7 +204,10 @@ button {
   flex-direction: row;
   align-items: stretch;
   white-space: pre;
-  min-height: 1.4em;
+  height: 1.4em;
+  line-height: 1.4em;
+  margin: 0;
+  padding: 0;
 }
 
 .line-number {
@@ -199,12 +216,15 @@ button {
   padding-right: 0.25ch;
   color: color-mix(in srgb, var(--fg) 45%, transparent);
   user-select: none;
+  line-height: inherit;
 }
 
 .editor-line-content {
   flex: 1;
   min-width: 0;
   position: relative;
+  line-height: inherit;
+  height: 100%;
 }
 
 .cursor-cell {
@@ -237,7 +257,11 @@ button {
 }
 
 .visual-selection {
-  background: color-mix(in srgb, var(--fg) 35%, transparent);
+  background: var(--visual-selection-bg);
+  display: inline-block;
+  min-height: 1.4em;
+  line-height: 1.4em;
+  vertical-align: top;
 }
 
 .search-match {

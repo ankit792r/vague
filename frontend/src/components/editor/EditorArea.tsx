@@ -1,6 +1,10 @@
 import type { RefObject } from "preact"
 import type { EditorCursor, EditorSearchHighlight, EditorSearchMatch, EditorSelection } from "../../types/editor"
 import { EditorLine, type CursorFill } from "./EditorLine"
+import {
+  rowSelectionHighlight,
+  selectionForLineSpans,
+} from "../../utils/selectionRow"
 
 function cursorShapeForMode(mode: string): "block" | "bar" {
   return mode === "insert" ? "bar" : "block"
@@ -68,9 +72,16 @@ export function EditorArea({
           !hideCursor &&
           cursor.visible &&
           cursor.row === index
-        const lineClass = showCursorLine
-          ? "editor-line cursor-line"
-          : "editor-line"
+        const rowSel = rowSelectionHighlight(index, selection)
+        const parts = ["editor-line"]
+        if (showCursorLine) {
+          parts.push("cursor-line")
+        }
+        if (rowSel === "full") {
+          parts.push("visual-line-row")
+        }
+        const lineClass = parts.join(" ")
+        const spanSelection = selectionForLineSpans(index, selection)
         return (
           <div key={index} class={lineClass}>
             {signColumn ? (
@@ -105,7 +116,7 @@ export function EditorArea({
                 cursor={displayCursor}
                 cursorShape={cursorShape}
                 cursorFill={cursorFill}
-                selection={selection}
+                selection={spanSelection}
                 searchMatch={searchMatch}
                 searchHighlights={searchHighlights}
               />
