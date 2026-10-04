@@ -104,6 +104,9 @@ func attachBridgeToWebView(ctx context.Context, w webview.WebView, cli *Client) 
 	b := NewBridge(ctx, w, cli)
 
 	// Here will register other handler
+	RegisterFrameHandlers(b)
+	RegisterInputHandlers(b)
+	RegisterCommandHandlers(b)
 
 	err := b.Webview.Bind("hostInvoke", b.Invoke)
 	if err != nil {

@@ -12,3 +12,11 @@ func (b *Bridge) frameAttach(params MethodParams) (any, error) {
 func (b *Bridge) frameDetach(params MethodParams) (any, error) {
 	return nil, nil
 }
+
+
+func RegisterInputHandlers(b *Bridge) {
+}
+
+
+func RegisterCommandHandlers(b *Bridge) {
+}
