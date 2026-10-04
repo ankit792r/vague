@@ -5,25 +5,25 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"log"
 	"net"
 	"net/http"
 	"os"
 	"path"
 	"strings"
-	"vague/backbone/bridge"
 
 	"github.com/abemedia/go-webview"
 	_ "github.com/abemedia/go-webview/embedded"
 )
 
-func LaunchWebView(ctx *context.Context) error {
+func LaunchWebView(ctx context.Context, cli *Client) error {
 	w := webview.New(true)
 	defer w.Destroy()
 
 	w.SetTitle("Vague")
 	w.SetSize(1200, 800, webview.HintNone)
 
-	bridge.AttachBridgeToWebView(w)
+	attachBridgeToWebView(ctx, w, cli)
 
 	url := "http://localhost:5173"
 	if os.Getenv("VAGUE_DEV") != "1" {
@@ -97,4 +97,16 @@ func LoadStaticUI() (string, error) {
 	}()
 
 	return addr, nil
+}
+
+// This will attach bridge in webview
+func attachBridgeToWebView(ctx context.Context, w webview.WebView, cli *Client) {
+	b := NewBridge(ctx, w, cli)
+
+	// Here will register other handler
+
+	err := b.Webview.Bind("hostInvoke", b.Invoke)
+	if err != nil {
+		log.Fatalf("Failed to attach UI bridge: %v", err)
+	}
 }

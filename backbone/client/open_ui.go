@@ -7,16 +7,16 @@ import (
 )
 
 func OpenUI(ctx context.Context, files ...string) error {
-	conn, err := ClientConnect()
+	cli, err := ClientConnect()
 	if err != nil {
 		return err
 	}
 
 	defer func() {
-		// if err := conn.UiDetach(ctx); err != nil {
+		// if err := cli.UiDetach(ctx); err != nil {
 		// 	slog.Error("ui detach", "error", err)
 		// }
-		conn.Close()
+		cli.Close()
 	}()
 
 	workDir, err := clientWorkDir()
@@ -27,7 +27,7 @@ func OpenUI(ctx context.Context, files ...string) error {
 	// TODO: this will be passed to the backend to open and load buffers
 	fmt.Println(workDir)
 
-	return LaunchWebView(&ctx)
+	return LaunchWebView(ctx, cli)
 }
 
 func clientWorkDir() (string, error) {

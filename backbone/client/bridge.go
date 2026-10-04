@@ -1,10 +1,9 @@
-package bridge
+package client
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/abemedia/go-webview"
@@ -19,15 +18,17 @@ type Handler func(params MethodParams) (any, error)
 
 type Bridge struct {
 	ctx      context.Context
-	webview  webview.WebView
+	cli      *Client
+	Webview  webview.WebView
 	mu       sync.RWMutex
 	handlers map[string]Handler
 }
 
-func NewBridge(w webview.WebView, ctx context.Context) *Bridge {
+func NewBridge(ctx context.Context, w webview.WebView, cli *Client) *Bridge {
 	return &Bridge{
 		ctx:      ctx,
-		webview:  w,
+		cli:      cli,
+		Webview:  w,
 		handlers: make(map[string]Handler),
 	}
 }
@@ -40,7 +41,7 @@ func (b *Bridge) Register(method string, h Handler) {
 }
 
 // TODO: we have to fix the return type of **invoke()**
-func (b *Bridge) invoke(methodName string, params MethodParams) any {
+func (b *Bridge) Invoke(methodName string, params MethodParams) any {
 	b.mu.RLock()
 	h, ok := b.handlers[methodName]
 	b.mu.RUnlock()
@@ -70,22 +71,5 @@ func (b *Bridge) Emit(event string, data any) {
 		string(encoded),
 	)
 
-	b.webview.Eval(js)
-}
-
-// This will attach bridge in webview
-func AttachBridgeToWebView(w webview.WebView) {
-	b := NewBridge(w)
-
-	// Here will register other handler
-	// b.RegisterFrame()
-	// b.RegisterInput()
-	// b.RegisterCommand()
-	// handlers.RegisterFrameHandlers(b)
-	RegisterFrameHandler(b)
-
-	err := b.webview.Bind("hostInvoke", b.invoke)
-	if err != nil {
-		log.Fatalf("Failed to attach UI bridge: %v", err)
-	}
+	b.Webview.Eval(js)
 }
