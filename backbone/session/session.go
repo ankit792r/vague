@@ -16,7 +16,7 @@ type Session struct {
 	Conn     net.Conn
 	Reader   *bufio.Reader
 	outbound chan process.Message
-	state    *FrameState
+	State    *FrameState
 
 	done     chan struct{}
 	doneOnce sync.Once
@@ -29,7 +29,7 @@ func NewSession(id uint64, conn net.Conn) *Session {
 		Conn:     conn,
 		Reader:   bufio.NewReader(conn),
 		outbound: make(chan process.Message, outboundQueue),
-		state:    EmptyFrameState(),
+		State:    EmptyFrameState(),
 
 		done: make(chan struct{}),
 	}

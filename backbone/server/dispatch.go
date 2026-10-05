@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"vague/backbone/process"
 	"vague/backbone/process/protocols"
 	"vague/backbone/session"
@@ -15,6 +16,9 @@ func (s *Server) dispatch(ctx context.Context, sess *session.Session, msg proces
 	default:
 	}
 
+
+		fmt.Println(msg)
+
 	// frameID := sess.FrameID()
 
 	// INFO: this function will send notification to ui on any failure
@@ -27,16 +31,18 @@ func (s *Server) dispatch(ctx context.Context, sess *session.Session, msg proces
 	// }
 
 	var params protocols.CommandParams
+	// FIXME: here is the issue, we dont getting the method name parsed correclty by DecodeParams method
+	// instead we have to find and alternative way to pass Message
 	if err := msg.DecodeParams(&params); err != nil {
 		sess.Reply(msg.ID, nil, err)
 		return
 	}
 
-	// sess.Reply(msg.ID, "{}", nil)
+	fmt.Println("params name", params)
+	fmt.Println("protocol name", protocols.FrameAttached)
 
 	switch params.Name {
 	case protocols.FrameAttached:
-		res, err := frame.UiAttached(ctx, sess, &params, s.runtime)
-		sess.Reply(msg.ID, res, err)
+		frame.FrameAttached(ctx, sess, &params, s.runtime, msg.ID)
 	}
 }
