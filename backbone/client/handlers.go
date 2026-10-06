@@ -1,6 +1,9 @@
 package client
 
-import "vague/backbone/process/protocols"
+import (
+	"vague/backbone/process/protocols"
+	"vague/bonefire/frame"
+)
 
 func RegisterFrameHandlers(b *Bridge) {
 	b.Register("frame_attached", b.frameAttach)
@@ -9,7 +12,7 @@ func RegisterFrameHandlers(b *Bridge) {
 
 func (b *Bridge) frameAttach(params MethodParams) (any, error) {
 	var result protocols.FrameAttachResult
-	if err := b.cli.call(b.ctx, protocols.FrameAttached, params, &result); err != nil {
+	if err := b.cli.call(b.ctx, frame.MethodFrameAttached, params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
