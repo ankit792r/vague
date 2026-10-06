@@ -51,13 +51,7 @@ type Window struct {
 	CursorColumnOn bool           `json:"cursor_column_on,omitempty"`
 }
 
+// Creating empty state
 func EmptyFrameState() *FrameState {
-	window := &Window{}
-
-	windows := make([]Window, 1)
-	windows = append(windows, *window)
-
-	return &FrameState{
-		Windows: windows,
-	}
+	return &FrameState{}
 }
