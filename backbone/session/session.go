@@ -11,16 +11,18 @@ import (
 
 const outboundQueue = 256
 
+// Session <==> Window Frame
+// when clinet connects with server it creates session which
+// represent window frame (frame) to UI/Frontend
 type Session struct {
 	Id       uint64
 	Conn     net.Conn
 	Reader   *bufio.Reader
 	outbound chan process.Message
-	State    *FrameState
+	State    *SessionState
 
 	done     chan struct{}
 	doneOnce sync.Once
-	frameId  uint64
 }
 
 func NewSession(id uint64, conn net.Conn) *Session {
@@ -29,9 +31,7 @@ func NewSession(id uint64, conn net.Conn) *Session {
 		Conn:     conn,
 		Reader:   bufio.NewReader(conn),
 		outbound: make(chan process.Message, outboundQueue),
-		State:    EmptyFrameState(),
-
-		done: make(chan struct{}),
+		done:     make(chan struct{}),
 	}
 }
 
@@ -39,14 +39,6 @@ func (s *Session) Close() {
 	s.doneOnce.Do(func() {
 		close(s.done)
 	})
-}
-
-func (s *Session) SetFrameID(id uint64) {
-	s.frameId = id
-}
-
-func (s *Session) FrameID() uint64 {
-	return s.frameId
 }
 
 // writeLoop drains the outbound queue until the session closes. Frames are

@@ -1,5 +1,28 @@
 package session
 
+import "vague/bonefire/window"
+
+type SessionState struct {
+	ShowCmd bool   `json:"show_cmd"`
+	Echo    string `json:"echo"`
+	Width   int    `json:"width"`
+	Height  int    `json:"height"`
+	WorkDir string `json:"work_dir"`
+
+	Root           *window.Window `json:"root"`
+	ActiveWindowId uint64         `json:"active_window_id"`
+	NextWindowId   uint64         `json:"next_window_id"`
+
+	Dirty bool `json:"dirty"`
+}
+
+func (s *Session) NewSessionState() *SessionState {
+	return &SessionState{
+		ShowCmd: false,
+		Echo:    "Hii there",
+	}
+}
+
 // CursorPos is where the client should draw the caret.
 type CursorPos struct {
 	Row     int  `json:"row"`
@@ -21,7 +44,6 @@ type RedrawBuffer struct {
 }
 
 type FrameState struct {
-	FrameID    uint64   `json:"frame_id"`
 	Windows    []Window `json:"windows,omitempty"`
 	Theme      string   `json:"theme,omitempty"`
 	ShowCmd    string   `json:"showcmd,omitempty"`
