@@ -22,6 +22,7 @@ func (s *Session) NewSessionState() *SessionState {
 	return &SessionState{
 		ShowCmd: false,
 		Echo:    "Hii there",
+		BufferMap: make(map[uint64]*buffer.Buffer),
 	}
 }
 
