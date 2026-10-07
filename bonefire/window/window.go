@@ -27,6 +27,8 @@ type Window struct {
 	FrameId  uint64 `json:"frame_id"`
 	BufferId uint64 `json:"buffer_id"`
 
+	Lines []string `json:"lines"`
+
 	Children []*Window `json:"children,omitempty"`
 }
 
