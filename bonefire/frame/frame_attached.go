@@ -14,8 +14,8 @@ func FrameAttached(ctx context.Context, sess *session.Session, params *protocols
 	res, err := rt.Do(ctx, func(editor, frames, windows string) (any, error) {
 		state := sess.NewSessionState()
 
-		state.NextWindowId += 1
-		state.Root = window.NewWindow(state.NextWindowId, sess.Id)
+		sess.NextWindowId += 1
+		state.Root = window.NewWindow(sess.NextWindowId, sess.Id)
 
 		sess.State = state
 		return state, nil

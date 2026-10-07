@@ -21,6 +21,9 @@ type Session struct {
 	outbound chan process.Message
 	State    *SessionState
 
+	NextWindowId uint64
+	NextBufferId uint64
+
 	done     chan struct{}
 	doneOnce sync.Once
 }

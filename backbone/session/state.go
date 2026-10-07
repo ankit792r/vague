@@ -1,6 +1,9 @@
 package session
 
-import "vague/bonefire/window"
+import (
+	"vague/bonefire/buffer"
+	"vague/bonefire/window"
+)
 
 type SessionState struct {
 	ShowCmd bool   `json:"show_cmd"`
@@ -11,9 +14,8 @@ type SessionState struct {
 
 	Root           *window.Window `json:"root"`
 	ActiveWindowId uint64         `json:"active_window_id"`
-	NextWindowId   uint64         `json:"next_window_id"`
 
-	Dirty bool `json:"dirty"`
+	BufferMap map[uint64]*buffer.Buffer `json:"-"`
 }
 
 func (s *Session) NewSessionState() *SessionState {
