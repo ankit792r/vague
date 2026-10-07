@@ -2,6 +2,7 @@ package client
 
 import (
 	"vague/backbone/process/protocols"
+	"vague/backbone/session"
 	"vague/bonefire/frame"
 )
 
@@ -11,7 +12,7 @@ func RegisterFrameHandlers(b *Bridge) {
 }
 
 func (b *Bridge) frameAttach(params MethodParams) (any, error) {
-	var result protocols.FrameAttachResult
+	var result session.SessionState
 	if err := b.cli.call(b.ctx, frame.MethodFrameAttached, params, &result); err != nil {
 		return nil, err
 	}
@@ -19,7 +20,7 @@ func (b *Bridge) frameAttach(params MethodParams) (any, error) {
 }
 
 func (b *Bridge) frameDetach(params MethodParams) (any, error) {
-	var result protocols.FrameDetachResult
+	var result session.SessionState
 	if err := b.cli.call(b.ctx, protocols.FrameDetached, params, &result); err != nil {
 		return nil, err
 	}
