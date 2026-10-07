@@ -1,7 +1,11 @@
+import { useFrameState } from "../hooks/useFrameState"
+
 export function EditorArea() {
-  return (
-    <div class="editor-area" aria-label="editor">
-    <h3>Editor Area</h3>
-    </div>
-  )
+	const { fState } = useFrameState()
+
+	return (
+		<div class="editor-area" aria-label="editor">
+			{fState?.root?.lines.map(line => <p> {line}</p>)}
+		</div>
+	)
 }
