@@ -15,6 +15,7 @@ export function FrameStateProvider({ children }: { children: ComponentChildren }
 	const [fState, setFState] = useState<FrameState | null>(null);
 
 	const updateState = (updates: Partial<FrameState>) => {
+    console.log("go ui update from host", updates)
 		setFState((prev) => {
 			if (prev === null) {
 				return null;

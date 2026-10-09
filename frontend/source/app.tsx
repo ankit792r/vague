@@ -2,26 +2,29 @@ import { useEffect } from "preact/hooks";
 import { VagueFrame } from "./comps/VagueFrame";
 import { onKeyDown } from "./keymap/keydown";
 import { HostInvoke } from "./bridge/bridge";
-import type { FrameState } from "./hooks/types";
 import { useFrameState } from "./hooks/useFrameState";
+import useWindowSize from "./hooks/useWindowSize";
 
 export function App() {
-	const { setFState } = useFrameState()
+  const { setFState, updateState } = useFrameState()
+  const { width, height } = useWindowSize();
 
-	useEffect(() => {
-		window.onHostEvent = (state: FrameState) => {
-			console.log(state);
-		}
+  useEffect(() => {
+    window.onHostEvent = updateState
 
-		window.addEventListener("keydown", onKeyDown)
+    // window.onHostEvent = (state: FrameState) => {
+    // 	console.log(state);
+    // }
 
-		HostInvoke("frame_attached", { args: [], })
-			.then(setFState)
+    window.addEventListener("keydown", onKeyDown)
 
-		return () => window.removeEventListener("keydown", onKeyDown)
-	}, [])
+    HostInvoke("frame_attached", { args: [width.toString(), height.toString()], })
+      .then(setFState)
 
-	return (
-		<VagueFrame />
-	)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
+
+  return (
+    <VagueFrame />
+  )
 }

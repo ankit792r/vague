@@ -2,6 +2,7 @@ package frame
 
 import (
 	"context"
+	"fmt"
 	"vague/backbone/process/protocols"
 	"vague/backbone/runtime"
 	"vague/backbone/session"
@@ -12,6 +13,7 @@ import (
 const MethodFrameAttached = "frame_attached"
 
 func FrameAttached(ctx context.Context, sess *session.Session, params *protocols.CommandParams, rt *runtime.Runtime, messID uint64) {
+	fmt.Println("FrameAttached", params)
 	res, err := rt.Do(ctx, func(editor, frames, windows string) (any, error) {
 		state := sess.NewSessionState()
 		defer func() {
