@@ -10,9 +10,9 @@ import (
 )
 
 type MethodParams struct {
-	args  []string
-	bang  bool
-	count uint
+	Args  []string
+	Bang  bool
+	Count uint
 }
 type Handler func(params MethodParams) (any, error)
 
