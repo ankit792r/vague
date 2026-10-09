@@ -2,13 +2,14 @@ package bonefire
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"vague/backbone/process"
 	"vague/backbone/runtime"
 	"vague/backbone/session"
 )
 
-type HandlerV2 func(dsp *DispatcherV2, msg *process.Message)
+type HandlerV2 func(dsp *DispatcherV2, params *json.RawMessage) (any, error)
 
 var handlersV2 = make(map[string]HandlerV2)
 
@@ -31,7 +32,12 @@ func (d *DispatcherV2) Dispatch(msg *process.Message) {
 	if !ok {
 		panic("handler not found: " + msg.Method)
 	}
-	handler(d, msg)
+	res, err := handler(d, &msg.Params)
+	if err != nil {
+		d.Sess.Reply(msg.ID, nil, err)
+		return
+	}
+	d.Sess.Reply(msg.ID, res, nil)
 }
 
 func (d *DispatcherV2) Execute(dfn runtime.DoFunc) (any, error) {

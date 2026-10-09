@@ -1,8 +1,8 @@
 package frame
 
 import (
+	"encoding/json"
 	"fmt"
-	"vague/backbone/process"
 	"vague/bonefire"
 	"vague/bonefire/buffer"
 	"vague/bonefire/window"
@@ -13,8 +13,20 @@ func init() {
 	bonefire.RegisterV2("frame_attached", FrameAttached)
 }
 
-func FrameAttached(dsp *bonefire.DispatcherV2, msg *process.Message) {
+type FrameAttachedParams struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+func FrameAttached(dsp *bonefire.DispatcherV2, params *json.RawMessage) (any, error) {
 	_, sess := dsp.Ctx, dsp.Sess
+	var parsedParams FrameAttachedParams
+	if err := json.Unmarshal(*params, &parsedParams); err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Params", parsedParams)
+
 	res, err := dsp.Execute(func(editor, frames, windows string) (any, error) {
 		state := sess.NewSessionState()
 		defer func() {
@@ -38,9 +50,8 @@ func FrameAttached(dsp *bonefire.DispatcherV2, msg *process.Message) {
 	})
 
 	if err != nil {
-		sess.Reply(msg.ID, nil, err)
-		return
+		return nil, err
 	}
 
-	sess.Reply(msg.ID, res, nil)
+	return res, nil
 }

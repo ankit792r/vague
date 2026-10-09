@@ -18,7 +18,9 @@ export function App() {
 
     window.addEventListener("keydown", onKeyDown)
 
-    HostInvoke("frame_attached", { args: [width.toString(), height.toString()], })
+    console.log("width", width)
+    console.log("height", height)
+    HostInvoke("frame_attached", { args: { width: width, height: height }, })
       .then(setFState)
 
     return () => window.removeEventListener("keydown", onKeyDown)

@@ -10,10 +10,11 @@ import (
 )
 
 type MethodParams struct {
-	Args  []string
-	Bang  bool
-	Count uint
+	Args  json.RawMessage `json:"args,omitempty"`
+	Bang  bool            `json:"bang,omitempty"`
+	Count uint            `json:"count,omitempty"`
 }
+
 type Handler func(params MethodParams) (any, error)
 
 type Bridge struct {

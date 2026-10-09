@@ -43,6 +43,12 @@ type Message struct {
 	Error  string          `json:"error,omitempty"`
 }
 
+type InvokeParams struct {
+	Args  json.RawMessage `json:"args,omitempty"` // object, array, or omitted
+	Bang  bool            `json:"bang,omitempty"`
+	Count int             `json:"count,omitempty"`
+}
+
 // NewRequest builds a request, encoding its parameters.
 func NewRequest(id uint64, method string, params any) (Message, error) {
 	raw, err := Encode(params)
@@ -121,6 +127,18 @@ func Encode(v any) (json.RawMessage, error) {
 	}
 
 	return raw, nil
+}
+
+func DecodeArgs[T any](msg *Message) (T, error) {
+	var env InvokeParams
+	var zero T
+	if err := msg.DecodeParams(&env); err != nil {
+		return zero, err
+	}
+	if err := json.Unmarshal(env.Args, &zero); err != nil {
+		return zero, err
+	}
+	return zero, nil
 }
 
 // DecodeParams unmarshals a request or notification's parameters into dst.

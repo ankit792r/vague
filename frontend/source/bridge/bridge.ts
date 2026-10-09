@@ -1,7 +1,7 @@
 import type { FrameState } from "../hooks/types";
 
-export type HostMethodParams = {
-	args?: string[],
+export type HostMethodParams<T = any> = {
+	args?: T,
 	bang?: boolean,
 	count?: number,
 }
@@ -14,13 +14,13 @@ declare global {
 
 
 		// FIXME: return of this will also give partial status update
-		hostInvoke?: (method: string, params: HostMethodParams) => Promise<FrameState>
+		hostInvoke?: <T = any>(method: string, params: HostMethodParams<T>) => Promise<FrameState>
 	}
 }
 
-export async function HostInvoke(
+export async function HostInvoke<T = any>(
 	method: string,
-	params: HostMethodParams
+	params: HostMethodParams<T>
 ): Promise<FrameState> { // FIXME: change unknow to proper state type
 	const invoke = window.hostInvoke;
 	if (!invoke)
