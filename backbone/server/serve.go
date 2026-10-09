@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net"
 	"time"
+	"vague/backbone/dispatch"
 	"vague/backbone/process"
 	"vague/backbone/session"
 )
@@ -98,6 +99,8 @@ func (s *Server) serveSession(ctx context.Context, sess *session.Session) {
 		sess.Conn.Close()
 	}()
 
+	dpchr := dispatch.NewDispatcher(ctx, sess, s.runtime)
+
 	for {
 		payload, err := process.ReadFrame(sess.Reader)
 		if err != nil {
@@ -121,6 +124,7 @@ func (s *Server) serveSession(ctx context.Context, sess *session.Session) {
 		}
 
 		// Dispatch here
-		s.dispatch(ctx, sess, msg)
+		// s.dispatch(ctx, sess, msg)
+		dpchr.Dispatch(&msg)
 	}
 }

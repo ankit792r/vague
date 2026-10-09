@@ -1,21 +1,17 @@
 package frame
 
 import (
-	"context"
-	"fmt"
-	"vague/backbone/process/protocols"
-	"vague/backbone/runtime"
-	"vague/backbone/session"
+	"vague/backbone/process"
+	"vague/backbone/dispatch"
 	"vague/bonefire/buffer"
 	"vague/bonefire/window"
 )
 
-const MethodFrameAttached = "frame_attached"
+func FrameAttached(dsp *dispatch.Dispatcher, msg *process.Message) {
+	_, sess := dsp.Ctx, dsp.Sess
 
-func FrameAttached(ctx context.Context, sess *session.Session, params *protocols.CommandParams, rt *runtime.Runtime, messID uint64) {
-	fmt.Println("FrameAttached", params)
-	res, err := rt.Do(ctx, func(editor, frames, windows string) (any, error) {
-		state := sess.NewSessionState()
+	res, err := dsp.Execute(func(editor, frames, windows string) (any, error) {
+		state := dsp.Sess.NewSessionState()
 		defer func() {
 			sess.NextBufferId += 1
 			sess.NextWindowId += 1
@@ -37,9 +33,9 @@ func FrameAttached(ctx context.Context, sess *session.Session, params *protocols
 	})
 
 	if err != nil {
-		sess.Reply(messID, nil, err)
+		sess.Reply(msg.ID, nil, err)
 		return
 	}
 
-	sess.Reply(messID, res, nil)
+	sess.Reply(msg.ID, res, nil)
 }

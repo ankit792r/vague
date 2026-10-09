@@ -5,7 +5,6 @@ import (
 	"vague/backbone/process"
 	"vague/backbone/process/protocols"
 	"vague/backbone/session"
-	"vague/bonefire/frame"
 )
 
 func (s *Server) dispatch(ctx context.Context, sess *session.Session, msg process.Message) {
@@ -21,8 +20,8 @@ func (s *Server) dispatch(ctx context.Context, sess *session.Session, msg proces
 		return
 	}
 
-	switch msg.Method {
-	case frame.MethodFrameAttached:
-		frame.FrameAttached(ctx, sess, &params, s.runtime, msg.ID)
-	}
+	// switch msg.Method {
+	// case FRAME_ATTACHED:
+	// 	frame.FrameAttached(ctx, sess, &params, s.runtime, msg.ID)
+	// }
 }
