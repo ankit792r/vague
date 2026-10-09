@@ -2,6 +2,7 @@ package bonefire
 
 import (
 	"context"
+	"fmt"
 	"vague/backbone/process"
 	"vague/backbone/runtime"
 	"vague/backbone/session"
@@ -25,6 +26,7 @@ func RegisterV2(method string, h HandlerV2) {
 }
 
 func (d *DispatcherV2) Dispatch(msg *process.Message) {
+	fmt.Println("Dispatching message", msg.Method)
 	handler, ok := handlersV2[msg.Method]
 	if !ok {
 		panic("handler not found: " + msg.Method)
@@ -33,6 +35,7 @@ func (d *DispatcherV2) Dispatch(msg *process.Message) {
 }
 
 func (d *DispatcherV2) Execute(dfn runtime.DoFunc) (any, error) {
+	fmt.Println("Executing function", dfn)
 	res, err := d.Rt.Do(d.Ctx, dfn)
 	return res, err
 }

@@ -59,7 +59,7 @@ func (c *Client) Close() error {
 }
 
 func (c *Client) call(ctx context.Context, method string, params any, result any) error {
-	fmt.Println("method name", method)
+	fmt.Println("Calling method", method)
 	msg, err := func() (process.Message, error) {
 		c.mu.Lock()
 		defer c.mu.Unlock()

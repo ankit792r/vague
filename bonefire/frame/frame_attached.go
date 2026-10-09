@@ -1,6 +1,7 @@
 package frame
 
 import (
+	"fmt"
 	"vague/backbone/process"
 	"vague/bonefire"
 	"vague/bonefire/buffer"
@@ -8,6 +9,7 @@ import (
 )
 
 func init() {
+	fmt.Println("Registering frame_attached handler")
 	bonefire.RegisterV2("frame_attached", FrameAttached)
 }
 

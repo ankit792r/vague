@@ -14,6 +14,7 @@ import (
 	"vague/bonefire"
 
 	// module initialization
+
 	_ "vague/bonefire/frame"
 )
 
@@ -102,9 +103,8 @@ func (s *Server) serveSession(ctx context.Context, sess *session.Session) {
 		sess.Conn.Close()
 	}()
 
-	// dpchr := dispatch.NewDispatcher(ctx, sess, s.runtime)
+	// create dispatcher
 	dis := bonefire.DispatcherV2{Ctx: ctx, Sess: sess, Rt: s.runtime}
-	// Register handlers here
 
 	for {
 		payload, err := process.ReadFrame(sess.Reader)
@@ -128,9 +128,7 @@ func (s *Server) serveSession(ctx context.Context, sess *session.Session) {
 			continue
 		}
 
-		// Dispatch here
-		// s.dispatch(ctx, sess, msg)
-		// dpchr.Dispatch(&msg)
+		// Dispatch message to dispatcher
 		dis.Dispatch(&msg)
 	}
 }
