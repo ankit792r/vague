@@ -1,17 +1,20 @@
 package frame
 
 import (
-	"vague/backbone/dispatch"
 	"vague/backbone/process"
+	"vague/bonefire"
 	"vague/bonefire/buffer"
 	"vague/bonefire/window"
 )
 
-func FrameAttached(dsp *dispatch.Dispatcher, msg *process.Message) {
-	_, sess := dsp.Ctx, dsp.Sess
+func init() {
+	bonefire.RegisterV2("frame_attached", FrameAttached)
+}
 
+func FrameAttached(dsp *bonefire.DispatcherV2, msg *process.Message) {
+	_, sess := dsp.Ctx, dsp.Sess
 	res, err := dsp.Execute(func(editor, frames, windows string) (any, error) {
-		state := dsp.Sess.NewSessionState()
+		state := sess.NewSessionState()
 		defer func() {
 			sess.NextBufferId += 1
 			sess.NextWindowId += 1

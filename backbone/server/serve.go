@@ -9,9 +9,12 @@ import (
 	"log/slog"
 	"net"
 	"time"
-	"vague/backbone/dispatch"
 	"vague/backbone/process"
 	"vague/backbone/session"
+	"vague/bonefire"
+
+	// module initialization
+	_ "vague/bonefire/frame"
 )
 
 func (s *Server) Serve(ctx context.Context, listener *process.Listener) error {
@@ -99,7 +102,9 @@ func (s *Server) serveSession(ctx context.Context, sess *session.Session) {
 		sess.Conn.Close()
 	}()
 
-	dpchr := dispatch.NewDispatcher(ctx, sess, s.runtime)
+	// dpchr := dispatch.NewDispatcher(ctx, sess, s.runtime)
+	dis := bonefire.DispatcherV2{Ctx: ctx, Sess: sess, Rt: s.runtime}
+	// Register handlers here
 
 	for {
 		payload, err := process.ReadFrame(sess.Reader)
@@ -125,6 +130,7 @@ func (s *Server) serveSession(ctx context.Context, sess *session.Session) {
 
 		// Dispatch here
 		// s.dispatch(ctx, sess, msg)
-		dpchr.Dispatch(&msg)
+		// dpchr.Dispatch(&msg)
+		dis.Dispatch(&msg)
 	}
 }
