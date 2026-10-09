@@ -1,8 +1,8 @@
 package frame
 
 import (
-	"vague/backbone/process"
 	"vague/backbone/dispatch"
+	"vague/backbone/process"
 	"vague/bonefire/buffer"
 	"vague/bonefire/window"
 )
