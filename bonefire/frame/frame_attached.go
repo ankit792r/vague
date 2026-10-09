@@ -20,9 +20,11 @@ type FrameAttachedParams struct {
 
 func FrameAttached(dsp *bonefire.DispatcherV2, params *json.RawMessage) (any, error) {
 	_, sess := dsp.Ctx, dsp.Sess
+	fmt.Println("Params", params)
 	var parsedParams FrameAttachedParams
 	if err := json.Unmarshal(*params, &parsedParams); err != nil {
-		return nil, err
+		fmt.Println("Error unmarshalling params", err)
+		return nil, fmt.Errorf("frame_attached: %w", err)
 	}
 
 	fmt.Println("Params", parsedParams)

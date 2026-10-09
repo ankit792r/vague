@@ -32,6 +32,7 @@ func (d *DispatcherV2) Dispatch(msg *process.Message) {
 	if !ok {
 		panic("handler not found: " + msg.Method)
 	}
+	fmt.Println("Params", msg.Params)
 	res, err := handler(d, &msg.Params)
 	if err != nil {
 		d.Sess.Reply(msg.ID, nil, err)
