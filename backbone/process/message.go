@@ -19,26 +19,18 @@ const (
 
 	// KindResponse answers a request.
 	KindResponse Kind = "response"
-
-	// KindNotify expects no reply and travels in either direction:
-	// clients send input and resize, the server sends redraws.
-	KindNotify Kind = "notify"
 )
 
 // A Message is the single envelope on the wire. Which fields are meaningful
 // depends on Kind.
 type Message struct {
-	Kind Kind `json:"kind"`
-
-	// ID correlates a request with its response. It is unset on
-	// notifications.
-	ID uint64 `json:"id,omitempty"`
+	Kind Kind   `json:"kind"`
+	ID   uint64 `json:"id,omitempty"`
 
 	// Method names the call on requests and notifications.
 	Method string `json:"method,omitempty"`
 
 	Params json.RawMessage `json:"params,omitempty"`
-
 	Result json.RawMessage `json:"result,omitempty"`
 	Error  string          `json:"error,omitempty"`
 }
@@ -57,16 +49,6 @@ func NewRequest(id uint64, method string, params any) (Message, error) {
 	}
 
 	return Message{Kind: KindRequest, ID: id, Method: method, Params: raw}, nil
-}
-
-// NewNotifn builds a notification.
-func NewNotify(method string, params any) (Message, error) {
-	raw, err := Encode(params)
-	if err != nil {
-		return Message{}, err
-	}
-
-	return Message{Kind: KindNotify, Method: method, Params: raw}, nil
 }
 
 // NewResponse builds a successful response.
@@ -101,11 +83,6 @@ func (m Message) Validate() error {
 			return fmt.Errorf("response has no id")
 		}
 
-	case KindNotify:
-		if m.Method == "" {
-			return fmt.Errorf("notify has no method")
-		}
-
 	default:
 		return fmt.Errorf("unknown message kind %q", m.Kind)
 	}
@@ -129,31 +106,18 @@ func Encode(v any) (json.RawMessage, error) {
 	return raw, nil
 }
 
+// DecodeArgs unmarshals a request or notification's parameters into dst.
+// Absent parameters leave dst untouched, so methods that take none can skip
+// the call.
 func DecodeArgs[T any](msg *Message) (T, error) {
 	var env InvokeParams
 	var zero T
-	if err := msg.DecodeParams(&env); err != nil {
-		return zero, err
+
+	if err := json.Unmarshal(msg.Params, &env); err != nil {
+		return zero, fmt.Errorf("decode params for %q: %w", msg.Method, err)
 	}
-	if err := json.Unmarshal(env.Args, &zero); err != nil {
-		return zero, err
-	}
+
 	return zero, nil
-}
-
-// DecodeParams unmarshals a request or notification's parameters into dst.
-// Absent parameters leave dst untouched, so methods that take none can skip
-// the call.
-func (m Message) DecodeParams(dst any) error {
-	if len(m.Params) == 0 {
-		return nil
-	}
-
-	if err := json.Unmarshal(m.Params, dst); err != nil {
-		return fmt.Errorf("decode params for %q: %w", m.Method, err)
-	}
-
-	return nil
 }
 
 // DecodeResult unmarshals a response's result into dst.

@@ -5,17 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"vague/backbone/process"
 
 	"github.com/abemedia/go-webview"
 )
 
-type MethodParams struct {
-	Args  json.RawMessage `json:"args,omitempty"`
-	Bang  bool            `json:"bang,omitempty"`
-	Count uint            `json:"count,omitempty"`
-}
-
-type Handler func(params MethodParams) (any, error)
+type Handler func(params process.InvokeParams) (any, error)
 
 type Bridge struct {
 	ctx      context.Context
@@ -42,7 +37,7 @@ func (b *Bridge) Register(method string, h Handler) {
 }
 
 // TODO: we have to fix the return type of **invoke()**
-func (b *Bridge) Invoke(methodName string, params MethodParams) any {
+func (b *Bridge) Invoke(methodName string, params process.InvokeParams) any {
 	b.mu.RLock()
 	h, ok := b.handlers[methodName]
 	b.mu.RUnlock()

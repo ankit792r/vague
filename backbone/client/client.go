@@ -41,8 +41,7 @@ func ClientConnect() (*Client, error) {
 		reader:  bufio.NewReader(conn),
 		nextId:  1,
 		pending: make(map[uint64]chan process.Message),
-		// notifications: make(chan Notification, notificationQueue),
-		done: make(chan struct{}),
+		done:    make(chan struct{}),
 	}
 
 	// Here start the reading loop
@@ -148,20 +147,6 @@ func (c *Client) reason() error {
 	}
 
 	return ErrClosed
-}
-
-// notify sends a message that expects no reply.
-func (c *Client) notify(method string, params any) error {
-	msg, err := process.NewNotify(method, params)
-	if err != nil {
-		return err
-	}
-
-	if err := c.write(msg); err != nil {
-		return fmt.Errorf("send %s: %w", method, err)
-	}
-
-	return nil
 }
 
 // fail records why the connection ended and wakes every waiting call.

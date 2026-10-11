@@ -1,13 +1,16 @@
 package client
 
-import "vague/backbone/session"
+import (
+	"vague/backbone/process"
+	"vague/backbone/session"
+)
 
 func RegisterFrameHandlers(b *Bridge) {
 	b.Register("frame_attached", b.frameAttach)
 	b.Register("frame_detached", b.frameDetach)
 }
 
-func (b *Bridge) frameAttach(params MethodParams) (any, error) {
+func (b *Bridge) frameAttach(params process.InvokeParams) (any, error) {
 	var result session.SessionState
 	if err := b.cli.call(b.ctx, "frame_attached", params, &result); err != nil {
 		return nil, err
@@ -15,7 +18,7 @@ func (b *Bridge) frameAttach(params MethodParams) (any, error) {
 	return &result, nil
 }
 
-func (b *Bridge) frameDetach(params MethodParams) (any, error) {
+func (b *Bridge) frameDetach(params process.InvokeParams) (any, error) {
 	var result session.SessionState
 	if err := b.cli.call(b.ctx, "frame_detached", params, &result); err != nil {
 		return nil, err

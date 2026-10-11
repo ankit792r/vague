@@ -18,16 +18,16 @@ type FrameAttachedParams struct {
 	Height int `json:"height"`
 }
 
-func FrameAttached(dsp *bonefire.DispatcherV2, params *json.RawMessage) (any, error) {
+func FrameAttached(dsp *bonefire.DispatcherV2, params json.RawMessage) (any, error) {
 	_, sess := dsp.Ctx, dsp.Sess
-	fmt.Println("Params", params)
+
 	var parsedParams FrameAttachedParams
-	if err := json.Unmarshal(*params, &parsedParams); err != nil {
+	if err := json.Unmarshal(params, &parsedParams); err != nil {
 		fmt.Println("Error unmarshalling params", err)
 		return nil, fmt.Errorf("frame_attached: %w", err)
 	}
 
-	fmt.Println("Params", parsedParams)
+	fmt.Println("Params parsed ---------> ", parsedParams)
 
 	res, err := dsp.Execute(func(editor, frames, windows string) (any, error) {
 		state := sess.NewSessionState()

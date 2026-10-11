@@ -43,14 +43,3 @@ func (s *Session) Reply(id uint64, result any, cause error) {
 
 	s.Send(msg)
 }
-
-// notify pushes a server-initiated message.
-func (s *Session) Notify(method string, params any) {
-	msg, err := process.NewNotify(method, params)
-	if err != nil {
-		slog.Warn("failed to encode notification", "method", method, "error", err)
-		return
-	}
-
-	s.Send(msg)
-}

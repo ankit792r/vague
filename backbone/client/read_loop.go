@@ -7,8 +7,6 @@ import (
 )
 
 func (c *Client) readLoop() {
-	// defer close(c.notifications)
-
 	for {
 		payload, err := process.ReadFrame(c.reader)
 		if err != nil {
@@ -22,55 +20,17 @@ func (c *Client) readLoop() {
 			return
 		}
 
-		switch msg.Kind {
-		case process.KindResponse:
-			c.deliver(msg)
+		c.mu.Lock()
+		waiter, ok := c.pending[msg.ID]
+		delete(c.pending, msg.ID)
+		c.mu.Unlock()
 
-		// case process.KindNotify:
-		// 	c.queue(Notification{Method: msg.Method, Params: msg.Params})
-
-		default:
-			// The server does not call the client, so this is a protocol
-			// violation rather than something to route.
-			c.fail(fmt.Errorf("unexpected message kind %q from server", msg.Kind))
+		if !ok {
+			// A call that gave up, or a reply to a malformed frame, which
+			// carries no usable ID.
 			return
 		}
 
+		waiter <- msg
 	}
-
 }
-
-// deliver hands a response to the call waiting on its ID.
-func (c *Client) deliver(msg process.Message) {
-	c.mu.Lock()
-	waiter, ok := c.pending[msg.ID]
-	delete(c.pending, msg.ID)
-	c.mu.Unlock()
-
-	if !ok {
-		// A call that gave up, or a reply to a malformed frame, which
-		// carries no usable ID.
-		return
-	}
-
-	waiter <- msg
-}
-
-// queue offers a notification, discarding the oldest if nobody is reading.
-// func (c *Client) queue(note Notification) {
-// 	select {
-// 	case c.notifications <- note:
-// 		return
-// 	default:
-// 	}
-//
-// 	select {
-// 	case <-c.notifications:
-// 	default:
-// 	}
-//
-// 	select {
-// 	case c.notifications <- note:
-// 	default:
-// 	}
-// }
