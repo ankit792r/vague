@@ -9,6 +9,11 @@ export function App() {
   const { setFState, updateState } = useFrameState()
   const { width, height } = useWindowSize();
 
+  useEffect(()=> {
+    HostInvoke("frame_updated", { args: { width: width, height: height }, })
+      .then(setFState)
+  }, [width, height])
+
   useEffect(() => {
     window.onHostEvent = updateState
 
@@ -17,7 +22,6 @@ export function App() {
     // }
 
     window.addEventListener("keydown", onKeyDown)
-
     HostInvoke("frame_attached", { args: { width: width, height: height }, })
       .then(setFState)
 
