@@ -18,8 +18,6 @@ export function App() {
 
     window.addEventListener("keydown", onKeyDown)
 
-    console.log("width", width)
-    console.log("height", height)
     HostInvoke("frame_attached", { args: { width: width, height: height }, })
       .then(setFState)
 

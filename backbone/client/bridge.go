@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 	"vague/backbone/process"
+	"vague/backbone/session"
 
 	"github.com/abemedia/go-webview"
 )
@@ -37,21 +38,30 @@ func (b *Bridge) Register(method string, h Handler) {
 }
 
 // TODO: we have to fix the return type of **invoke()**
+// func (b *Bridge) Invoke(methodName string, params process.InvokeParams) any {
+// 	b.mu.RLock()
+// 	h, ok := b.handlers[methodName]
+// 	b.mu.RUnlock()
+// 	if !ok {
+// 		return fmt.Sprintf("got unknown method: %s \n", methodName)
+// 	}
+//
+// 	data, err := h(params)
+//
+// 	if err != nil {
+// 		return err.Error()
+// 	}
+//
+// 	return data
+// }
+
 func (b *Bridge) Invoke(methodName string, params process.InvokeParams) any {
-	b.mu.RLock()
-	h, ok := b.handlers[methodName]
-	b.mu.RUnlock()
-	if !ok {
-		return fmt.Sprintf("got unknown method: %s \n", methodName)
-	}
-
-	data, err := h(params)
-
-	if err != nil {
+	var res session.SessionState
+	if err := b.cli.call(b.ctx, methodName, params, &res); err != nil {
 		return err.Error()
 	}
 
-	return data
+	return &res
 }
 
 // Emit to client
