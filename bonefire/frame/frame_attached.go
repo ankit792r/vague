@@ -3,6 +3,7 @@ package frame
 import (
 	"encoding/json"
 	"fmt"
+	"vague/backbone/process"
 	"vague/bonefire"
 	"vague/bonefire/buffer"
 	"vague/bonefire/window"
@@ -22,12 +23,10 @@ func FrameAttached(dsp *bonefire.DispatcherV2, params json.RawMessage) (any, err
 	_, sess := dsp.Ctx, dsp.Sess
 
 	var parsedParams FrameAttachedParams
-	if err := json.Unmarshal(params, &parsedParams); err != nil {
+	if err := process.DecodeInvokeArgs(params, &parsedParams); err != nil {
 		fmt.Println("Error unmarshalling params", err)
 		return nil, fmt.Errorf("frame_attached: %w", err)
 	}
-
-	fmt.Println("Params parsed ---------> ", parsedParams)
 
 	res, err := dsp.Execute(func(editor, frames, windows string) (any, error) {
 		state := sess.NewSessionState()
@@ -44,7 +43,7 @@ func FrameAttached(dsp *bonefire.DispatcherV2, params json.RawMessage) (any, err
 		state.BufferMap[root.Id] = buff
 
 		// Now here we have to calculate the lines for window
-		fullView := window.LayoutView(buff.Text, 100, 100, false)
+		fullView := window.LayoutView(buff.Text, parsedParams.Width, parsedParams.Height, false)
 
 		root.Lines = fullView.Lines
 

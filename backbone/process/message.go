@@ -106,14 +106,36 @@ func Encode(v any) (json.RawMessage, error) {
 	return raw, nil
 }
 
+// DecodeInvokeArgs unmarshals the args field from an InvokeParams JSON blob into dst.
+// Absent params or args leave dst untouched.
+func DecodeInvokeArgs(raw json.RawMessage, dst any) error {
+	if len(raw) == 0 {
+		return nil
+	}
+
+	var env InvokeParams
+	if err := json.Unmarshal(raw, &env); err != nil {
+		return fmt.Errorf("decode invoke params: %w", err)
+	}
+
+	if len(env.Args) == 0 {
+		return nil
+	}
+
+	if err := json.Unmarshal(env.Args, dst); err != nil {
+		return fmt.Errorf("decode args: %w", err)
+	}
+
+	return nil
+}
+
 // DecodeArgs unmarshals a request or notification's parameters into dst.
 // Absent parameters leave dst untouched, so methods that take none can skip
 // the call.
 func DecodeArgs[T any](msg *Message) (T, error) {
-	var env InvokeParams
 	var zero T
 
-	if err := json.Unmarshal(msg.Params, &env); err != nil {
+	if err := DecodeInvokeArgs(msg.Params, &zero); err != nil {
 		return zero, fmt.Errorf("decode params for %q: %w", msg.Method, err)
 	}
 
