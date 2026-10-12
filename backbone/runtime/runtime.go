@@ -11,7 +11,7 @@ import (
 
 var ErrShutdown = errors.New("editor runtime is shut down")
 
-type DoFunc func(editor string, frames string, windows string) (any, error)
+type DoFunc func(editor string, frames string) (any, error)
 
 type reply struct {
 	val any
@@ -106,7 +106,7 @@ func (r *Runtime) exec(fn DoFunc) (res reply) {
 		}
 	}()
 
-	val, err := fn(r.Editor, r.Frames, r.Windows)
+	val, err := fn(r.Editor, r.Frames)
 
 	return reply{val: val, err: err}
 }

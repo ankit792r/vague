@@ -28,7 +28,7 @@ func FrameAttached(dsp *bonefire.DispatcherV2, params json.RawMessage) (any, err
 		return nil, fmt.Errorf("frame_attached: %w", err)
 	}
 
-	res, err := dsp.Execute(func(editor, frames, windows string) (any, error) {
+	res, err := dsp.Execute(func(editor, frames string) (any, error) {
 		state := sess.NewSessionState()
 		defer func() {
 			sess.NextBufferId += 1
